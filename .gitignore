@@ -37,3 +37,4 @@ local.db*
 test-results/
 playwright-report/
 e2e/.tmp/
+e2e/.tmp/
