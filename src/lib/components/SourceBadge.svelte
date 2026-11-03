@@ -11,23 +11,23 @@
 <style>
 	.src-swissfcd {
 		background: color-mix(in srgb, #ff3b30 14%, transparent);
-		color: #d70015;
+		color: #b0000f;
 	}
 	.src-off {
 		background: color-mix(in srgb, #ff9500 16%, transparent);
-		color: #a05a00;
+		color: #7f4400;
 	}
 	.src-usda {
 		background: color-mix(in srgb, #5856d6 16%, transparent);
-		color: #3634a3;
+		color: #2e2c8f;
 	}
 	.src-custom {
 		background: color-mix(in srgb, #34c759 16%, transparent);
-		color: #1f7a35;
+		color: #18652b;
 	}
 	.src-recipe {
 		background: color-mix(in srgb, #007aff 14%, transparent);
-		color: #0058b8;
+		color: #004a9c;
 	}
 	@media (prefers-color-scheme: dark) {
 		.src-swissfcd {

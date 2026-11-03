@@ -12,13 +12,14 @@
 	--bg-elev-2: #f2f2f7;
 	--bg-blur: rgba(249, 249, 249, 0.94);
 	--label: #000000;
-	--label-2: rgba(60, 60, 67, 0.62);
+	--label-2: #6c6c72; /* iOS secondaryLabel, darkened for WCAG AA on #f2f2f7 */
 	--label-3: rgba(60, 60, 67, 0.36);
 	--sep: rgba(60, 60, 67, 0.22);
 	--fill: rgba(120, 120, 128, 0.12);
 	--fill-2: rgba(120, 120, 128, 0.2);
 	--tint: #007aff;
 	--tint-press: #0062cc;
+	--tab-active: #0062cc; /* small tab labels need 4.5:1 */
 	--on-tint: #ffffff;
 	--danger: #ff3b30;
 	--success: #248a3d;
@@ -58,6 +59,7 @@
 		--fill-2: rgba(118, 118, 128, 0.36);
 		--tint: #0a84ff;
 		--tint-press: #409cff;
+		--tab-active: #0a84ff;
 		--danger: #ff453a;
 		--success: #30d158;
 		--warning: #ff9f0a;

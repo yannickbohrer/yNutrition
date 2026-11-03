@@ -1,0 +1,16 @@
+.git
+node_modules
+build
+.svelte-kit
+.env
+.env.*
+!.env.example
+data/*.db
+data/*.db-*
+data/swissfcd.json
+backups
+e2e/.tmp
+test-results
+playwright-report
+docs/screenshots
+*.log

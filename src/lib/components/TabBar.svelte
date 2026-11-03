@@ -78,6 +78,6 @@
 		max-width: 120px;
 	}
 	a.active {
-		color: var(--tint);
+		color: var(--tab-active, var(--tint));
 	}
 </style>

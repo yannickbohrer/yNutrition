@@ -14,11 +14,14 @@
 		"format": "prettier --write .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "playwright install && playwright test",
-		"db:push": "drizzle-kit push",
+		"test:e2e": "npm run build && playwright test --project=setup --project=iphone",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"start": "node scripts/start.js",
+		"import:swissfcd": "node scripts/import-swissfcd.js",
+		"recovery": "node scripts/recovery.js",
+		"backup": "node scripts/backup.js",
+		"screenshots": "npm run build && playwright test --project=screenshots",
+		"icons": "node scripts/dev/make-icons.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -29,7 +32,6 @@
 		"@types/better-sqlite3": "^9.6.0",
 		"@types/node": "^22.20.5",
 		"drizzle-kit": "^0.31.10",
-		"drizzle-orm": "^0.45.2",
 		"eslint": "^10.4.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",
@@ -55,6 +57,7 @@
 		"barcode-detector": "^3.2.3",
 		"better-sqlite3": "^13.0.2",
 		"chart.js": "^4.6.1",
+		"drizzle-orm": "^0.45.4",
 		"zxing-wasm": "^3.1.6"
 	},
 	"allowScripts": {
@@ -62,5 +65,8 @@
 		"esbuild@0.25.12": true,
 		"esbuild@0.18.20": true,
 		"better-sqlite3@13.0.3": true
+	},
+	"engines": {
+		"node": ">=22"
 	}
 }

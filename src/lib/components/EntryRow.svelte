@@ -117,8 +117,8 @@
 		onpointerup={up}
 		onpointercancel={up}
 		onclick={click}
-		aria-label={t('a11y.openEntry', { name: entry.name })}
 	>
+		<span class="visually-hidden">{t('a11y.openEntry', { name: '' })}</span>
 		<span class="time tabular">{entry.time}</span>
 		<span class="grow">
 			<span class="row-title">{entry.name}</span>

@@ -269,3 +269,35 @@ test('targets can be changed', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('.kcal-line')).toContainText(/2['’]200/);
 });
+
+test('recovery CLI prints a one-time link that registers a new passkey', async ({ browser }) => {
+	const { spawnSync } = await import('node:child_process');
+	const out = spawnSync(process.execPath, ['scripts/recovery.js'], {
+		env: {
+			...process.env,
+			NODE_ENV: 'production',
+			DATABASE_PATH: 'e2e/.tmp/test.db',
+			SESSION_SECRET: 'e2e-session-secret',
+			ORIGIN: 'http://localhost:4173'
+		},
+		encoding: 'utf8'
+	});
+	const link = out.stdout.match(/http:\/\/localhost:4173\/setup\?token=\S+/)?.[0];
+	expect(link, out.stderr).toBeTruthy();
+
+	const ctx = await browser.newContext({ ...test.info().project.use, storageState: undefined });
+	const page = await ctx.newPage();
+	const { addVirtualAuthenticator } = await import('./helpers');
+	await addVirtualAuthenticator(page);
+	await page.goto(link!);
+	await page.getByTestId('device-name').fill('Recovery-Mac');
+	await page.getByTestId('setup-button').click();
+	await expect(page.getByTestId('day-title')).toBeVisible();
+	await page.goto('/settings/passkeys');
+	await expect(page.getByTestId('passkey-list')).toContainText('Recovery-Mac');
+	await expect(page.getByTestId('passkey-list')).toContainText('Test-iPhone');
+	// the link is single-use
+	await page.goto(link!);
+	await expect(page.getByRole('alert')).toBeVisible();
+	await ctx.close();
+});
