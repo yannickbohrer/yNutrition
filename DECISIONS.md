@@ -138,6 +138,33 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   recessed (scaled and dimmed) like iPadOS, because two same-sized form sheets look broken.
 - The sidebar's **quick add** logs to the day being viewed on Today, otherwise to today.
 
+## Phone, laptop and ultrawide layouts
+
+- **The iPad design is the reference**, so everything else follows it and iPad itself stays
+  pixel-identical. Larger screens **add panes** instead of stretching rows.
+- **Two tiers above iPad**, both landscape only:
+  - _desktop_ = `min-width: 1400px`: two-column food, recipe, weight and `/add` pages, taller charts.
+  - _ultra_ = `min-width: 1800px`: Today gets a third pane (all nutrients), Insights three columns.
+- **Why 1400**: the largest iPad is 1376 CSS px wide (iPad Pro 13"), so no iPad can reach these
+  tiers. Laptops below 1400 px simply get the iPad landscape layout.
+- **Centred shell past 2560 px**: without it, an ultrawide leaves the sidebar about 1000 px away
+  from the content. Sidebar and content are centred together via `--shell-inset`. Settings and
+  forms keep their width caps, because forms don't improve by getting wider.
+- **`min-width: 1000px` clause on tablet and wide**: a 1280 × 720 laptop can drop below the 560 px
+  height gate once browser chrome is counted, and got the phone UI. No phone is that wide (largest
+  iPhone landscape: 956 px).
+- **Phone uses the floating tab bar** too, with the icon above the label so the German labels fit
+  at 320 px. Bottom sheets stay: form sheets don't suit a phone-width screen.
+- **Mouse and keyboard**: on `(hover: hover) and (pointer: fine)`, entries get a delete button on
+  hover or focus, because the swipe action is unreachable by keyboard. Hover must never reserve
+  space, so an iPad with a trackpad keeps its layout.
+- The manifest uses `"orientation": "any"`, since `portrait` conflicts with the landscape layouts
+  on platforms that honour it.
+- **Container query traps**: `.day-main` is an unnamed container that reaches about 780 px on iPad
+  portrait, so `NutrientTable` matches a _named_ container (`nutrients`). `/add` columns come from
+  the page rather than a container on `AddPanel`, because `container-type` stops margins collapsing
+  and would shift the sheets.
+
 ## Testing
 
 - E2E runs Chromium with **iPhone 14 emulation** (viewport, touch, UA), because the CDP virtual
@@ -148,6 +175,9 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   placement, no horizontal scroll), logging through the inline panel, the settings split view,
   live rotation, the smallest iPad landscape (944 × 656) and that iPhone landscape stays on the
   phone layout.
+- Laptop, monitor and ultrawide run `e2e/desktop.e2e.ts` in the `laptop`, `desktop` and `ultrawide`
+  projects (1440, 1920, 3440 px, mouse input). `e2e/phone.e2e.ts` covers the floating bar and every
+  route from 320 to 430 px.
 - The camera is mocked via Chromium's fake media stream plus a test hook
   (`window.__NUTRITION_TEST_BARCODE__`) that stands in for the detector.
 - `deploy.sh` was tested end-to-end against a simulated Debian 12 VM (privileged container with

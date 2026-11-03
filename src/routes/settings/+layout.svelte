@@ -20,7 +20,8 @@
 </div>
 
 <style>
-	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+		(min-width: 1000px) and (orientation: landscape) {
 		.settings-shell.split {
 			display: grid;
 			grid-template-columns: 300px minmax(0, 1fr);

@@ -1,6 +1,7 @@
 /**
  * Captures every main screen in light and dark mode (iPhone viewport) into docs/screenshots,
- * plus the main iPad screens in portrait and landscape (docs/screenshots/ipad-*).
+ * plus the main iPad screens in portrait and landscape (docs/screenshots/ipad-*) and the main
+ * screens on a laptop, a monitor and an ultrawide (docs/screenshots/{laptop,desktop,ultrawide}-*).
  * Run: npx playwright test --project=screenshots
  */
 import { test, expect, devices, type Page } from '@playwright/test';
@@ -204,6 +205,53 @@ for (const [orientation, device] of [
 
 			await page.goto('/settings/targets');
 			await shot('05-settings-targets');
+			await ctx.close();
+		});
+	}
+}
+
+for (const [name, width, height] of [
+	['laptop', 1440, 900],
+	['desktop', 1920, 1080],
+	['ultrawide', 3440, 1440]
+] as const) {
+	for (const scheme of ['light', 'dark'] as const) {
+		test(`${name} (${scheme})`, async ({ browser }) => {
+			const ctx = await browser.newContext({
+				...devices['Desktop Chrome'],
+				viewport: { width, height },
+				locale: 'de-CH',
+				timezoneId: 'Europe/Zurich',
+				storageState: 'e2e/.tmp/state.json',
+				colorScheme: scheme
+			});
+			const page = await ctx.newPage();
+			const shot = async (file: string) => {
+				await page.waitForTimeout(450);
+				await page.screenshot({ path: `${OUT}/${name}-${scheme}-${file}.png` });
+			};
+
+			await page.goto('/');
+			await expect(page.getByTestId('timeline')).toBeVisible();
+			await shot('01-today');
+
+			await page.goto('/add');
+			await expect(page.getByTestId('favorites-list')).toBeVisible();
+			await shot('02-add');
+
+			await page.goto('/insights');
+			await expect(page.locator('canvas').first()).toBeVisible();
+			await shot('03-insights');
+
+			await page.goto(`/foods/${await food(page, 'emmentaler')}`);
+			await shot('04-food-detail');
+
+			await page.goto('/insights/weight');
+			await expect(page.getByTestId('weight-list')).toBeVisible();
+			await shot('05-weight');
+
+			await page.goto('/settings/targets');
+			await shot('06-settings-targets');
 			await ctx.close();
 		});
 	}

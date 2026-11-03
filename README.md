@@ -1,8 +1,8 @@
 # Nutrition
 
 A self-hosted, single-user calorie and nutrition tracker. It runs as a PWA and is built for
-an iPhone installed to the home screen, with dedicated iPad layouts for portrait and
-landscape, and it works on desktop too. German (Swiss) and English.
+an iPhone installed to the home screen, with dedicated layouts for iPad (portrait and landscape),
+laptops and ultrawide monitors. German (Swiss) and English.
 
 - **Passkey login only** (Face ID / Touch ID via WebAuthn). No passwords.
 - **Fast local food search** over the Swiss Food Composition Database (≈1'250 generic foods,
@@ -35,6 +35,10 @@ split-view settings.
 | ![](docs/screenshots/ipad-landscape-light-01-today.png)   | ![](docs/screenshots/ipad-portrait-light-01-today.png)   |
 | ![](docs/screenshots/ipad-landscape-dark-04-insights.png) | ![](docs/screenshots/ipad-portrait-dark-04-insights.png) |
 
+**Laptop and monitor**: the iPad landscape layout, with two-column detail pages from 1400 px. From
+1800 px Today adds an all-nutrients pane and Insights uses three columns, and past 2560 px the
+whole app is centred.
+
 All screens, light and dark: [`docs/screenshots/`](docs/screenshots).
 
 ## Stack
@@ -61,20 +65,20 @@ allow WebAuthn on `localhost` without HTTPS.
 
 ### Scripts
 
-| Script                            | Purpose                                                                                  |
-| --------------------------------- | ---------------------------------------------------------------------------------------- |
-| `npm run dev`                     | Vite dev server                                                                          |
-| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                             |
-| `npm run check`                   | `svelte-check` (TypeScript)                                                              |
-| `npm run lint` / `npm run format` | Prettier + ESLint                                                                        |
-| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)             |
-| `npm run test:e2e`                | Playwright E2E on emulated iPhone and iPad (portrait + landscape), Chromium + WebAuthn   |
-| `npm run screenshots`             | Capture every main screen (iPhone + iPad) in light and dark mode into `docs/screenshots` |
-| `npm run import:swissfcd`         | Import the Swiss food DB (`--download` refreshes the official XLSX files)                |
-| `npm run recovery`                | Print a one-time passkey registration link                                               |
-| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |
-| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                        |
-| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                            |
+| Script                            | Purpose                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `npm run dev`                     | Vite dev server                                                                         |
+| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                            |
+| `npm run check`                   | `svelte-check` (TypeScript)                                                             |
+| `npm run lint` / `npm run format` | Prettier + ESLint                                                                       |
+| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)            |
+| `npm run test:e2e`                | Playwright E2E on emulated iPhone, iPad, laptop and ultrawide, Chromium + WebAuthn      |
+| `npm run screenshots`             | Capture the main screens on every device class, light and dark, into `docs/screenshots` |
+| `npm run import:swissfcd`         | Import the Swiss food DB (`--download` refreshes the official XLSX files)               |
+| `npm run recovery`                | Print a one-time passkey registration link                                              |
+| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                            |
+| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                       |
+| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                           |
 
 ## Deployment
 

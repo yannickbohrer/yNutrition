@@ -19,7 +19,22 @@
 
 <svelte:head><title>{t('add.title')} · Nutrition</title></svelte:head>
 
-<main class="page">
+<main class="page add-page">
 	<h1 class="large-title">{t('add.title')}</h1>
 	<AddPanel onselect={select} />
 </main>
+
+<style>
+	/* ---------- desktop: suggestions side by side ---------- */
+	@media (min-width: 1400px) and (orientation: landscape) {
+		.add-page {
+			--page-max: 1240px;
+		}
+		.add-page :global(.add-cols) {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 0 24px;
+			align-items: start;
+		}
+	}
+</style>

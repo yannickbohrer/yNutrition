@@ -54,7 +54,8 @@ export const en: Messages = {
 		copyToDay: 'Copy to this day',
 		copied: 'Copied',
 		deletedEntry: '“{name}” deleted',
-		swipeHint: 'Swipe left to delete'
+		swipeHint: 'Swipe left to delete',
+		hoverHint: 'Hover over a row to delete it'
 	},
 	macros: {
 		energy_kcal: 'Calories',

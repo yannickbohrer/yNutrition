@@ -45,38 +45,42 @@
 		(missing && count > 0 && (missing[k] ?? 0) > 0 && nutrients[k] !== undefined);
 </script>
 
-{#each groups as { g, keys: ks } (g)}
-	<h3 class="section-header">{t(`nutrientGroup.${g}`)}</h3>
-	<ul class="group">
-		{#each ks as k (k)}
-			{@const def = NUTRIENTS[k]}
-			{@const v = nutrients[k]}
-			<li class="row nrow" class:sub={def.sub}>
-				<span class="grow">{t(`nutrient.${k}`)}</span>
-				<span class="val tabular" class:unknown={v === undefined}>
-					{#if v === undefined}
-						{t('picker.missingData')}
-					{:else}
-						{#if isPartial(k)}<span class="partial" title={t('day.incomplete')}>≥</span>{/if}
-						{def.unit === 'kcal' || def.unit === 'kJ' ? fmt(v) : fmtAmount(v)}
-						{def.unit}
-					{/if}
-					{#if targets?.[k]}
-						{@const tg = targets[k]!}
-						{@const cur = v ?? 0}
-						<span
-							class="target"
-							class:bad={(tg.max != null && cur > tg.max) || (tg.min != null && cur < tg.min)}
-							class:good={tg.min != null && cur >= tg.min && (tg.max == null || cur <= tg.max)}
-						>
-							{tg.max != null ? `/ ≤ ${fmtAmount(tg.max)}` : `/ ≥ ${fmtAmount(tg.min)}`}
+<div class="nt">
+	{#each groups as { g, keys: ks } (g)}
+		<div class="nt-group">
+			<h3 class="section-header">{t(`nutrientGroup.${g}`)}</h3>
+			<ul class="group">
+				{#each ks as k (k)}
+					{@const def = NUTRIENTS[k]}
+					{@const v = nutrients[k]}
+					<li class="row nrow" class:sub={def.sub}>
+						<span class="grow">{t(`nutrient.${k}`)}</span>
+						<span class="val tabular" class:unknown={v === undefined}>
+							{#if v === undefined}
+								{t('picker.missingData')}
+							{:else}
+								{#if isPartial(k)}<span class="partial" title={t('day.incomplete')}>≥</span>{/if}
+								{def.unit === 'kcal' || def.unit === 'kJ' ? fmt(v) : fmtAmount(v)}
+								{def.unit}
+							{/if}
+							{#if targets?.[k]}
+								{@const tg = targets[k]!}
+								{@const cur = v ?? 0}
+								<span
+									class="target"
+									class:bad={(tg.max != null && cur > tg.max) || (tg.min != null && cur < tg.min)}
+									class:good={tg.min != null && cur >= tg.min && (tg.max == null || cur <= tg.max)}
+								>
+									{tg.max != null ? `/ ≤ ${fmtAmount(tg.max)}` : `/ ≥ ${fmtAmount(tg.min)}`}
+								</span>
+							{/if}
 						</span>
-					{/if}
-				</span>
-			</li>
-		{/each}
-	</ul>
-{/each}
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/each}
+</div>
 
 <style>
 	.nrow {
@@ -112,5 +116,15 @@
 	.partial {
 		color: var(--warning);
 		margin-right: 2px;
+	}
+	/* a named container: Today's log column on iPad is an anonymous one and must not match */
+	@container nutrients (min-width: 760px) {
+		.nt {
+			columns: 2;
+			column-gap: 24px;
+		}
+		.nt-group {
+			break-inside: avoid;
+		}
 	}
 </style>

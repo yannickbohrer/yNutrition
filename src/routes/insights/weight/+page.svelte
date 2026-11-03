@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import BackNav from '#lib/components/BackNav.svelte';
 	import ChartCanvas from '#lib/components/ChartCanvas.svelte';
+	import { viewport } from '#lib/stores/viewport.svelte.ts';
 	import { api } from '#lib/api.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
 	import { toast } from '#lib/stores/ui.svelte.ts';
@@ -103,89 +104,103 @@
 
 <svelte:head><title>{t('weight.title')} · Nutrition</title></svelte:head>
 
-<main class="page">
+<main class="page weight-page">
 	<BackNav href="/insights" label={t('insights.title')} />
 	<h1 class="large-title">{t('weight.title')}</h1>
 
-	<form class="group" onsubmit={add} data-testid="weight-form">
-		<div class="row">
-			<label class="grow" for="w-kg">{t('weight.kg')}</label><input
-				id="w-kg"
-				type="number"
-				inputmode="decimal"
-				step="0.1"
-				min="20"
-				max="400"
-				bind:value={kg}
-				data-testid="weight-kg"
-			/>
-		</div>
-		<div class="row">
-			<label class="grow" for="w-date">{t('weight.date')}</label><input
-				id="w-date"
-				type="date"
-				bind:value={date}
-				max={app.today}
-			/>
-		</div>
-		<div class="row">
-			<label for="w-note">{t('weight.note')}</label><input
-				id="w-note"
-				bind:value={note}
-				placeholder={t('weight.notePlaceholder')}
-			/>
-		</div>
-		<div class="row">
-			<button class="btn" type="submit" disabled={busy || !kg} data-testid="weight-submit"
-				>{t('weight.add')}</button
-			>
-		</div>
-	</form>
+	<div class="w-cols">
+		<div>
+			<form class="group" onsubmit={add} data-testid="weight-form">
+				<div class="row">
+					<label class="grow" for="w-kg">{t('weight.kg')}</label><input
+						id="w-kg"
+						type="number"
+						inputmode="decimal"
+						step="0.1"
+						min="20"
+						max="400"
+						bind:value={kg}
+						data-testid="weight-kg"
+					/>
+				</div>
+				<div class="row">
+					<label class="grow" for="w-date">{t('weight.date')}</label><input
+						id="w-date"
+						type="date"
+						bind:value={date}
+						max={app.today}
+					/>
+				</div>
+				<div class="row">
+					<label for="w-note">{t('weight.note')}</label><input
+						id="w-note"
+						bind:value={note}
+						placeholder={t('weight.notePlaceholder')}
+					/>
+				</div>
+				<div class="row">
+					<button class="btn" type="submit" disabled={busy || !kg} data-testid="weight-submit"
+						>{t('weight.add')}</button
+					>
+				</div>
+			</form>
 
-	{#if list.length}
-		<div class="tiles">
-			<div class="tile">
-				<span class="t-label">{t('weight.latest')}</span><span class="t-val tabular"
-					>{fmt(latest.kg, 1)}<small> kg</small></span
-				>
-			</div>
-			<div class="tile">
-				<span class="t-label">{t('weight.change')}</span><span class="t-val tabular"
-					>{change === null ? '–' : (change > 0 ? '+' : '') + fmt(change, 1)}<small>
-						kg</small
-					></span
-				>
-			</div>
-		</div>
-		{#if asc.length > 1}
-			<section class="card">
-				<h2>{t('weight.trend')}</h2>
-				{#key list}<ChartCanvas config={chartConfig} label={t('weight.trend')} height={200} />{/key}
-			</section>
-		{/if}
-		<h2 class="section-header">{t('weight.history')}</h2>
-		<ul class="group" data-testid="weight-list">
-			{#each list as w (w.id)}
-				<li class="row">
-					<span class="grow">
-						<span class="row-title"
-							>{fmtDate(w.date, {
-								weekday: 'short',
-								day: 'numeric',
-								month: 'short',
-								year: 'numeric'
-							})}</span
+			{#if list.length}
+				<div class="tiles">
+					<div class="tile">
+						<span class="t-label">{t('weight.latest')}</span><span class="t-val tabular"
+							>{fmt(latest.kg, 1)}<small> kg</small></span
 						>
-						{#if w.note}<span class="row-sub">{w.note}</span>{/if}
-					</span>
-					<strong class="tabular">{fmt(w.kg, 1)} kg</strong>
-					<button class="del" onclick={() => remove(w.id)} aria-label={t('app.delete')}>×</button>
-				</li>
-			{/each}
-		</ul>
-	{:else}
-		<p class="empty">{t('weight.empty')}</p>
-	{/if}
+					</div>
+					<div class="tile">
+						<span class="t-label">{t('weight.change')}</span><span class="t-val tabular"
+							>{change === null ? '–' : (change > 0 ? '+' : '') + fmt(change, 1)}<small>
+								kg</small
+							></span
+						>
+					</div>
+				</div>
+				{#if asc.length > 1}
+					<section class="card">
+						<h2>{t('weight.trend')}</h2>
+						{#key list}<ChartCanvas
+								config={chartConfig}
+								label={t('weight.trend')}
+								height={viewport.desktop ? 320 : 200}
+							/>{/key}
+					</section>
+				{/if}
+			{/if}
+		</div>
+		{#if list.length}
+			<div class="w-history">
+				<h2 class="section-header">{t('weight.history')}</h2>
+				<ul class="group" data-testid="weight-list">
+					{#each list as w (w.id)}
+						<li class="row">
+							<span class="grow">
+								<span class="row-title"
+									>{fmtDate(w.date, {
+										weekday: 'short',
+										day: 'numeric',
+										month: 'short',
+										year: 'numeric'
+									})}</span
+								>
+								{#if w.note}<span class="row-sub">{w.note}</span>{/if}
+							</span>
+							<strong class="tabular">{fmt(w.kg, 1)} kg</strong>
+							<button class="del" onclick={() => remove(w.id)} aria-label={t('app.delete')}
+								>×</button
+							>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{:else}
+			<p class="empty">{t('weight.empty')}</p>
+		{/if}
+	</div>
 </main>
 
 <style>
@@ -241,5 +256,21 @@
 		color: var(--danger-text);
 		font-size: 22px;
 		width: 32px;
+	}
+
+	/* ---------- desktop: entry and trend | history ---------- */
+	@media (min-width: 1400px) and (orientation: landscape) {
+		.weight-page {
+			--page-max: 1240px;
+		}
+		.w-cols {
+			display: grid;
+			grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+			gap: 0 28px;
+			align-items: start;
+		}
+		.w-history > .section-header:first-child {
+			margin-top: 0;
+		}
 	}
 </style>

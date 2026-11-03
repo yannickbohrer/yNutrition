@@ -122,121 +122,128 @@
 	const kcal = (n: Nutrients) => (n.energy_kcal === undefined ? '–' : fmt(n.energy_kcal));
 </script>
 
-<main class="page">
+<main class="page recipe-page">
 	<BackNav href="/recipes" label={t('recipe.listTitle')} />
 	<h1 class="large-title">{r ? t('recipe.editTitle') : t('recipe.newTitle')}</h1>
+	<div class="r-grid">
+		<div class="r-details">
+			<ul class="group">
+				<li class="row">
+					<label for="r-name">{t('recipe.name')}</label><input
+						id="r-name"
+						bind:value={name}
+						data-testid="recipe-name"
+					/>
+				</li>
+				<li class="row">
+					<label for="r-serv">{t('recipe.servings')}</label><input
+						id="r-serv"
+						type="number"
+						inputmode="decimal"
+						min="1"
+						bind:value={servings}
+						data-testid="recipe-servings"
+					/>
+				</li>
+				<li class="row">
+					<label for="r-cw">{t('recipe.cookedWeight')}</label><input
+						id="r-cw"
+						type="number"
+						inputmode="decimal"
+						bind:value={cookedWeight}
+						placeholder={t('app.optional')}
+					/><span class="u">g</span>
+				</li>
+			</ul>
+			<p class="section-footer">{t('recipe.cookedWeightHint')}</p>
+		</div>
 
-	<ul class="group">
-		<li class="row">
-			<label for="r-name">{t('recipe.name')}</label><input
-				id="r-name"
-				bind:value={name}
-				data-testid="recipe-name"
-			/>
-		</li>
-		<li class="row">
-			<label for="r-serv">{t('recipe.servings')}</label><input
-				id="r-serv"
-				type="number"
-				inputmode="decimal"
-				min="1"
-				bind:value={servings}
-				data-testid="recipe-servings"
-			/>
-		</li>
-		<li class="row">
-			<label for="r-cw">{t('recipe.cookedWeight')}</label><input
-				id="r-cw"
-				type="number"
-				inputmode="decimal"
-				bind:value={cookedWeight}
-				placeholder={t('app.optional')}
-			/><span class="u">g</span>
-		</li>
-	</ul>
-	<p class="section-footer">{t('recipe.cookedWeightHint')}</p>
-
-	<h2 class="section-header">{t('recipe.ingredients')}</h2>
-	<ul class="group" data-testid="recipe-items">
-		{#each items as it, i (i)}
-			<li class="row">
-				<button class="grow item" onclick={() => editItem(i)}>
-					<span class="row-title">{it.name}</span>
-					<span class="row-sub tabular"
-						>{fmt(it.amount, 1)}
-						{it.basis}{it.per100?.energy_kcal !== undefined
-							? ` · ${fmt((it.per100.energy_kcal * it.amount) / 100)} kcal`
-							: ''}</span
+		<div class="r-items">
+			<h2 class="section-header">{t('recipe.ingredients')}</h2>
+			<ul class="group" data-testid="recipe-items">
+				{#each items as it, i (i)}
+					<li class="row">
+						<button class="grow item" onclick={() => editItem(i)}>
+							<span class="row-title">{it.name}</span>
+							<span class="row-sub tabular"
+								>{fmt(it.amount, 1)}
+								{it.basis}{it.per100?.energy_kcal !== undefined
+									? ` · ${fmt((it.per100.energy_kcal * it.amount) / 100)} kcal`
+									: ''}</span
+							>
+						</button>
+						<button
+							class="del"
+							onclick={() => (items = items.filter((_, j) => j !== i))}
+							aria-label={t('app.delete')}>×</button
+						>
+					</li>
+				{:else}
+					<li class="row secondary">{t('recipe.noIngredients')}</li>
+				{/each}
+				<li>
+					<button class="row add" onclick={() => (picking = true)} data-testid="add-ingredient"
+						><Icon name="plus" /> {t('recipe.addIngredient')}</button
 					>
-				</button>
-				<button
-					class="del"
-					onclick={() => (items = items.filter((_, j) => j !== i))}
-					aria-label={t('app.delete')}>×</button
-				>
-			</li>
-		{:else}
-			<li class="row secondary">{t('recipe.noIngredients')}</li>
-		{/each}
-		<li>
-			<button class="row add" onclick={() => (picking = true)} data-testid="add-ingredient"
-				><Icon name="plus" /> {t('recipe.addIngredient')}</button
-			>
-		</li>
-	</ul>
+				</li>
+			</ul>
 
-	{#if items.length}
-		<div class="totals" data-testid="recipe-totals">
-			<div>
-				<span class="lbl">{t('recipe.total')}</span><strong class="tabular"
-					>{kcal(calc.total)} kcal</strong
-				><span class="sub tabular">{fmt(calc.finalWeight)} g</span>
-			</div>
-			<div>
-				<span class="lbl">{t('recipe.perServing')}</span><strong
-					class="tabular"
-					data-testid="per-serving-kcal">{kcal(calc.perServing)} kcal</strong
-				><span class="sub tabular">{fmt(calc.servingWeight)} g</span>
-			</div>
-			<div>
-				<span class="lbl">{t('recipe.per100')}</span><strong class="tabular"
-					>{kcal(calc.per100)} kcal</strong
-				><span class="sub tabular"
-					>P {fmt(calc.per100.protein ?? 0, 1)} · KH {fmt(calc.per100.carbs ?? 0, 1)} · F {fmt(
-						calc.per100.fat ?? 0,
-						1
-					)}</span
+			{#if items.length}
+				<div class="totals" data-testid="recipe-totals">
+					<div>
+						<span class="lbl">{t('recipe.total')}</span><strong class="tabular"
+							>{kcal(calc.total)} kcal</strong
+						><span class="sub tabular">{fmt(calc.finalWeight)} g</span>
+					</div>
+					<div>
+						<span class="lbl">{t('recipe.perServing')}</span><strong
+							class="tabular"
+							data-testid="per-serving-kcal">{kcal(calc.perServing)} kcal</strong
+						><span class="sub tabular">{fmt(calc.servingWeight)} g</span>
+					</div>
+					<div>
+						<span class="lbl">{t('recipe.per100')}</span><strong class="tabular"
+							>{kcal(calc.per100)} kcal</strong
+						><span class="sub tabular"
+							>P {fmt(calc.per100.protein ?? 0, 1)} · KH {fmt(calc.per100.carbs ?? 0, 1)} · F {fmt(
+								calc.per100.fat ?? 0,
+								1
+							)}</span
+						>
+					</div>
+				</div>
+				{#if calc.partial.length}
+					<p class="section-footer warn">
+						{t('recipe.partialHint', {
+							list: calc.partial
+								.slice(0, 6)
+								.map((k) => t(`nutrient.${k}`))
+								.join(', ')
+						})}
+					</p>
+				{/if}
+			{/if}
+		</div>
+
+		<div class="r-extra">
+			<h2 class="section-header">{t('recipe.notes')}</h2>
+			<textarea class="notes" bind:value={notes} rows="3" aria-label={t('recipe.notes')}></textarea>
+
+			{#if error}<p class="error" role="alert">{error}</p>{/if}
+			<div class="buttons">
+				<button class="btn" onclick={save} disabled={busy} data-testid="save-recipe"
+					>{t('app.save')}</button
 				>
+				{#if r}
+					<button
+						class="btn secondary"
+						onclick={() => logFood(r.id, app.today)}
+						data-testid="log-recipe">{t('recipe.log')}</button
+					>
+					<button class="btn danger" onclick={remove}>{t('app.delete')}</button>
+				{/if}
 			</div>
 		</div>
-		{#if calc.partial.length}
-			<p class="section-footer warn">
-				{t('recipe.partialHint', {
-					list: calc.partial
-						.slice(0, 6)
-						.map((k) => t(`nutrient.${k}`))
-						.join(', ')
-				})}
-			</p>
-		{/if}
-	{/if}
-
-	<h2 class="section-header">{t('recipe.notes')}</h2>
-	<textarea class="notes" bind:value={notes} rows="3" aria-label={t('recipe.notes')}></textarea>
-
-	{#if error}<p class="error" role="alert">{error}</p>{/if}
-	<div class="buttons">
-		<button class="btn" onclick={save} disabled={busy} data-testid="save-recipe"
-			>{t('app.save')}</button
-		>
-		{#if r}
-			<button
-				class="btn secondary"
-				onclick={() => logFood(r.id, app.today)}
-				data-testid="log-recipe">{t('recipe.log')}</button
-			>
-			<button class="btn danger" onclick={remove}>{t('app.delete')}</button>
-		{/if}
 	</div>
 </main>
 
@@ -328,5 +335,34 @@
 		flex-direction: column;
 		gap: 10px;
 		margin-top: 24px;
+	}
+
+	/* ---------- desktop: ingredients | details ---------- */
+	@media (min-width: 1400px) and (orientation: landscape) {
+		.recipe-page {
+			--page-max: 1240px;
+		}
+		.r-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+			grid-template-rows: auto 1fr;
+			grid-template-areas:
+				'items details'
+				'items extra';
+			gap: 0 28px;
+			align-items: start;
+		}
+		.r-details {
+			grid-area: details;
+		}
+		.r-items {
+			grid-area: items;
+		}
+		.r-extra {
+			grid-area: extra;
+		}
+		.r-items > .section-header:first-child {
+			margin-top: 0;
+		}
 	}
 </style>

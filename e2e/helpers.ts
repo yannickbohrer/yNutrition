@@ -18,6 +18,22 @@ export async function addVirtualAuthenticator(
 	return { cdp, id: authenticatorId };
 }
 
+/** Bounding box of the first match, which must be rendered. */
+export async function box(page: Page, selector: string) {
+	const b = await page.locator(selector).first().boundingBox();
+	expect(b, selector).not.toBeNull();
+	return b!;
+}
+
+/** The page must never scroll sideways. */
+export async function expectNoHorizontalScroll(page: Page) {
+	const { sw, w } = await page.evaluate(() => ({
+		sw: document.documentElement.scrollWidth,
+		w: window.innerWidth
+	}));
+	expect(sw).toBeLessThanOrEqual(w);
+}
+
 export function zurichDate(offsetDays = 0): string {
 	const d = new Date(Date.now() + offsetDays * 86400000);
 	return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zurich' }).format(d);

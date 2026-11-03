@@ -213,24 +213,32 @@
 
 	{#if !q.trim()}
 		{#if suggestions && (suggestions.favorites.length || suggestions.recent.length)}
-			{#if suggestions.favorites.length}
-				<h2 class="section-header">{t('add.favorites')}</h2>
-				<div class="group" data-testid="favorites-list">
-					{#each suggestions.favorites as f (f.id)}<FoodRow food={f} {onselect} />{/each}
-				</div>
-			{/if}
-			{#if frequentList.length}
-				<h2 class="section-header">{t('add.frequent')}</h2>
-				<div class="group">
-					{#each frequentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
-				</div>
-			{/if}
-			{#if recentList.length}
-				<h2 class="section-header">{t('add.recent')}</h2>
-				<div class="group" data-testid="recent-list">
-					{#each recentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
-				</div>
-			{/if}
+			<div class="add-cols">
+				{#if suggestions.favorites.length}
+					<div>
+						<h2 class="section-header">{t('add.favorites')}</h2>
+						<div class="group" data-testid="favorites-list">
+							{#each suggestions.favorites as f (f.id)}<FoodRow food={f} {onselect} />{/each}
+						</div>
+					</div>
+				{/if}
+				{#if frequentList.length}
+					<div>
+						<h2 class="section-header">{t('add.frequent')}</h2>
+						<div class="group">
+							{#each frequentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
+						</div>
+					</div>
+				{/if}
+				{#if recentList.length}
+					<div>
+						<h2 class="section-header">{t('add.recent')}</h2>
+						<div class="group" data-testid="recent-list">
+							{#each recentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
 		{:else if suggestions}
 			<p class="empty">{t('add.emptySuggestions')}</p>
 		{/if}

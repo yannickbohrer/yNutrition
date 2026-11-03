@@ -1,9 +1,9 @@
 <script lang="ts">
 	/**
 	 * Main navigation, one component for three layouts (pure CSS, see app.css breakpoints):
-	 *  - iPhone: classic bottom tab bar
+	 *  - phone: floating tab bar (icon above label)
 	 *  - iPad portrait: floating tab bar centred at the bottom (icon + label side by side)
-	 *  - iPad landscape: sidebar on the left with app title and quick add
+	 *  - iPad landscape and larger: sidebar on the left with app title and quick add
 	 */
 	import { page } from '$app/state';
 	import Icon, { type IconName } from './Icon.svelte';
@@ -74,18 +74,22 @@
 </nav>
 
 <style>
-	/* ---------- iPhone: bottom tab bar ---------- */
+	/* ---------- phone: floating tab bar ---------- */
 	.tabbar {
 		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
+		left: calc(12px + var(--safe-left));
+		right: calc(12px + var(--safe-right));
+		bottom: calc(var(--safe-bottom) + 8px);
 		z-index: 50;
-		padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
+		max-width: 420px;
+		margin: 0 auto;
+		padding: 4px;
 		background: var(--bg-blur);
 		backdrop-filter: saturate(180%) blur(20px);
 		-webkit-backdrop-filter: saturate(180%) blur(20px);
-		border-top: 0.5px solid var(--sep);
+		border: 0.5px solid var(--sep);
+		border-radius: 29px;
+		box-shadow: var(--shadow);
 		/* avoid jitter during iOS overscroll */
 		transform: translateZ(0);
 	}
@@ -104,21 +108,25 @@
 		align-items: center;
 		justify-content: center;
 		gap: 2px;
-		height: var(--tabbar-h);
+		height: 50px;
+		border-radius: 25px;
 		color: var(--label-2);
 		font-size: 10.5px;
 		font-weight: 500;
 		max-width: 120px;
 	}
 	a.active {
+		background: var(--fill);
 		color: var(--tab-active, var(--tint));
 	}
 
 	/* ---------- iPad portrait: floating tab bar ---------- */
-	@media (min-width: 640px) and (min-height: 560px) {
+	@media (min-width: 640px) and (min-height: 560px), (min-width: 1000px) {
 		.tabbar {
 			left: 50%;
 			right: auto;
+			max-width: none;
+			margin: 0;
 			bottom: calc(var(--safe-bottom) + 14px);
 			transform: translateX(-50%);
 			padding: 5px;
@@ -150,11 +158,12 @@
 	}
 
 	/* ---------- iPad landscape: sidebar ---------- */
-	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+		(min-width: 1000px) and (orientation: landscape) {
 		.tabbar {
 			top: 0;
 			bottom: 0;
-			left: 0;
+			left: var(--shell-inset);
 			transform: none;
 			width: var(--nav-w);
 			display: flex;
@@ -210,6 +219,19 @@
 			padding: 0 12px;
 			font-size: 16px;
 			white-space: nowrap;
+		}
+	}
+
+	/* centred shell: the sidebar no longer touches the screen edge */
+	@media (min-width: 2561px) and (orientation: landscape) {
+		.tabbar {
+			border-left: 0.5px solid var(--sep);
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		a:not(.active):hover {
+			background: var(--fill);
 		}
 	}
 </style>

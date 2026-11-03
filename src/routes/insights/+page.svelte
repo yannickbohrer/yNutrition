@@ -197,7 +197,15 @@
 					<ChartCanvas
 						config={chartConfig}
 						label={t('insights.kcalChart')}
-						height={viewport.wide ? 340 : viewport.tablet ? 300 : 220}
+						height={viewport.ultra
+							? 480
+							: viewport.desktop
+								? 420
+								: viewport.wide
+									? 340
+									: viewport.tablet
+										? 300
+										: 220}
 					/>
 				{/key}
 				<p class="hint">
@@ -512,7 +520,7 @@
 	}
 
 	/* ---------- iPad portrait: chart on top, then two columns ---------- */
-	@media (min-width: 640px) and (min-height: 560px) {
+	@media (min-width: 640px) and (min-height: 560px), (min-width: 1000px) {
 		.period-bar {
 			display: flex;
 			align-items: center;
@@ -568,7 +576,8 @@
 	}
 
 	/* ---------- iPad landscape: chart + breakdown left, figures right ---------- */
-	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+		(min-width: 1000px) and (orientation: landscape) {
 		.insights-page {
 			--page-max: 1240px;
 		}
@@ -589,6 +598,24 @@
 		}
 		.a-macros > .section-header:first-child {
 			margin-top: 24px;
+		}
+	}
+
+	/* ---------- ultra: chart | figures | breakdown ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.insights-page {
+			--page-max: none;
+		}
+		.ins-grid {
+			grid-template-columns: minmax(0, 5fr) minmax(320px, 3fr) minmax(320px, 3fr);
+			grid-template-rows: auto auto 1fr;
+			grid-template-areas:
+				'chart tiles bd'
+				'chart macros bd'
+				'chart side bd';
+		}
+		.a-bd > .section-header:first-child {
+			margin-top: 0;
 		}
 	}
 </style>

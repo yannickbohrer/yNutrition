@@ -6,6 +6,7 @@
 	import { fmt, t } from '#lib/i18n/index.svelte.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
 	import { KJ_PER_KCAL } from '#lib/nutrition.ts';
+	import { viewport } from '#lib/stores/viewport.svelte.ts';
 
 	let {
 		entry,
@@ -130,6 +131,16 @@
 		</span>
 		<span class="kcal tabular">{energy === null ? '–' : fmt(energy)}<small> {unit}</small></span>
 	</button>
+	{#if viewport.mouse && x === 0}
+		<button
+			class="hover-del"
+			onclick={() => ondelete(entry)}
+			aria-label={t('a11y.deleteEntry')}
+			data-testid="entry-hover-delete"
+		>
+			<Icon name="trash" size={18} />
+		</button>
+	{/if}
 </li>
 
 <style>
@@ -200,5 +211,31 @@
 		font-weight: 400;
 		color: var(--label-2);
 		font-size: 12px;
+	}
+	/* mouse and keyboard: a delete button instead of the swipe, shown on demand */
+	.hover-del {
+		position: absolute;
+		top: 50%;
+		right: 10px;
+		z-index: 1;
+		width: 36px;
+		height: 36px;
+		display: grid;
+		place-items: center;
+		padding: 0;
+		border: 0;
+		border-radius: 18px;
+		background: var(--fill);
+		color: var(--danger-text);
+		opacity: 0;
+		transform: translateY(-50%);
+	}
+	.entry:hover .hover-del,
+	.entry:focus-within .hover-del {
+		opacity: 1;
+	}
+	.entry:hover:has(.hover-del) .content,
+	.entry:focus-within:has(.hover-del) .content {
+		padding-right: 56px;
 	}
 </style>

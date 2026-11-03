@@ -45,18 +45,28 @@
 	--safe-right: env(safe-area-inset-right, 0px);
 	--tabbar-h: 50px;
 	--gutter: 16px;
-	/* width of the iPad landscape sidebar (0 elsewhere) */
+	/* width of the sidebar (0 without one) */
 	--nav-w: 0px;
+	/* space left and right of the centred app shell on very wide screens (0 elsewhere) */
+	--shell-inset: 0px;
 	--page-max: 720px;
+}
+/* phone: floating tab bar, 58 px pill + 8 px gap below it */
+:root:has(.tabbar) {
+	--tabbar-h: 66px;
 }
 
 /*
- * iPad layouts. Breakpoints (keep in sync with src/lib/stores/viewport.svelte.ts):
- *   tablet = (min-width: 640px) and (min-height: 560px)        → iPad portrait (and up)
- *   wide   = tablet and (min-width: 900px) and landscape      → iPad landscape
- * The min-height keeps iPhones in landscape (≤ 932 × 430) on the phone layout.
+ * Layout tiers (keep in sync with src/lib/stores/viewport.svelte.ts):
+ *   tablet  = ≥ 640 × 560, or ≥ 1000 wide           → iPad portrait (and up)
+ *   wide    = tablet and ≥ 900 wide and landscape   → iPad landscape, small laptops
+ *   desktop = ≥ 1400 wide and landscape             → laptops; two-column detail pages
+ *   ultra   = ≥ 1800 wide and landscape             → monitors; third pane, centred shell
+ * The min-height keeps iPhones in landscape (≤ 956 × 440) on the phone layout; ≥ 1000 wide is
+ * never a phone, so short laptop windows keep the sidebar. desktop starts above the largest
+ * iPad (1376 px), so nothing from there on can reach an iPad.
  */
-@media (min-width: 640px) and (min-height: 560px) {
+@media (min-width: 640px) and (min-height: 560px), (min-width: 1000px) {
 	:root {
 		--gutter: 28px;
 		--page-max: 860px;
@@ -66,7 +76,8 @@
 		--tabbar-h: 70px;
 	}
 }
-@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+	(min-width: 1000px) and (orientation: landscape) {
 	:root {
 		--page-max: 980px;
 	}
@@ -76,7 +87,14 @@
 	}
 	/* sidebar takes the left edge (incl. safe area) */
 	.app-shell.with-nav {
-		padding-left: var(--nav-w);
+		padding-left: calc(var(--nav-w) + var(--shell-inset));
+		padding-right: var(--shell-inset);
+	}
+}
+/* keep the sidebar next to the content: past 2560 px the whole app is centred */
+@media (min-width: 1800px) and (orientation: landscape) {
+	:root:has(.tabbar) {
+		--shell-inset: max(0px, (100vw - 2560px) / 2);
 	}
 }
 
@@ -191,7 +209,8 @@ a {
 	max-width: var(--page-max);
 	margin: 0 auto;
 }
-@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+	(min-width: 1000px) and (orientation: landscape) {
 	.with-nav .page {
 		padding-left: var(--gutter);
 		padding-bottom: 64px;
@@ -455,6 +474,20 @@ a.row:active {
 
 .warn {
 	color: var(--warning);
+}
+
+/* mouse and trackpad: hover feedback only, nothing here may change the layout */
+@media (hover: hover) and (pointer: fine) {
+	html {
+		scrollbar-gutter: stable;
+	}
+	button.row:hover,
+	a.row:hover {
+		background: color-mix(in srgb, var(--label) 6%, var(--bg-elev));
+	}
+	.btn:not(:disabled):hover {
+		filter: brightness(1.08);
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {

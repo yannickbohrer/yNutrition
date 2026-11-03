@@ -279,7 +279,9 @@
 					/>
 				{/each}
 			</ul>
-			<p class="section-footer">{t('day.swipeHint')}</p>
+			<p class="section-footer">
+				{t(viewport.mouse && !viewport.touch ? 'day.hoverHint' : 'day.swipeHint')}
+			</p>
 		{:else}
 			<div class="empty-card">
 				<p class="empty-title">{t('day.empty')}</p>
@@ -293,15 +295,17 @@
 				<span class="grow">{t('day.copyEntries')}</span>
 				<span class="chev"><Icon name="chevronRight" size={16} /></span>
 			</a>
-			<button class="row" onclick={() => (showAll = !showAll)} aria-expanded={showAll}>
-				<Icon name="info" />
-				<span class="grow">{t('day.showAll')}</span>
-				<span class="chev" style:transform={showAll ? 'rotate(90deg)' : undefined}
-					><Icon name="chevronRight" size={16} /></span
-				>
-			</button>
+			{#if !viewport.ultra}
+				<button class="row" onclick={() => (showAll = !showAll)} aria-expanded={showAll}>
+					<Icon name="info" />
+					<span class="grow">{t('day.showAll')}</span>
+					<span class="chev" style:transform={showAll ? 'rotate(90deg)' : undefined}
+						><Icon name="chevronRight" size={16} /></span
+					>
+				</button>
+			{/if}
 		</div>
-		{#if showAll}
+		{#if showAll && !viewport.ultra}
 			<h2 class="visually-hidden">{t('day.nutrients')}</h2>
 			<NutrientTable
 				nutrients={day.totals}
@@ -311,6 +315,21 @@
 			/>
 		{/if}
 	</div>
+	{#if viewport.ultra}
+		<aside class="day-nutrients" aria-label={t('day.nutrients')} data-testid="nutrients-pane">
+			<h2 class="add-title">{t('day.nutrients')}</h2>
+			{#if day.entries.length}
+				<NutrientTable
+					nutrients={day.totals}
+					missing={day.missing}
+					count={day.count}
+					targets={app.settings.targets.extra}
+				/>
+			{:else}
+				<p class="empty">{t('day.empty')}</p>
+			{/if}
+		</aside>
+	{/if}
 	{#if viewport.wide}
 		<aside class="day-add" aria-label={addTitle} data-testid="inline-add">
 			<h2 class="add-title">{addTitle}</h2>
@@ -487,7 +506,7 @@
 		container-type: inline-size;
 		min-width: 0;
 	}
-	@media (min-width: 640px) and (min-height: 560px) {
+	@media (min-width: 640px) and (min-height: 560px), (min-width: 1000px) {
 		.fab {
 			right: calc(max(0px, (100vw - var(--page-max)) / 2) + var(--gutter) + var(--safe-right));
 			bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 6px);
@@ -525,7 +544,8 @@
 	}
 
 	/* ---------- iPad landscape: log | add panel ---------- */
-	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
+		(min-width: 1000px) and (orientation: landscape) {
 		.day-page {
 			--page-max: 1280px;
 			display: grid;
@@ -549,6 +569,27 @@
 			font-size: 22px;
 			font-weight: 700;
 			margin: 4px 0 10px;
+		}
+	}
+
+	/* ---------- ultra: log | all nutrients | add panel ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.day-page {
+			--page-max: none;
+			grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(340px, 420px);
+		}
+		.day-nutrients {
+			container: nutrients / inline-size;
+			position: sticky;
+			top: 0;
+			max-height: 100dvh;
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			padding: calc(var(--safe-top) + 12px) 0 24px;
+			margin-top: calc(-8px - var(--safe-top));
+		}
+		.day-nutrients :global(.nt-group:first-child .section-header) {
+			margin-top: 14px;
 		}
 	}
 </style>

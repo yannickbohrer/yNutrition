@@ -35,6 +35,12 @@ const ipadLandscape = {
 	defaultBrowserType: 'chromium' as const
 };
 
+// laptops and monitors: mouse input, no touch
+const desktopAt = (width: number, height: number) => ({
+	...devices['Desktop Chrome'],
+	viewport: { width, height }
+});
+
 export default defineConfig({
 	testDir: 'e2e',
 	testMatch: '**/*.e2e.ts',
@@ -57,7 +63,12 @@ export default defineConfig({
 		{ name: 'setup', testMatch: /auth\.setup\.e2e\.ts/, use: iphone },
 		{
 			name: 'iphone',
-			testIgnore: [/auth\.setup\.e2e\.ts/, /screenshots\.e2e\.ts/, /ipad\.e2e\.ts/],
+			testIgnore: [
+				/auth\.setup\.e2e\.ts/,
+				/screenshots\.e2e\.ts/,
+				/ipad\.e2e\.ts/,
+				/desktop\.e2e\.ts/
+			],
 			dependencies: ['setup'],
 			use: { ...iphone, storageState: 'e2e/.tmp/state.json' }
 		},
@@ -72,6 +83,24 @@ export default defineConfig({
 			testMatch: /ipad\.e2e\.ts/,
 			dependencies: ['setup'],
 			use: { ...ipadLandscape, storageState: 'e2e/.tmp/state.json' }
+		},
+		{
+			name: 'laptop',
+			testMatch: /desktop\.e2e\.ts/,
+			dependencies: ['setup'],
+			use: { ...desktopAt(1440, 900), storageState: 'e2e/.tmp/state.json' }
+		},
+		{
+			name: 'desktop',
+			testMatch: /desktop\.e2e\.ts/,
+			dependencies: ['setup'],
+			use: { ...desktopAt(1920, 1080), storageState: 'e2e/.tmp/state.json' }
+		},
+		{
+			name: 'ultrawide',
+			testMatch: /desktop\.e2e\.ts/,
+			dependencies: ['setup'],
+			use: { ...desktopAt(3440, 1440), storageState: 'e2e/.tmp/state.json' }
 		},
 		{
 			name: 'screenshots',

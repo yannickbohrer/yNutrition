@@ -54,7 +54,7 @@
 
 <svelte:head><title>{food.name} · Nutrition</title></svelte:head>
 
-<main class="page">
+<main class="page" class:food-page={!editing}>
 	<BackNav
 		href={food.source === 'recipe' ? '/recipes' : '/add'}
 		label={food.source === 'recipe' ? t('recipe.listTitle') : t('add.title')}
@@ -77,70 +77,75 @@
 			<button class="btn danger" onclick={remove}>{t('app.delete')}</button>
 		</div>
 	{:else}
-		<h1 class="title">{food.name}</h1>
-		<div class="meta">
-			<SourceBadge source={food.source} />
-			{#if food.brand}<span>{food.brand}</span>{/if}
-			{#if food.barcode}<span class="tabular">· {food.barcode}</span>{/if}
+		<div class="food-cols">
+			<div>
+				<h1 class="title">{food.name}</h1>
+				<div class="meta">
+					<SourceBadge source={food.source} />
+					{#if food.brand}<span>{food.brand}</span>{/if}
+					{#if food.barcode}<span class="tabular">· {food.barcode}</span>{/if}
+				</div>
+				{#if food.deleted}<p class="warn">{t('food.deleted')}</p>{/if}
+
+				<div class="actions">
+					<button
+						class="btn"
+						onclick={() => logFood(food, app.today)}
+						disabled={food.deleted}
+						data-testid="log-food">{t('food.log')}</button
+					>
+					<button
+						class="btn secondary fav"
+						onclick={toggleFav}
+						aria-pressed={favorite}
+						aria-label={favorite ? t('food.unfavorite') : t('food.favorite')}
+						data-testid="food-favorite"
+					>
+						<Icon name="star" fill={favorite} size={20} />
+						{t('a11y.favorite')}
+					</button>
+				</div>
+
+				{#if food.incomplete}
+					<p class="hint warn"><Icon name="warn" size={14} /> {t('food.incompleteHint')}</p>
+				{/if}
+
+				<h2 class="section-header">{t('food.portions')}</h2>
+				<ul class="group">
+					{#each food.portions as p (p.amount)}
+						<li class="row">
+							<span class="grow">{p.label}</span>
+							<span class="secondary tabular">{fmt(p.amount, 1)} {food.basis}</span>
+							{#if p.kind === 'user' && p.id}
+								<button class="del" onclick={() => delPortion(p.id!)} aria-label={t('app.delete')}
+									>×</button
+								>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</div>
+			<div class="food-right">
+				<h2 class="section-header">{t('food.per100', { unit: food.basis })}</h2>
+				<NutrientTable
+					nutrients={food.nutrients}
+					partial={food.partial}
+					showUnknown={food.source !== 'swissfcd'}
+				/>
+
+				{#if attribution}
+					<p class="section-footer attribution">
+						{attribution}
+						{#if food.sourceUrl}<a
+								href={food.sourceUrl}
+								target="_blank"
+								rel="noopener"
+								data-testid="source-link">{t('food.viewSource')} ↗</a
+							>{/if}
+					</p>
+				{/if}
+			</div>
 		</div>
-		{#if food.deleted}<p class="warn">{t('food.deleted')}</p>{/if}
-
-		<div class="actions">
-			<button
-				class="btn"
-				onclick={() => logFood(food, app.today)}
-				disabled={food.deleted}
-				data-testid="log-food">{t('food.log')}</button
-			>
-			<button
-				class="btn secondary fav"
-				onclick={toggleFav}
-				aria-pressed={favorite}
-				aria-label={favorite ? t('food.unfavorite') : t('food.favorite')}
-				data-testid="food-favorite"
-			>
-				<Icon name="star" fill={favorite} size={20} />
-				{t('a11y.favorite')}
-			</button>
-		</div>
-
-		{#if food.incomplete}
-			<p class="hint warn"><Icon name="warn" size={14} /> {t('food.incompleteHint')}</p>
-		{/if}
-
-		<h2 class="section-header">{t('food.portions')}</h2>
-		<ul class="group">
-			{#each food.portions as p (p.amount)}
-				<li class="row">
-					<span class="grow">{p.label}</span>
-					<span class="secondary tabular">{fmt(p.amount, 1)} {food.basis}</span>
-					{#if p.kind === 'user' && p.id}
-						<button class="del" onclick={() => delPortion(p.id!)} aria-label={t('app.delete')}
-							>×</button
-						>
-					{/if}
-				</li>
-			{/each}
-		</ul>
-
-		<h2 class="section-header">{t('food.per100', { unit: food.basis })}</h2>
-		<NutrientTable
-			nutrients={food.nutrients}
-			partial={food.partial}
-			showUnknown={food.source !== 'swissfcd'}
-		/>
-
-		{#if attribution}
-			<p class="section-footer attribution">
-				{attribution}
-				{#if food.sourceUrl}<a
-						href={food.sourceUrl}
-						target="_blank"
-						rel="noopener"
-						data-testid="source-link">{t('food.viewSource')} ↗</a
-					>{/if}
-			</p>
-		{/if}
 	{/if}
 </main>
 
@@ -187,5 +192,21 @@
 		display: flex;
 		gap: 4px;
 		align-items: flex-start;
+	}
+
+	/* ---------- desktop: food | nutrients ---------- */
+	@media (min-width: 1400px) and (orientation: landscape) {
+		.food-page {
+			--page-max: 1240px;
+		}
+		.food-cols {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0 28px;
+			align-items: start;
+		}
+		.food-right > :global(.section-header:first-child) {
+			margin-top: 6px;
+		}
 	}
 </style>

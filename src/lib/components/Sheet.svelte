@@ -176,7 +176,7 @@
 		height: calc(100dvh - var(--safe-top) - 12px);
 	}
 	/* iPad (both orientations): centred form sheet like UIModalPresentationFormSheet */
-	@media (min-width: 640px) and (min-height: 560px) {
+	@media (min-width: 640px) and (min-height: 560px), (min-width: 1000px) {
 		.sheet {
 			top: 50%;
 			bottom: auto;

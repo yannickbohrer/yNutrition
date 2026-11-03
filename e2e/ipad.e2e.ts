@@ -2,28 +2,13 @@
  * iPad layouts. Runs in the `ipad-portrait` and `ipad-landscape` projects (iPad Pro 11).
  * Logs to a fixed past day so it never interferes with the iPhone feature tests.
  */
-import { test, expect, type Page } from '@playwright/test';
-import { confirmPicker, pickFood } from './helpers';
+import { test, expect } from '@playwright/test';
+import { box, confirmPicker, expectNoHorizontalScroll, pickFood } from './helpers';
 
 test.describe.configure({ mode: 'serial' });
 
 const DAY = '2025-03-14';
 const isLandscape = () => test.info().project.name === 'ipad-landscape';
-
-async function box(page: Page, selector: string) {
-	const b = await page.locator(selector).first().boundingBox();
-	expect(b, selector).not.toBeNull();
-	return b!;
-}
-
-/** The page must never scroll sideways. */
-async function expectNoHorizontalScroll(page: Page) {
-	const { sw, w } = await page.evaluate(() => ({
-		sw: document.documentElement.scrollWidth,
-		w: window.innerWidth
-	}));
-	expect(sw).toBeLessThanOrEqual(w);
-}
 
 test.describe('portrait', () => {
 	test.beforeEach(() => test.skip(isLandscape(), 'portrait only'));
@@ -108,6 +93,7 @@ test.describe('landscape', () => {
 		expect(dialog.x).toBeGreaterThan(100); // centred form sheet
 		await confirmPicker(page);
 		await expect(page.getByTestId('entry-row').filter({ hasText: 'Banane, roh' })).toBeVisible();
+		await expect(page.getByText('Nach links wischen zum Löschen')).toBeVisible();
 		await expectNoHorizontalScroll(page);
 
 		// clean up so the day stays empty for re-runs
@@ -176,6 +162,6 @@ test('iPhone landscape keeps the phone layout', async ({ page }) => {
 	await page.setViewportSize({ width: 852, height: 393 });
 	await page.goto(`/?date=${DAY}`);
 	const bar = await box(page, 'nav.tabbar');
-	expect(bar.width).toBe(852);
+	expect(bar.width).toBeLessThanOrEqual(420); // floating phone bar
 	await expect(page.getByTestId('sidebar-add')).toBeHidden();
 });

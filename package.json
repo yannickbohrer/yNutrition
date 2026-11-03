@@ -14,7 +14,7 @@
 		"format": "prettier --write .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "npm run build && playwright test --project=setup --project=iphone --project=ipad-portrait --project=ipad-landscape",
+		"test:e2e": "npm run build && playwright test --project=setup --project=iphone --project=ipad-portrait --project=ipad-landscape --project=laptop --project=desktop --project=ultrawide",
 		"db:generate": "drizzle-kit generate",
 		"start": "node scripts/start.js",
 		"import:swissfcd": "node scripts/import-swissfcd.js",

@@ -58,7 +58,8 @@ export const de = {
 		copyToDay: 'Zu diesem Tag kopieren',
 		copied: 'Kopiert',
 		deletedEntry: '«{name}» gelöscht',
-		swipeHint: 'Nach links wischen zum Löschen'
+		swipeHint: 'Nach links wischen zum Löschen',
+		hoverHint: 'Zum Löschen mit der Maus auf eine Zeile zeigen'
 	},
 	macros: {
 		energy_kcal: 'Kalorien',
