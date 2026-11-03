@@ -1,0 +1,245 @@
+{
+	"hits": [
+		{
+			"code": "7610097111188",
+			"brands": ["rivella"],
+			"lang": "en",
+			"quantity": "1.5l",
+			"countries_tags": ["en:germany", "en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 9,
+				"energy-kcal_100g": 37,
+				"energy-kj_100g": 155,
+				"fat_100g": 0,
+				"proteins_100g": 0,
+				"salt_100g": 0.03,
+				"saturated-fat_100g": 0,
+				"sodium_100g": 0.012,
+				"sugars_100g": 9
+			},
+			"product_name": "Rivella Rot Original",
+			"product_name_de": "Rivella",
+			"product_name_en": "Rivella Rot Original",
+			"generic_name_de": "Kohlensäurehaltiges Tafelgetränk mit 35% Milchserum",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/711/1188/front_en.64.200.jpg"
+		},
+		{
+			"code": "7610097126182",
+			"brands": ["Rivella"],
+			"lang": "fr",
+			"quantity": "1.5l",
+			"countries_tags": ["en:france", "en:germany", "en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 5.2,
+				"sugars_100g": 5.2,
+				"energy-kcal_100g": 21,
+				"proteins_100g": 0,
+				"sodium_100g": 0.008,
+				"fat_100g": 0,
+				"saturated-fat_100g": 0,
+				"salt_100g": 0.02
+			},
+			"product_name": "Rivella Refresh",
+			"product_name_de": "Rivella Refresh",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/712/6182/front_fr.4.200.jpg"
+		},
+		{
+			"code": "7610097111072",
+			"brands": ["Rivella"],
+			"lang": "de",
+			"quantity": "0.5l",
+			"countries_tags": ["en:france", "en:germany", "en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 9,
+				"energy-kcal_100g": 37,
+				"energy-kj_100g": 160,
+				"fat_100g": 0,
+				"proteins_100g": 0,
+				"salt_100g": 0.03,
+				"saturated-fat_100g": 0,
+				"sodium_100g": 0.012,
+				"sugars_100g": 9
+			},
+			"product_name": "Rivella rot",
+			"product_name_de": "Rivella rot",
+			"generic_name_de": "Kohlensäurehaltiges Tafelgetränk mit 35% Milchserum",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/711/1072/front_de.74.200.jpg"
+		},
+		{
+			"code": "7610097222075",
+			"brands": ["Rivella"],
+			"lang": "de",
+			"quantity": "0.5 L",
+			"countries_tags": ["en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 5.2,
+				"energy-kcal_100g": 22,
+				"energy-kj_100g": 92,
+				"fat_100g": 0,
+				"proteins_100g": 0,
+				"salt_100g": 0,
+				"saturated-fat_100g": 0,
+				"sodium_100g": 0,
+				"sugars_100g": 5.2
+			},
+			"product_name": "Rivella Refresh",
+			"product_name_de": "Rivella Refresh",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/722/2075/front_de.3.200.jpg"
+		},
+		{
+			"code": "7610097112406",
+			"brands": ["Rivella"],
+			"lang": "fr",
+			"quantity": "0.5l",
+			"countries_tags": ["en:germany", "en:switzerland"],
+			"product_name": "Rivella",
+			"product_name_de": "Rivella Blau"
+		},
+		{
+			"code": "7610097111416",
+			"brands": ["Rivella"],
+			"lang": "fr",
+			"quantity": "1.25l",
+			"countries_tags": ["en:france", "en:germany", "en:switzerland"],
+			"nutriments": {
+				"sugars_100g": 9,
+				"carbohydrates_100g": 9,
+				"sodium_100g": 0.012,
+				"energy-kcal_100g": 37,
+				"fat_100g": 0,
+				"salt_100g": 0.03,
+				"saturated-fat_100g": 0,
+				"proteins_100g": 0
+			},
+			"product_name": "Rivella",
+			"product_name_de": "Rivella rot"
+		},
+		{
+			"code": "7610097126076",
+			"brands": ["Rivella"],
+			"lang": "de",
+			"quantity": "0ml",
+			"countries_tags": ["en:france", "en:germany", "en:switzerland"],
+			"nutriments": {
+				"proteins_100g": 0,
+				"energy-kcal_100g": 21,
+				"sugars_100g": 5.2,
+				"carbohydrates_100g": 5.2,
+				"saturated-fat_100g": 0,
+				"salt_100g": 0,
+				"fat_100g": 0,
+				"sodium_100g": 0
+			},
+			"product_name": "Rivella Refresh",
+			"product_name_de": "Rivella Refresh",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/712/6076/front_de.18.200.jpg"
+		},
+		{
+			"code": "7610097123754",
+			"brands": ["Rivella"],
+			"lang": "fr",
+			"countries_tags": ["en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 3.8,
+				"energy-kcal_100g": 16,
+				"energy-kj_100g": 67,
+				"fat_100g": 0,
+				"fiber_100g": 0,
+				"proteins_100g": 0,
+				"salt_100g": 0,
+				"saturated-fat_100g": 0,
+				"sodium_100g": 0,
+				"sugars_100g": 3.8
+			},
+			"product_name": "Enertea mate",
+			"product_name_de": "Enertea mate - Rivella",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/712/3754/front_fr.3.200.jpg"
+		},
+		{
+			"code": "7610097200271",
+			"brands": ["Rivella"],
+			"lang": "de",
+			"countries_tags": ["en:france", "en:switzerland"],
+			"nutriments": {
+				"sodium_100g": 0.008,
+				"carbohydrates_100g": 5,
+				"sugars_100g": 5,
+				"salt_100g": 0.02,
+				"proteins_100g": 0,
+				"saturated-fat_100g": 0,
+				"energy-kcal_100g": 22,
+				"fat_100g": 0
+			},
+			"product_name": "Rivella Mit Grüntee Extrakten, Grün",
+			"product_name_de": "Rivella Mit Grüntee Extrakten, Grün",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/720/0271/front_de.3.200.jpg"
+		},
+		{
+			"code": "7610097193078",
+			"brands": ["Rivella"],
+			"lang": "fr",
+			"quantity": "500 ml",
+			"countries_tags": ["en:switzerland"],
+			"nutriments": {
+				"carbohydrates_100g": 4.3,
+				"energy-kj_100g": 70,
+				"fat_100g": 0,
+				"proteins_100g": 0,
+				"salt_100g": 0,
+				"saturated-fat_100g": 0,
+				"sodium_100g": 0,
+				"sugars_100g": 3.7
+			},
+			"product_name": "Liqit Michel Grapefruit Ananas Fruchtsaftgetränk",
+			"product_name_de": "Liqit Michel Grapefruit Ananas Fruchtsaftgetränk",
+			"product_name_en": "Liqit Michel Grapefruit pineapple fruit juice drink",
+			"image_front_small_url": "https://images.openfoodfacts.org/images/products/761/009/719/3078/front_fr.6.200.jpg"
+		}
+	],
+	"aggregations": null,
+	"facets": {},
+	"charts": {},
+	"page": 1,
+	"page_size": 10,
+	"page_count": 5,
+	"debug": {
+		"query": {
+			"query": {
+				"bool": {
+					"should": [
+						{ "match_phrase": { "product_name.de": { "query": "rivella", "boost": 2.0 } } },
+						{ "match_phrase": { "generic_name.de": { "query": "rivella", "boost": 2.0 } } },
+						{ "match_phrase": { "categories.de": { "query": "rivella", "boost": 2.0 } } },
+						{ "match_phrase": { "labels.de": { "query": "rivella", "boost": 2.0 } } },
+						{ "match_phrase": { "brands": { "query": "rivella", "boost": 2.0 } } },
+						{
+							"multi_match": {
+								"query": "rivella",
+								"fields": [
+									"product_name.de",
+									"generic_name.de",
+									"categories.de",
+									"labels.de",
+									"brands"
+								]
+							}
+						}
+					],
+					"filter": [
+						{
+							"bool": { "must": [{ "term": { "countries_tags": { "value": "en:switzerland" } } }] }
+						}
+					],
+					"minimum_should_match": 1
+				}
+			},
+			"size": 10,
+			"from": 0
+		}
+	},
+	"took": 7,
+	"timed_out": false,
+	"count": 47,
+	"is_count_exact": true,
+	"warnings": null
+}

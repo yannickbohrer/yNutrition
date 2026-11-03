@@ -1,0 +1,3627 @@
+{
+	"version": 1,
+	"_doc": "Typical portions for common generic foods. 'match' = case-insensitive regexes tested against the German and English food name (first matching rule wins, so specific rules come first). 'g' = grams; 'ml' = millilitres (converted with the food density when the food is stored per 100 g). 'default' marks the most common portion (initial slider position).",
+	"presets": [
+		{
+			"id": "apple-juice",
+			"match": ["^Apfelsaft", "^apple juice"],
+			"portions": [
+				{
+					"de": "1 Glas (2 dl)",
+					"en": "1 glass (200 ml)",
+					"ml": 200,
+					"default": true
+				},
+				{
+					"de": "1 kleines Glas (1 dl)",
+					"en": "1 small glass (100 ml)",
+					"ml": 100
+				},
+				{
+					"de": "1 Flasche (5 dl)",
+					"en": "1 bottle (500 ml)",
+					"ml": 500
+				}
+			]
+		},
+		{
+			"id": "applesauce",
+			"match": ["^Apfelmus", "^applesauce"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 20
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "apple-pie",
+			"match": [
+				"wähe/-kuchen",
+				"^Fruchtwähe",
+				"^Käsekuchen",
+				"^Spinatkuchen",
+				"^Tomatenkuchen",
+				"^Zwiebelkuchen",
+				"^Quiche",
+				"\\b(fruit )?(tart|pie)\\b"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 kleines Stück",
+					"en": "1 small piece",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "apple-dried",
+			"match": ["^Apfel, geschält, getrocknet", "^apples?, dried"],
+			"portions": [
+				{
+					"de": "1 Ring",
+					"en": "1 ring",
+					"g": 4
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "apple",
+			"match": ["^Apfel, ", "^apples?, raw", "^apples?$"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 120
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 170,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 220
+				}
+			]
+		},
+		{
+			"id": "banana-dried",
+			"match": ["^Banane, (gedörrt|getrocknet)", "^banana chips", "^bananas?, dried"],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "banana",
+			"match": ["^Banane", "^bananas?\\b"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 100
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 120,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "pear",
+			"match": ["^Birne, roh", "^pears?, raw"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 130
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 180,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 230
+				}
+			]
+		},
+		{
+			"id": "orange",
+			"match": ["^Orange, roh", "^oranges?, raw"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 130
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 180,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 240
+				}
+			]
+		},
+		{
+			"id": "mandarin",
+			"match": ["^Mandarine", "^(mandarin|tangerine|clementine)"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 70,
+					"default": true
+				},
+				{
+					"de": "2 Stück",
+					"en": "2 pieces",
+					"g": 140
+				}
+			]
+		},
+		{
+			"id": "kiwi",
+			"match": ["^Kiwi", "^kiwi"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 75,
+					"default": true
+				},
+				{
+					"de": "2 Stück",
+					"en": "2 pieces",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "grapefruit",
+			"match": ["^Grapefruit", "^grapefruit"],
+			"portions": [
+				{
+					"de": "½ Grapefruit",
+					"en": "½ grapefruit",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 Grapefruit",
+					"en": "1 grapefruit",
+					"g": 300
+				}
+			]
+		},
+		{
+			"id": "lemon-juice",
+			"match": ["^Zitronensaft", "^lemon juice"],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"ml": 5
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"ml": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "lemon",
+			"match": ["^Zitrone, roh", "^lemons?, raw"],
+			"portions": [
+				{
+					"de": "1 Schnitz",
+					"en": "1 wedge",
+					"g": 10
+				},
+				{
+					"de": "1 Zitrone",
+					"en": "1 lemon",
+					"g": 90,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "peach",
+			"match": ["^Pfirsich, gelb, roh", "^Nektarine", "^(peach|nectarine)e?s?, raw"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "apricot-dried",
+			"match": ["^Aprikose, getrocknet", "^apricots?, dried"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 8
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "apricot",
+			"match": ["^Aprikose, roh", "^apricots?, raw"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 45,
+					"default": true
+				},
+				{
+					"de": "3 Stück",
+					"en": "3 pieces",
+					"g": 135
+				}
+			]
+		},
+		{
+			"id": "plum",
+			"match": ["^Zwetschge, roh", "^Pflaume, roh", "^Mirabelle, roh", "^plums?, raw"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 35
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 175,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "prune",
+			"match": ["^Pflaume, getrocknet", "^(prunes|plums?, dried)"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 9
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 45,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cherry",
+			"match": ["^Kirsche, roh", "^cherries, (sweet, )?raw"],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 80
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "grapes",
+			"match": ["^Traube, ", "^grapes"],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 80
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "strawberry",
+			"match": ["^Erdbeere", "^strawberr"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 berry",
+					"g": 15
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 Körbchen",
+					"en": "1 punnet",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "berries",
+			"match": [
+				"^(Himbeere|Heidelbeere, roh|Brombeere|Johannisbeere|Stachelbeere|Preiselbeere|Holunderbeere)",
+				"^Beeren \\(Durchschnitt\\), roh",
+				"^(raspberr|blueberr|blackberr|currant|gooseberr)"
+			],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 60
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 125,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pineapple",
+			"match": ["^Ananas, roh", "^pineapple, raw"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 80,
+					"default": true
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 165
+				}
+			]
+		},
+		{
+			"id": "mango-dried",
+			"match": ["^Mango, getrocknet", "^mangos?, dried"],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "mango",
+			"match": ["^Mango", "^mangos?\\b"],
+			"portions": [
+				{
+					"de": "½ Mango",
+					"en": "½ mango",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 Mango",
+					"en": "1 mango",
+					"g": 300
+				}
+			]
+		},
+		{
+			"id": "melon",
+			"match": ["^Wassermelone", "^Zuckermelone", "^(watermelon|melons?, cantaloupe|honeydew)"],
+			"portions": [
+				{
+					"de": "1 Schnitz",
+					"en": "1 wedge",
+					"g": 250,
+					"default": true
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "avocado",
+			"match": ["^Avocado", "^avocados?"],
+			"portions": [
+				{
+					"de": "½ Avocado",
+					"en": "½ avocado",
+					"g": 75,
+					"default": true
+				},
+				{
+					"de": "1 Avocado",
+					"en": "1 avocado",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "fig-dried",
+			"match": ["^Feige, getrocknet", "^figs?, dried"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 20,
+					"default": true
+				},
+				{
+					"de": "3 Stück",
+					"en": "3 pieces",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "fig",
+			"match": ["^Feige, roh", "^figs?, raw"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 50,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "date",
+			"match": ["^Dattel", "^dates?, (medjool|deglet)"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 8
+				},
+				{
+					"de": "Medjool, 1 Stück",
+					"en": "Medjool, 1 piece",
+					"g": 24
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "raisin",
+			"match": ["^Rosine", "^raisins"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pomegranate",
+			"match": ["^Granatapfel", "^pomegranate"],
+			"portions": [
+				{
+					"de": "½ Granatapfel",
+					"en": "½ pomegranate",
+					"g": 90,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "kaki",
+			"match": ["^Kaki", "^persimmon"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 170,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "lychee",
+			"match": ["^Litschi", "^lychee"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 10
+				},
+				{
+					"de": "10 Stück",
+					"en": "10 pieces",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "passionfruit",
+			"match": ["^Passionsfrucht", "^passion-?fruit"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 20,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "papaya",
+			"match": ["^Papaya", "^papayas?"],
+			"portions": [
+				{
+					"de": "½ Papaya",
+					"en": "½ papaya",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "rhubarb",
+			"match": ["^Rhabarber, roh", "^rhubarb"],
+			"portions": [
+				{
+					"de": "1 Stange",
+					"en": "1 stalk",
+					"g": 50,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "fruit-avg",
+			"match": ["^Früchte \\(Durchschnitt\\), roh", "^Zitrusfrüchte", "^fruit"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 120,
+					"default": true
+				},
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "canned-fruit",
+			"match": ["Konserve, abgetropft", "^Fruchtcocktail", "canned"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "stewed-fruit",
+			"match": [
+				"gedünstet, abgetropft",
+				"gekocht, abgetropft",
+				"^Rhabarberkompott",
+				"^Beeren \\(Durchschnitt\\), gekocht",
+				"^Früchte \\(Durchschnitt\\), gekocht",
+				"^(stewed|compote)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 125,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "dried-fruit-other",
+			"match": [
+				"^Birne, getrocknet",
+				"^Heidelbeere, gefriergetrocknet",
+				"^Früchte \\(Durchschnitt\\), getrocknet",
+				"^(dried fruit|fruit, dried)"
+			],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "candied",
+			"match": ["^(Zitronat|Orangeat|Kandierte Kastanien|Zitronenschale)", "^candied"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "quince",
+			"match": ["^Quitte", "^quince"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "chestnut-puree",
+			"match": ["^Marroni-Püree", "^chestnut puree"],
+			"portions": [
+				{
+					"de": "1 Portion Vermicelles",
+					"en": "1 serving vermicelles",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "coconut",
+			"match": ["^Kokosnuss", "^coconut"],
+			"portions": [
+				{
+					"de": "1 EL Flocken",
+					"en": "1 tbsp flakes",
+					"g": 6
+				},
+				{
+					"de": "1 Stück frisch",
+					"en": "1 piece fresh",
+					"g": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "sausage-avg",
+			"match": [
+				"^(Brühwürste|Kochwürste|Rohwürste|Rohpökelwaren|Kochpökelware|Blutwurst|Cotechino|Zampone)"
+			],
+			"portions": [
+				{
+					"de": "1 Wurst",
+					"en": "1 sausage",
+					"g": 100,
+					"default": true
+				},
+				{
+					"de": "1 Portion Aufschnitt",
+					"en": "1 serving cold cuts",
+					"g": 50
+				}
+			]
+		},
+		{
+			"id": "rollmops",
+			"match": ["^Rollmops", "^herring"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "dough",
+			"match": [
+				"teig\\b",
+				"teig,",
+				"teig \\(",
+				"^Fermentierter Teig",
+				"^(dough|pastry dough|puff pastry)"
+			],
+			"portions": [
+				{
+					"de": "1 Rolle (rund)",
+					"en": "1 sheet (round)",
+					"g": 230,
+					"default": true
+				},
+				{
+					"de": "¼ Rolle",
+					"en": "¼ sheet",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "cassava",
+			"match": ["^Maniok", "^(cassava|yuca)"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "seaweed",
+			"match": ["^Alge", "^(seaweed|nori)"],
+			"portions": [
+				{
+					"de": "1 Blatt",
+					"en": "1 sheet",
+					"g": 3,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tvp",
+			"match": ["^Soja, texturiert"],
+			"portions": [
+				{
+					"de": "1 Portion (trocken)",
+					"en": "1 serving (dry)",
+					"g": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "sprouts",
+			"match": ["^Sojasprossen", "^(bean sprouts|sprouts)"],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 50,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "wheat-grain",
+			"match": ["^Weizen \\(Weichweizen\\)", "^wheat, "],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "vitello",
+			"match": ["^Vitello tonnato"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "wrap",
+			"match": ["^(tortilla|wrap)", "^Tortilla"],
+			"portions": [
+				{
+					"de": "1 Fladen",
+					"en": "1 wrap",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "bagel",
+			"match": ["^bagel"],
+			"portions": [
+				{
+					"de": "1 Bagel",
+					"en": "1 bagel",
+					"g": 90,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pancake",
+			"match": ["^(Crêpes|Mehlomelette|Pancake)", "^(pancakes?|crepes?)"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 80,
+					"default": true
+				},
+				{
+					"de": "2 Stück",
+					"en": "2 pieces",
+					"g": 160
+				}
+			]
+		},
+		{
+			"id": "protein-powder",
+			"match": ["^(protein powder|whey)", "^Proteinpulver"],
+			"portions": [
+				{
+					"de": "1 Messlöffel",
+					"en": "1 scoop",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "peanut-butter-cup",
+			"match": ["^(protein shake)", "^Proteindrink"],
+			"portions": [
+				{
+					"de": "1 Flasche",
+					"en": "1 bottle",
+					"ml": 330,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "smoothie",
+			"match": ["^Smoothie", "^smoothie"],
+			"portions": [
+				{
+					"de": "1 Flasche (2.5 dl)",
+					"en": "1 bottle (250 ml)",
+					"ml": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cider-kombucha",
+			"match": ["^(Kombucha|kombucha)"],
+			"portions": [
+				{
+					"de": "1 Flasche (3.3 dl)",
+					"en": "1 bottle (330 ml)",
+					"ml": 330,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "sushi",
+			"match": ["^Sushi", "^sushi"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 30
+				},
+				{
+					"de": "1 Box (8 Stück)",
+					"en": "1 box (8 pcs)",
+					"g": 240,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "dumplings",
+			"match": ["^(Ravioli|Tortellini)", "^(ravioli|tortellini|dumplings)"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "noodle-instant",
+			"match": ["^(instant noodles|ramen)", "^Instantnudeln"],
+			"portions": [
+				{
+					"de": "1 Packung",
+					"en": "1 pack",
+					"g": 85,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "muffin",
+			"match": ["^muffin", "^Muffin"],
+			"portions": [
+				{
+					"de": "1 Muffin",
+					"en": "1 muffin",
+					"g": 90,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tomato-sauce",
+			"match": ["^Tomatensauce", "^Bolognaisesauce", "^(tomato|pasta|marinara) sauce"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				}
+			]
+		},
+		{
+			"id": "tomato-paste",
+			"match": ["^Tomatenpüree", "^tomato (paste|puree)"],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tomato-juice",
+			"match": ["^Tomatensaft", "^Karottensaft", "^(tomato|carrot) juice"],
+			"portions": [
+				{
+					"de": "1 Glas (2 dl)",
+					"en": "1 glass (200 ml)",
+					"ml": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cherry-tomato",
+			"match": ["^cherry tomato", "^Cherrytomate"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 15
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tomato-dried",
+			"match": ["^Tomate, getrocknet", "^tomato(es)?, sun-dried"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 5
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tomato",
+			"match": ["^Tomate, ", "^tomato(es)?, (red, )?(ripe, )?raw"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 90
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 180
+				}
+			]
+		},
+		{
+			"id": "cucumber-pickled",
+			"match": ["^Gurke, in Essig", "^pickles?"],
+			"portions": [
+				{
+					"de": "1 Gewürzgurke",
+					"en": "1 gherkin",
+					"g": 20,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cucumber",
+			"match": ["^Gurke, roh", "^cucumber"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 7
+				},
+				{
+					"de": "¼ Gurke",
+					"en": "¼ cucumber",
+					"g": 100,
+					"default": true
+				},
+				{
+					"de": "1 Gurke",
+					"en": "1 cucumber",
+					"g": 400
+				}
+			]
+		},
+		{
+			"id": "carrot",
+			"match": ["^Karotte", "^carrots?\\b"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 80,
+					"default": true
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "bell-pepper",
+			"match": ["^Peperoni", "^peppers?, sweet"],
+			"portions": [
+				{
+					"de": "½ Peperoni",
+					"en": "½ pepper",
+					"g": 80
+				},
+				{
+					"de": "1 Peperoni",
+					"en": "1 pepper",
+					"g": 160,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "onion-fried",
+			"match": ["^Zwiebel, geröstet"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 8,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "onion",
+			"match": ["^Zwiebel, ", "^Schalotte", "^onions?, raw"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 50
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "garlic",
+			"match": ["^Knoblauch", "^garlic"],
+			"portions": [
+				{
+					"de": "1 Zehe",
+					"en": "1 clove",
+					"g": 4,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "ginger",
+			"match": ["^Ingwer", "^ginger"],
+			"portions": [
+				{
+					"de": "1 Stück (2 cm)",
+					"en": "1 piece (2 cm)",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "potato-gnocchi",
+			"match": ["^Kartoffelgnocchi", "^gnocchi"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "potato-mash",
+			"match": ["^Kartoffelstock", "^Instant-Kartoffelstock", "^(mashed potato|potatoes, mashed)"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "fries",
+			"match": ["^Pommes Frites", "^Ofen-Frites", "^(french fries|potatoes, french fried)"],
+			"portions": [
+				{
+					"de": "klein",
+					"en": "small",
+					"g": 100
+				},
+				{
+					"de": "mittel",
+					"en": "medium",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "gross",
+					"en": "large",
+					"g": 200
+				}
+			]
+		},
+		{
+			"id": "chips",
+			"match": [
+				"^Pommes Chips",
+				"^Mais-Chips",
+				"^(potato chips|tortilla chips|snacks, potato chips)"
+			],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				},
+				{
+					"de": "½ Beutel",
+					"en": "½ bag",
+					"g": 75
+				},
+				{
+					"de": "1 Beutel",
+					"en": "1 bag",
+					"g": 150
+				}
+			]
+		},
+		{
+			"id": "rosti",
+			"match": ["^Rösti", "^hash brown"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "potato-gratin",
+			"match": ["^Kartoffelgratin", "^Gemüsegratin"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "potato-salad",
+			"match": ["^Kartoffelsalat", "^potato salad"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "potato",
+			"match": ["^Kartoffel, ", "^Süsskartoffel", "^(sweet )?potato(es)?, "],
+			"portions": [
+				{
+					"de": "1 kleine",
+					"en": "1 small",
+					"g": 80
+				},
+				{
+					"de": "1 mittlere",
+					"en": "1 medium",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "broccoli",
+			"match": [
+				"^Broccoli",
+				"^Blumenkohl",
+				"^Rosenkohl",
+				"^(broccoli|cauliflower|brussels sprouts)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "Beilage klein",
+					"en": "small side",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "zucchini",
+			"match": ["^Zucchetti, ", "^Aubergine, ", "^(zucchini|squash, summer|eggplant)"],
+			"portions": [
+				{
+					"de": "½ Stück",
+					"en": "½ piece",
+					"g": 100
+				},
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "spinach",
+			"match": ["^Spinat, ", "^Mangold", "^Federkohl", "^(spinach|chard|kale)"],
+			"portions": [
+				{
+					"de": "1 Handvoll (roh)",
+					"en": "1 handful (raw)",
+					"g": 30
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "salad",
+			"match": [
+				"^Kopfsalat",
+				"^Eisbergsalat",
+				"^Blattsalat",
+				"^Nüsslisalat",
+				"^Rucola",
+				"^Lattich",
+				"^Endivie",
+				"^Cicorino",
+				"^Zuckerhutsalat",
+				"^Chicorée",
+				"^Brunnenkresse",
+				"^(lettuce|arugula|rocket|endive)"
+			],
+			"portions": [
+				{
+					"de": "1 Beilagensalat",
+					"en": "1 side salad",
+					"g": 50,
+					"default": true
+				},
+				{
+					"de": "1 grosser Salat",
+					"en": "1 large salad",
+					"g": 120
+				}
+			]
+		},
+		{
+			"id": "mushroom",
+			"match": [
+				"^Champignon",
+				"^Pilz \\(",
+				"^Eierschwamm",
+				"^Steinpilz",
+				"^Morchel",
+				"^mushrooms?"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 20
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "corn",
+			"match": ["^Mais, ", "^Zuckermais", "^corn, sweet"],
+			"portions": [
+				{
+					"de": "1 Kolben",
+					"en": "1 cob",
+					"g": 150
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 80,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "peas",
+			"match": [
+				"^Erbse, grün",
+				"^Erbse \\(Konserve",
+				"^Erbsen und Karotten",
+				"^Kefe",
+				"^Edamame",
+				"^peas, green"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "green-beans",
+			"match": ["^Bohne, grün, (roh|gedämpft)", "^beans?, (snap|green)"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "leek-celery-etc",
+			"match": [
+				"^Lauch",
+				"^Fenchel",
+				"^Kohlrabi",
+				"^Knollensellerie",
+				"^Stangensellerie",
+				"^Rande",
+				"^Pastinake",
+				"^Schwarzwurzel",
+				"^Topinambur",
+				"^Kürbis, ",
+				"^Weisskohl",
+				"^Rotkohl",
+				"^Wirz",
+				"^Chinakohl",
+				"^Spargel",
+				"^Rettich",
+				"^(leek|fennel|celery|beets?|parsnip|pumpkin|cabbage|asparagus)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "Beilage klein",
+					"en": "small side",
+					"g": 80
+				}
+			]
+		},
+		{
+			"id": "radish",
+			"match": ["^Radieschen", "^radish"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 10
+				},
+				{
+					"de": "1 Bund",
+					"en": "1 bunch",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "herbs",
+			"match": [
+				"^(Basilikum|Petersilie|Schnittlauch|Pfefferminze|Salbei|Thymian|Rosmarin)",
+				"^(basil|parsley|chives|mint|sage|thyme|rosemary)"
+			],
+			"portions": [
+				{
+					"de": "1 EL gehackt",
+					"en": "1 tbsp chopped",
+					"g": 3,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "sauerkraut",
+			"match": ["^Sauerkraut", "^sauerkraut"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "olive",
+			"match": ["^Olive, ", "^olives"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 4
+				},
+				{
+					"de": "10 Stück",
+					"en": "10 pieces",
+					"g": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pickles-small",
+			"match": ["^Kapern", "^Silberzwiebel", "^Maiskölbchen", "^capers"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "veg-avg",
+			"match": [
+				"^Gemüse \\(Durchschnitt\\)",
+				"^Kohlgemüse",
+				"^Blattgemüse",
+				"^Wurzel- und Knollengemüse",
+				"^vegetables?"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "soup",
+			"match": ["suppe\\b", "^Minestrone", "^Gazpacho", "^Bouillon", "\\bsoup\\b", "^broth"],
+			"portions": [
+				{
+					"de": "1 Teller",
+					"en": "1 bowl",
+					"g": 300,
+					"default": true
+				},
+				{
+					"de": "1 Tasse",
+					"en": "1 cup",
+					"g": 200
+				}
+			]
+		},
+		{
+			"id": "cooked-legumes",
+			"match": [
+				"^(Linse|Kichererbse|Bohne \\(alle Arten\\)|Sojabohne|Hülsenfrüchte \\(Durchschnitt\\)|Erbse, reif, getrocknet), (ganz, |geschält, )?gekocht",
+				"^Dörrbohne",
+				"^(lentils|chickpeas|beans, \\w+), (mature seeds, )?cooked"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "½ Dose (abgetropft)",
+					"en": "½ can (drained)",
+					"g": 120
+				}
+			]
+		},
+		{
+			"id": "dry-legumes",
+			"match": [
+				"^(Linse|Kichererbse|Bohne \\(alle Arten\\)|Sojabohne|Hülsenfrüchte \\(Durchschnitt\\)|Erbse, reif), .*getrocknet",
+				"^(lentils|chickpeas|beans, \\w+), (mature seeds, )?raw"
+			],
+			"portions": [
+				{
+					"de": "1 Portion (trocken)",
+					"en": "1 serving (dry)",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "hummus",
+			"match": ["^Hummus", "^Guacamole", "^Tzatziki", "^(hummus|guacamole|tzatziki)"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 50,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tofu",
+			"match": ["^Tofu", "^Tempeh", "^Seitan", "^tofu", "^tempeh"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "1 Packung",
+					"en": "1 pack",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "falafel",
+			"match": ["^Falafel", "^falafel"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 20
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 100,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "veg-meat-alt",
+			"match": ["vegan aus", "^Gehacktes/Geschnetzeltes/Pätzli, vegetarisch", "^Nugget, vegan"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pasta-cooked",
+			"match": [
+				"^Teigwaren .*gekocht",
+				"^Teigwaren, frisch, gefüllt",
+				"^Spätzli",
+				"^(pasta|spaghetti|macaroni|noodles), .*cooked"
+			],
+			"portions": [
+				{
+					"de": "Beilage",
+					"en": "side",
+					"g": 150
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250,
+					"default": true
+				},
+				{
+					"de": "grosse Portion",
+					"en": "large serving",
+					"g": 350
+				}
+			]
+		},
+		{
+			"id": "pasta-dry",
+			"match": [
+				"^Teigwaren .*(trocken|roh)",
+				"^Knöpflimehl",
+				"^(pasta|spaghetti|macaroni|noodles), (dry|uncooked)"
+			],
+			"portions": [
+				{
+					"de": "Beilage (trocken)",
+					"en": "side (dry)",
+					"g": 60
+				},
+				{
+					"de": "1 Portion (trocken)",
+					"en": "1 serving (dry)",
+					"g": 100,
+					"default": true
+				},
+				{
+					"de": "grosse Portion (trocken)",
+					"en": "large serving (dry)",
+					"g": 125
+				}
+			]
+		},
+		{
+			"id": "rice-cooked",
+			"match": [
+				"^Reis .*gekocht",
+				"^Risotto",
+				"^Pilzrisotto",
+				"^Tomatenrisotto",
+				"^Riz Casimir",
+				"^Nasi Goreng",
+				"^Bami Goreng",
+				"^rice, .*cooked"
+			],
+			"portions": [
+				{
+					"de": "Beilage",
+					"en": "side",
+					"g": 150
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "rice-dry",
+			"match": ["^Reis .*trocken", "^rice, .*raw"],
+			"portions": [
+				{
+					"de": "Beilage (trocken)",
+					"en": "side (dry)",
+					"g": 60
+				},
+				{
+					"de": "1 Portion (trocken)",
+					"en": "1 serving (dry)",
+					"g": 80,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "grain-cooked",
+			"match": [
+				"^(Quinoa|Amaranth, Samen|Couscous-Körner|Hartweizen, vorgekocht|Rollgerste, gekocht|Gerstotto|Hirsotto|Weizenotto|Maisgriess, gekocht|Polenta)",
+				"^(quinoa|couscous|bulgur|polenta|millet), cooked"
+			],
+			"portions": [
+				{
+					"de": "Beilage",
+					"en": "side",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "grain-dry",
+			"match": [
+				"^(Quinoa, roh|Amaranth, Samen, roh|Hirse, Korn|Buchweizen, Korn|Rollgerste|Maisgriess, trocken|Hartweizengriess)",
+				"^(quinoa|couscous|bulgur|millet|buckwheat)(, uncooked|, dry|$)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion (trocken)",
+					"en": "1 serving (dry)",
+					"g": 70,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "oats",
+			"match": [
+				"^Haferflocken",
+				"^Getreideflocken",
+				"^Gerstenflocken",
+				"^Hirseflocken",
+				"^Weizenflocken",
+				"^Haferkleie",
+				"^Weizenkleie",
+				"^Weizenkeime",
+				"^(oats|oatmeal|rolled oats)"
+			],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 40,
+					"default": true
+				},
+				{
+					"de": "grosse Portion",
+					"en": "large serving",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "porridge",
+			"match": ["^Haferbrei", "^Griessbrei", "^Milchreis", "^Birchermüesli", "^porridge"],
+			"portions": [
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 250,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "muesli",
+			"match": ["^Müeslimischung", "^Knuspermüesli", "^(muesli|granola)"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 45,
+					"default": true
+				},
+				{
+					"de": "grosse Portion",
+					"en": "large serving",
+					"g": 70
+				}
+			]
+		},
+		{
+			"id": "cereal",
+			"match": [
+				"^Cornflakes",
+				"^Getreide-Flakes",
+				"^Gepuffte",
+				"^Gepuffter",
+				"^Puffreis",
+				"^Getreide-Kissen",
+				"^(cereals?|corn flakes)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 30,
+					"default": true
+				},
+				{
+					"de": "grosse Portion",
+					"en": "large serving",
+					"g": 50
+				}
+			]
+		},
+		{
+			"id": "flour",
+			"match": ["mehl\\b", "mehl, ", "^Paniermehl", "stärke$", "^(flour|wheat flour)"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				},
+				{
+					"de": "1 dl",
+					"en": "100 ml",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "bread-roll",
+			"match": [
+				"^Bürli",
+				"^St. Galler Bürli",
+				"^Semmeli",
+				"^Mütschli",
+				"^Butterweggli",
+				"^Laugenbrötli",
+				"^Schoggibrötli",
+				"^Pantli",
+				"^(bread )?rolls?\\b"
+			],
+			"portions": [
+				{
+					"de": "1 Brötchen",
+					"en": "1 roll",
+					"g": 70,
+					"default": true
+				},
+				{
+					"de": "1 kleines Brötchen",
+					"en": "1 small roll",
+					"g": 45
+				}
+			]
+		},
+		{
+			"id": "croissant",
+			"match": [
+				"^Gipfeli",
+				"^Buttergipfeli",
+				"^Laugengipfeli",
+				"^Schinkengipfeli",
+				"^Nussgipfel",
+				"^croissant"
+			],
+			"portions": [
+				{
+					"de": "1 Gipfeli",
+					"en": "1 croissant",
+					"g": 45,
+					"default": true
+				},
+				{
+					"de": "1 grosses Gipfeli",
+					"en": "1 large croissant",
+					"g": 70
+				}
+			]
+		},
+		{
+			"id": "zopf",
+			"match": ["^Butterzopf", "^brioche"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 35,
+					"default": true
+				},
+				{
+					"de": "2 Scheiben",
+					"en": "2 slices",
+					"g": 70
+				}
+			]
+		},
+		{
+			"id": "toast",
+			"match": ["^Toastbrot", "^bread, .*toast"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 25,
+					"default": true
+				},
+				{
+					"de": "2 Scheiben",
+					"en": "2 slices",
+					"g": 50
+				}
+			]
+		},
+		{
+			"id": "crispbread",
+			"match": [
+				"^Knäckebrot",
+				"^Zwieback",
+				"^Maiswaffel",
+				"^Vollkornreiswaffel",
+				"^(crispbread|rice cakes?|rusk)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 10,
+					"default": true
+				},
+				{
+					"de": "3 Stück",
+					"en": "3 pieces",
+					"g": 30
+				}
+			]
+		},
+		{
+			"id": "baguette-sandwich",
+			"match": ["^Sandwich", "^sandwich"],
+			"portions": [
+				{
+					"de": "1 Sandwich",
+					"en": "1 sandwich",
+					"g": 180,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pretzel",
+			"match": [
+				"^Laugengebäck trocken",
+				"^Grissini",
+				"^Cracker",
+				"^Blätterteigstängel",
+				"^(pretzels|crackers|breadsticks)"
+			],
+			"portions": [
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "bread",
+			"match": ["brot\\b", "brot \\(", "brot, ", "^Brot", "^Pariserbrot", "^bread\\b"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 40,
+					"default": true
+				},
+				{
+					"de": "2 Scheiben",
+					"en": "2 slices",
+					"g": 80
+				},
+				{
+					"de": "1 dünne Scheibe",
+					"en": "1 thin slice",
+					"g": 25
+				}
+			]
+		},
+		{
+			"id": "egg-yolk",
+			"match": ["^Hühnereigelb", "^egg, yolk"],
+			"portions": [
+				{
+					"de": "1 Eigelb",
+					"en": "1 yolk",
+					"g": 18,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "egg-white",
+			"match": ["^Hühnereiweiss", "^egg, white"],
+			"portions": [
+				{
+					"de": "1 Eiweiss",
+					"en": "1 egg white",
+					"g": 33,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "omelette",
+			"match": ["^Eieromelett", "^Rührei", "^(omelet|scrambled egg)"],
+			"portions": [
+				{
+					"de": "1 Portion (2 Eier)",
+					"en": "1 serving (2 eggs)",
+					"g": 130,
+					"default": true
+				},
+				{
+					"de": "3 Eier",
+					"en": "3 eggs",
+					"g": 190
+				}
+			]
+		},
+		{
+			"id": "egg",
+			"match": ["^Hühnerei, ", "^eggs?, (whole|grade)"],
+			"portions": [
+				{
+					"de": "1 Stück (M)",
+					"en": "1 egg (M)",
+					"g": 55,
+					"default": true
+				},
+				{
+					"de": "1 Stück (L)",
+					"en": "1 egg (L)",
+					"g": 63
+				},
+				{
+					"de": "2 Stück",
+					"en": "2 eggs",
+					"g": 110
+				}
+			]
+		},
+		{
+			"id": "milk-powder",
+			"match": ["milchpulver", "^Kondensmilch", "^milk, (dry|condensed)"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "milk",
+			"match": [
+				"^(Vollmilch|Milch \\(Durchschnitt|Teilentrahmte Milch|Halbentrahmte Milch|Magermilch, UHT|Ziegenmilch|Schafmilch|Buttermilch|Molke)",
+				"^(Hafergetränk|Sojagetränk|Mandelgetränk|Reisgetränk|Kokosnussgetränk)",
+				"^milk\\b",
+				"^(oat|soy|almond|rice) (milk|drink|beverage)"
+			],
+			"portions": [
+				{
+					"de": "1 Schuss (in Kaffee)",
+					"en": "1 splash (in coffee)",
+					"ml": 20
+				},
+				{
+					"de": "1 Tasse (1.5 dl)",
+					"en": "1 cup (150 ml)",
+					"ml": 150
+				},
+				{
+					"de": "1 Glas (2 dl)",
+					"en": "1 glass (200 ml)",
+					"ml": 200,
+					"default": true
+				},
+				{
+					"de": "1 grosses Glas (3 dl)",
+					"en": "1 large glass (300 ml)",
+					"ml": 300
+				}
+			]
+		},
+		{
+			"id": "cocoa-drink",
+			"match": [
+				"^Kakaogetränk, gezuckert, zubereitet",
+				"^Malzgetränk",
+				"^(hot chocolate|chocolate milk)"
+			],
+			"portions": [
+				{
+					"de": "1 Tasse (2 dl)",
+					"en": "1 cup (200 ml)",
+					"ml": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cocoa-powder",
+			"match": ["^Kakaogetränk, gezuckert, Pulver", "^Kakaopulver", "^Schokoladenpulver", "^cocoa"],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5
+				},
+				{
+					"de": "1 Portion (3 TL)",
+					"en": "1 serving (3 tsp)",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "coffee-cream",
+			"match": ["^Kaffeerahm", "^(coffee creamer|half and half)"],
+			"portions": [
+				{
+					"de": "1 Portion (Kapsel)",
+					"en": "1 portion (cup)",
+					"g": 12,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "whipped-cream",
+			"match": [
+				"^(Vollrahm|Doppelrahm|Halbrahm|Rahm \\(Durchschnitt|Sauerrahm|Saurer Halbrahm)",
+				"^(cream, (heavy|whipping|sour|light))"
+			],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				},
+				{
+					"de": "1 dl",
+					"en": "100 ml",
+					"ml": 100
+				}
+			]
+		},
+		{
+			"id": "yogurt-plant",
+			"match": ["^Joghurtalternative"],
+			"portions": [
+				{
+					"de": "1 Becher",
+					"en": "1 cup",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "yogurt",
+			"match": ["^Joghurt(,| mit| Bifidus)", "^yogh?urt"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 20
+				},
+				{
+					"de": "1 Becher",
+					"en": "1 cup",
+					"g": 180,
+					"default": true
+				},
+				{
+					"de": "1 grosser Becher",
+					"en": "1 large cup",
+					"g": 500
+				}
+			]
+		},
+		{
+			"id": "quark",
+			"match": ["^Quark,", "^Blanc battu", "^Hüttenkäse", "^(quark|cottage cheese)"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 30
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "1 Becher",
+					"en": "1 tub",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "pudding",
+			"match": [
+				"^Pudding",
+				"^Griessköpfli",
+				"^Schokoladencrème",
+				"^Vanillecrème",
+				"^Schokoladenmousse",
+				"^Tiramisu",
+				"^(pudding|mousse|custard)"
+			],
+			"portions": [
+				{
+					"de": "1 Becher",
+					"en": "1 cup",
+					"g": 125,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "parmesan",
+			"match": ["^Parmesan", "^Sbrinz", "^Reibkäse", "^parmesan"],
+			"portions": [
+				{
+					"de": "1 EL gerieben",
+					"en": "1 tbsp grated",
+					"g": 6
+				},
+				{
+					"de": "1 Portion gerieben",
+					"en": "1 serving grated",
+					"g": 15,
+					"default": true
+				},
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 30
+				}
+			]
+		},
+		{
+			"id": "mozzarella",
+			"match": ["^Mozzarella", "^mozzarella"],
+			"portions": [
+				{
+					"de": "1 Kugel",
+					"en": "1 ball",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "½ Kugel",
+					"en": "½ ball",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "cream-cheese",
+			"match": [
+				"^Frischkäse",
+				"^Frischkäsezubereitung",
+				"^Ziegenfrischkäse",
+				"^Mascarpone",
+				"^Schmelzkäse, streichfähig",
+				"^cream cheese"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 10
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 20,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "raclette",
+			"match": ["^Raclettekäse", "^raclette"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 40,
+					"default": true
+				},
+				{
+					"de": "1 Portion (5 Scheiben)",
+					"en": "1 serving (5 slices)",
+					"g": 200
+				}
+			]
+		},
+		{
+			"id": "fondue",
+			"match": ["^Fondue", "^fondue"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cheese",
+			"match": [
+				"^(?!Fleischkäse)\\S*käse([ ,(]|$)",
+				"^Käsealternative",
+				"^(Appenzeller|Emmentaler|Greyerzer|Gruyère|Tilsiter|Tomme|Brie|Camembert|Gorgonzola|Roquefort|Reblochon|Limburger|St. Paulin|Tête de Moine|Vacherin|Freiburger Vacherin|Glarner Schabziger|Ziger)",
+				"^cheese(,|$| \\()",
+				"^Berner (Alp|Hobel)käse",
+				"^Hart- und Halbhartkäse"
+			],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 25
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 40,
+					"default": true
+				},
+				{
+					"de": "1 Stück (Znüni)",
+					"en": "1 snack piece",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "butter",
+			"match": [
+				"^(Butter|Vorzugsbutter|Kochbutter|Käsereibutter|Halbfettbutter|Bratbutter|Margarine|Joghurt-Butter)",
+				"^(butter|margarine)"
+			],
+			"portions": [
+				{
+					"de": "für 1 Brot",
+					"en": "for 1 slice",
+					"g": 8
+				},
+				{
+					"de": "1 Portion (Mödeli)",
+					"en": "1 pat",
+					"g": 10,
+					"default": true
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				}
+			]
+		},
+		{
+			"id": "mayo",
+			"match": [
+				"^Mayonnaise",
+				"^Cocktailsauce",
+				"^Tartarsauce",
+				"^Hollandaisesauce",
+				"^(mayonnaise|aioli)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "dressing",
+			"match": [
+				"^Salatsauce",
+				"^Essig-Öl-Salatsauce",
+				"^Vinaigrette",
+				"^Joghurt-Salatsauce",
+				"dressing"
+			],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "tuna-can",
+			"match": [
+				"^Thon ",
+				"^Sardine im Öl",
+				"^Sardine, in Tomatensauce",
+				"^Sardelle im Öl",
+				"^tuna, .*canned"
+			],
+			"portions": [
+				{
+					"de": "1 Dose (abgetropft)",
+					"en": "1 can (drained)",
+					"g": 120,
+					"default": true
+				},
+				{
+					"de": "½ Dose",
+					"en": "½ can",
+					"g": 60
+				}
+			]
+		},
+		{
+			"id": "smoked-salmon",
+			"match": ["^Lachs, geräuchert", "^Forelle, geräuchert", "^(smoked salmon|salmon, smoked)"],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 20
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "fish-sticks",
+			"match": ["^Fischstäbchen", "^fish sticks"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 28
+				},
+				{
+					"de": "5 Stück",
+					"en": "5 pieces",
+					"g": 140,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "oil",
+			"match": [
+				"^\\S*öl([ ,(]|$)",
+				"^(Kokosfett|Schweineschmalz|Palmöl|Kakaobutter)",
+				"\\boils?, (olive|canola|sunflower|vegetable|coconut|rapeseed)",
+				"^(olive|canola|sunflower|vegetable|coconut) oil"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 4
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "condiment",
+			"match": [
+				"^Ketchup",
+				"^Senf",
+				"^Barbecue",
+				"^Pestosauce",
+				"^Sojasauce",
+				"^Worcester",
+				"^Wasabi",
+				"^Sardellenpaste",
+				"^Essig",
+				"^Balsamico",
+				"^(ketchup|mustard|soy sauce|pesto|vinegar)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "gravy",
+			"match": ["^Bratensauce", "^Pilzsauce", "^Jägersauce", "^Béchamel", "^gravy"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 60,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "chicken-breast",
+			"match": ["^Poulet, Brust", "^Truthahn, Brust", "^chicken, .*breast", "^chicken breast"],
+			"portions": [
+				{
+					"de": "1 Brust (klein)",
+					"en": "1 breast (small)",
+					"g": 120
+				},
+				{
+					"de": "1 Brust",
+					"en": "1 breast",
+					"g": 160,
+					"default": true
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 120
+				}
+			]
+		},
+		{
+			"id": "chicken-leg",
+			"match": ["^Poulet, Schenkel", "^chicken, .*(thigh|drumstick|leg)"],
+			"portions": [
+				{
+					"de": "1 Schenkel",
+					"en": "1 leg",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "chicken-whole",
+			"match": ["^Poulet, ganz", "^Geflügelfleisch", "^chicken"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "¼ Poulet",
+					"en": "¼ chicken",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "steak",
+			"match": [
+				"Entrecôte",
+				"^Rind, Filet",
+				"Steak",
+				"^Rind, Hohrücken",
+				"^Hirsch, Entrecôte",
+				"^beef, .*steak",
+				"^steak"
+			],
+			"portions": [
+				{
+					"de": "1 Steak (klein)",
+					"en": "1 steak (small)",
+					"g": 150
+				},
+				{
+					"de": "1 Steak",
+					"en": "1 steak",
+					"g": 200,
+					"default": true
+				},
+				{
+					"de": "1 grosses Steak",
+					"en": "1 large steak",
+					"g": 300
+				}
+			]
+		},
+		{
+			"id": "burger-patty",
+			"match": ["^Hackplätzli", "^beef, ground, patty"],
+			"portions": [
+				{
+					"de": "1 Burger-Patty",
+					"en": "1 burger patty",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cutlet",
+			"match": [
+				"Plätzli",
+				"Schnitzel",
+				"Kotelett",
+				"^Cordon bleu",
+				"Piccata",
+				"^Saltimbocca",
+				"\\b(cutlet|schnitzel|chop)s?\\b"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "minced",
+			"match": ["Gehacktes", "^Hackbraten", "^(beef|pork|turkey), ground"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 125,
+					"default": true
+				},
+				{
+					"de": "1 Packung",
+					"en": "1 pack",
+					"g": 250
+				}
+			]
+		},
+		{
+			"id": "meat-generic",
+			"match": [
+				"^(Rind|Kalb|Schwein|Lamm|Pferd|Reh|Hirsch|Hase|Kaninchen|Wildschwein|Ziege|Wildfleisch|Fleisch)[ ,(]",
+				"^(Rindfleisch|Kalbfleisch|Schweinefleisch|Lamm/Schaf)",
+				"Geschnetzeltes",
+				"ragout",
+				"^Rippli",
+				"^(beef|pork|lamb|veal|venison)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "kleine Portion",
+					"en": "small serving",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "liver",
+			"match": ["Leber, roh", "^Leber \\(", "Niere", "Zunge", "Milken", "^liver"],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "sausage-cervelat",
+			"match": [
+				"^Cervelat",
+				"^Schützenwurst",
+				"^Bauernschüblig",
+				"^St. Galler Schüblig",
+				"^Schweinswurst",
+				"^Saucisse",
+				"^Luganighe",
+				"^Weisswurst",
+				"^Kalbsbratwurst",
+				"^Schweinsbratwurst",
+				"^(bratwurst|sausages?)"
+			],
+			"portions": [
+				{
+					"de": "1 Wurst",
+					"en": "1 sausage",
+					"g": 100,
+					"default": true
+				},
+				{
+					"de": "1 grosse Wurst (Bratwurst)",
+					"en": "1 large sausage",
+					"g": 130
+				}
+			]
+		},
+		{
+			"id": "wienerli",
+			"match": ["^Wienerli", "^Minipic", "^(frankfurter|hot dog sausage|wiener)"],
+			"portions": [
+				{
+					"de": "1 Paar (2 Stück)",
+					"en": "1 pair (2 pcs)",
+					"g": 100,
+					"default": true
+				},
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 50
+				}
+			]
+		},
+		{
+			"id": "landjaeger",
+			"match": ["^Landjäger", "^Salametti"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 50,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "cold-cuts",
+			"match": [
+				"^\\S*schinken([ ,(]|$)",
+				"^(Fleischkäse|Hinterschinken|Vorderschinken|Rohschinken|Rollschinken|Salami|Lyoner|Geflügellyoner|Mortadella|Fleischkäse|Bierwurst|Aufschnitt|Coppa|Bresaola|Mostbröckli|Trockenfleisch|Cotto|Trutenbrust|Kochspeck|Rohessspeck|Berner Zungenwurst|Leberwurst|Salsiz|Saucisson|Terrine|Wildfleischterrine)",
+				"^(ham|salami|bologna|bacon|prosciutto)\\b"
+			],
+			"portions": [
+				{
+					"de": "1 Scheibe",
+					"en": "1 slice",
+					"g": 20
+				},
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 50,
+					"default": true
+				},
+				{
+					"de": "Plättli-Portion",
+					"en": "platter serving",
+					"g": 80
+				}
+			]
+		},
+		{
+			"id": "shrimp",
+			"match": [
+				"^Garnele",
+				"^Crevetten",
+				"^Scampi",
+				"^Krustentiere",
+				"^Miesmuschel",
+				"^Kalmar",
+				"^Surimi",
+				"^(shrimp|prawns|mussels|squid)"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 120,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "fish",
+			"match": [
+				"^(Lachs|Forelle|Dorsch|Egli|Felche|Flunder|Hecht|Heilbutt|Scholle|Seehecht|Seelachs|Seezunge|Thunfisch|Fisch \\(Durchschnitt|Sardine, roh)",
+				"^(salmon|trout|cod|tuna|fish|haddock|pollock|hake|sole)"
+			],
+			"portions": [
+				{
+					"de": "1 Filet",
+					"en": "1 fillet",
+					"g": 150,
+					"default": true
+				},
+				{
+					"de": "1 kleines Filet",
+					"en": "1 small fillet",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "nut-butter",
+			"match": [
+				"^Erdnussbutter",
+				"^Haselnuss-Schokolade-Brotaufstrich",
+				"^(peanut butter|nutella|hazelnut spread)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 7
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "seeds",
+			"match": [
+				"^(Chia-Samen|Leinsamen|Sesamsamen|Kürbiskerne|Sonnenblumenkerne|Pinienkerne)",
+				"^(chia|flax|sesame|pumpkin|sunflower|pine nuts?)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 4
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 10,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "walnut",
+			"match": ["^Baumnuss$", "^Baumnuss ", "^walnuts?"],
+			"portions": [
+				{
+					"de": "1 Nuss",
+					"en": "1 nut",
+					"g": 5
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "nuts",
+			"match": [
+				"^(Mandel|Haselnuss|Cashewnuss|Erdnuss|Pistazie|Paranuss|Samen, Kerne, Nüsse|Macadamia)(,|$| \\()",
+				"^Edelkastanie",
+				"^(almonds|hazelnuts|cashews|peanuts|pistachios|brazil ?nuts|nuts)\\b"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 nut",
+					"g": 1.2
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 25,
+					"default": true
+				},
+				{
+					"de": "grosse Handvoll",
+					"en": "large handful",
+					"g": 40
+				}
+			]
+		},
+		{
+			"id": "coconut-milk",
+			"match": ["^Kokosnussmilch", "^coconut milk"],
+			"portions": [
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 15
+				},
+				{
+					"de": "½ Dose",
+					"en": "½ can",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "chocolate-bar",
+			"match": ["^(Milchschokolade|Schokolade, (dunkel|weiss))", "^Branchli", "^chocolate"],
+			"portions": [
+				{
+					"de": "1 Reihe (4 Stück)",
+					"en": "1 row (4 squares)",
+					"g": 25
+				},
+				{
+					"de": "1 Stück",
+					"en": "1 square",
+					"g": 6
+				},
+				{
+					"de": "½ Tafel",
+					"en": "½ bar",
+					"g": 50,
+					"default": true
+				},
+				{
+					"de": "1 Tafel",
+					"en": "1 bar",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "cookies",
+			"match": [
+				"^(Petit Beurre|Haselnusskeks|Cookie|Mailänderli|Brunsli|Zimtstern|Spitzbube|Amaretti|Chräbeli|Florentiner|Haselnussmakrone|Kokosmakrone|Sablé|Willisauer Ringli|Basler Leckerli|Löffelbiscuit|Madeleine|Waffelguetzli|Schümliguetzli|Nuss-Stängeli|Haselnussstängeli)",
+				"^(cookies?|biscuits?)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 10,
+					"default": true
+				},
+				{
+					"de": "3 Stück",
+					"en": "3 pieces",
+					"g": 30
+				}
+			]
+		},
+		{
+			"id": "cake",
+			"match": [
+				"^(Cake|Marmorkuchen|Tirolercake|Rüeblitorte|Schwarzwälder|Zuger Kirschtorte|Engadiner Nusstorte|Linzertorte|Schokoladencake|Schokoladenkuchen|Tarte au citron|Crèmeschnitte|Panettone|Lebkuchen)",
+				"^(cake|cheesecake)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 80,
+					"default": true
+				},
+				{
+					"de": "1 grosses Stück",
+					"en": "1 large piece",
+					"g": 120
+				}
+			]
+		},
+		{
+			"id": "pastry",
+			"match": [
+				"^(Berliner|Donut|Nussschnecke|Birnwegge|Grittibänz|Fasnachtschüechli|Prussien|Schoggibrötli|Waffel, frisch|Biber)",
+				"^(donut|doughnut|danish)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 70,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "ice-cream",
+			"match": ["^(Rahmglace|Sorbet|Wassereis)", "^ice cream"],
+			"portions": [
+				{
+					"de": "1 Kugel",
+					"en": "1 scoop",
+					"g": 50,
+					"default": true
+				},
+				{
+					"de": "2 Kugeln",
+					"en": "2 scoops",
+					"g": 100
+				}
+			]
+		},
+		{
+			"id": "ice-cream-stick",
+			"match": ["^Glaceriegel", "^Cornet Glace"],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 75,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "candy",
+			"match": [
+				"^(Gummibonbon|Hartkaramellen|Weichkaramellen|Rahmkaramellen|Marzipan|Meringue)",
+				"^(candy|gummy|gummies)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 5
+				},
+				{
+					"de": "1 Handvoll",
+					"en": "1 handful",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "bars",
+			"match": [
+				"^Getreideriegel",
+				"^Erdnuss mit Schokolade",
+				"^(granola bar|cereal bar|protein bar)"
+			],
+			"portions": [
+				{
+					"de": "1 Riegel",
+					"en": "1 bar",
+					"g": 25,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "jam-honey",
+			"match": [
+				"^(Konfitüre|Honig|Lemon Curd|Dulce de Leche|Birnendicksaft|Agavensirup|Ahornsirup|Melasse)",
+				"^(jam|honey|syrup|maple syrup)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 7
+				},
+				{
+					"de": "für 1 Brot",
+					"en": "for 1 slice",
+					"g": 15,
+					"default": true
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 20
+				}
+			]
+		},
+		{
+			"id": "sugar",
+			"match": ["^Zucker", "^Traubenzucker", "^sugar"],
+			"portions": [
+				{
+					"de": "1 Würfel",
+					"en": "1 cube",
+					"g": 3
+				},
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5,
+					"default": true
+				},
+				{
+					"de": "1 EL",
+					"en": "1 tbsp",
+					"g": 12
+				}
+			]
+		},
+		{
+			"id": "salt",
+			"match": ["^(Kochsalz|Salz,)", "^salt"],
+			"portions": [
+				{
+					"de": "1 Prise",
+					"en": "1 pinch",
+					"g": 0.5
+				},
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 5,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "spices",
+			"match": [
+				"^(Zimt|Paprika \\(Gewürz\\)|Bierhefe|Bäckerhefe|Agar)",
+				"^(cinnamon|paprika|spices)"
+			],
+			"portions": [
+				{
+					"de": "1 TL",
+					"en": "1 tsp",
+					"g": 3,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "popcorn",
+			"match": ["^Popcorn", "^Erdnuss-Flips", "^Mais-Bällchen", "^popcorn"],
+			"portions": [
+				{
+					"de": "1 Schale",
+					"en": "1 bowl",
+					"g": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "pizza",
+			"match": ["^Pizza ", "^pizza"],
+			"portions": [
+				{
+					"de": "1 Stück (⅛)",
+					"en": "1 slice (⅛)",
+					"g": 50
+				},
+				{
+					"de": "½ Pizza",
+					"en": "½ pizza",
+					"g": 200
+				},
+				{
+					"de": "1 Pizza",
+					"en": "1 pizza",
+					"g": 400,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "burger",
+			"match": [
+				"^(Burger|Cheeseburger|Hamburger)",
+				"^Kebab",
+				"^Hot Dog",
+				"^(hamburger|cheeseburger|burger|kebab)"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 200,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "dishes",
+			"match": [
+				"zubereitet$",
+				"zubereitet \\(",
+				"^(Lasagne|Fleischlasagne|Gemüselasagne|Cannelloni|Älplermagronen|Capuns|Chili con carne|Ratatouille|Teigwarenauflauf)",
+				"hausgemacht$"
+			],
+			"portions": [
+				{
+					"de": "1 Portion",
+					"en": "1 serving",
+					"g": 300,
+					"default": true
+				},
+				{
+					"de": "kleine Portion",
+					"en": "small serving",
+					"g": 200
+				}
+			]
+		},
+		{
+			"id": "croque",
+			"match": [
+				"^Croque Monsieur",
+				"^Käseschnitte",
+				"^Fotzelschnitte",
+				"^Flammkuchen, gebacken",
+				"^Frühlingsrolle",
+				"^Samosa"
+			],
+			"portions": [
+				{
+					"de": "1 Stück",
+					"en": "1 piece",
+					"g": 150,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "espresso",
+			"match": ["^(Espresso|Ristretto)", "^espresso"],
+			"portions": [
+				{
+					"de": "1 Tasse",
+					"en": "1 cup",
+					"ml": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "coffee-milk",
+			"match": ["^(Cappuccino|Latte macchiato|Milchkaffee)", "^(cappuccino|latte)"],
+			"portions": [
+				{
+					"de": "1 Tasse",
+					"en": "1 cup",
+					"ml": 200,
+					"default": true
+				},
+				{
+					"de": "1 grosse Tasse",
+					"en": "1 large cup",
+					"ml": 300
+				}
+			]
+		},
+		{
+			"id": "coffee",
+			"match": ["^Kaffee, schwarz", "^Café crème", "^Tee, ungezuckert", "^(coffee|tea)"],
+			"portions": [
+				{
+					"de": "1 Tasse",
+					"en": "1 cup",
+					"ml": 150,
+					"default": true
+				},
+				{
+					"de": "1 Becher",
+					"en": "1 mug",
+					"ml": 250
+				}
+			]
+		},
+		{
+			"id": "beer",
+			"match": ["^Bier", "^Fünfkornbier", "^beer"],
+			"portions": [
+				{
+					"de": "1 Stange (3 dl)",
+					"en": "1 glass (300 ml)",
+					"ml": 300
+				},
+				{
+					"de": "1 Flasche/Dose (3.3 dl)",
+					"en": "1 bottle/can (330 ml)",
+					"ml": 330,
+					"default": true
+				},
+				{
+					"de": "1 Halbe (5 dl)",
+					"en": "1 pint (500 ml)",
+					"ml": 500
+				}
+			]
+		},
+		{
+			"id": "wine",
+			"match": ["^Wein ", "^Schaumwein", "^Apfelwein", "^Calimocho", "^wine"],
+			"portions": [
+				{
+					"de": "1 Glas (1 dl)",
+					"en": "1 glass (100 ml)",
+					"ml": 100
+				},
+				{
+					"de": "1 Glas (1.5 dl)",
+					"en": "1 glass (150 ml)",
+					"ml": 150,
+					"default": true
+				},
+				{
+					"de": "1 Flasche (7.5 dl)",
+					"en": "1 bottle (750 ml)",
+					"ml": 750
+				}
+			]
+		},
+		{
+			"id": "spirits",
+			"match": [
+				"^(Branntwein|Spirituosen|Kirsch|Eierlikör|Amaro|Portwein|Sherry|Wermut)",
+				"^(vodka|whisky|whiskey|gin|rum|liqueur)"
+			],
+			"portions": [
+				{
+					"de": "1 Glas (2 cl)",
+					"en": "1 shot (20 ml)",
+					"ml": 20
+				},
+				{
+					"de": "1 Glas (4 cl)",
+					"en": "1 double (40 ml)",
+					"ml": 40,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "soft-drink",
+			"match": [
+				"^(Colagetränk|Limonade|Eistee|Energy Drink|Sirup zubereitet|Fruchtsaft|Orangensaft|Orangennektar|Traubensaft|Birnensaft|Ananassaft|Fruchtsaft-Schorle|Kokoswasser)",
+				"^(cola|soda|soft drink|lemonade|iced tea|orange juice|juice)"
+			],
+			"portions": [
+				{
+					"de": "1 Glas (2 dl)",
+					"en": "1 glass (200 ml)",
+					"ml": 200
+				},
+				{
+					"de": "1 Dose (3.3 dl)",
+					"en": "1 can (330 ml)",
+					"ml": 330,
+					"default": true
+				},
+				{
+					"de": "1 Flasche (5 dl)",
+					"en": "1 bottle (500 ml)",
+					"ml": 500
+				}
+			]
+		},
+		{
+			"id": "syrup-concentrate",
+			"match": ["^Sirup unverdünnt"],
+			"portions": [
+				{
+					"de": "für 1 Glas",
+					"en": "for 1 glass",
+					"ml": 30,
+					"default": true
+				}
+			]
+		},
+		{
+			"id": "water",
+			"match": ["^Trinkwasser", "^water"],
+			"portions": [
+				{
+					"de": "1 Glas (2.5 dl)",
+					"en": "1 glass (250 ml)",
+					"ml": 250,
+					"default": true
+				},
+				{
+					"de": "1 Flasche (5 dl)",
+					"en": "1 bottle (500 ml)",
+					"ml": 500
+				}
+			]
+		}
+	]
+}
