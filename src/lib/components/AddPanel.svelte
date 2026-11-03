@@ -214,19 +214,19 @@
 	{#if !q.trim()}
 		{#if suggestions && (suggestions.favorites.length || suggestions.recent.length)}
 			{#if suggestions.favorites.length}
-				<h3 class="section-header">{t('add.favorites')}</h3>
+				<h2 class="section-header">{t('add.favorites')}</h2>
 				<div class="group" data-testid="favorites-list">
 					{#each suggestions.favorites as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
 			{/if}
 			{#if frequentList.length}
-				<h3 class="section-header">{t('add.frequent')}</h3>
+				<h2 class="section-header">{t('add.frequent')}</h2>
 				<div class="group">
 					{#each frequentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
 			{/if}
 			{#if recentList.length}
-				<h3 class="section-header">{t('add.recent')}</h3>
+				<h2 class="section-header">{t('add.recent')}</h2>
 				<div class="group" data-testid="recent-list">
 					{#each recentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
@@ -236,13 +236,13 @@
 		{/if}
 	{:else if local}
 		{#if local.mine.length}
-			<h3 class="section-header">{t('add.mine')}</h3>
+			<h2 class="section-header">{t('add.mine')}</h2>
 			<div class="group">
 				{#each local.mine as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 			</div>
 		{/if}
 		{#if local.local.length}
-			<h3 class="section-header">{t('add.local')}</h3>
+			<h2 class="section-header">{t('add.local')}</h2>
 			<div class="group" data-testid="local-results">
 				{#each local.local as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 			</div>
@@ -251,7 +251,7 @@
 			<p class="empty">{t('add.noResults', { q: local.query })}</p>
 		{/if}
 
-		<h3 class="section-header">{t('add.online')}</h3>
+		<h2 class="section-header">{t('add.online')}</h2>
 		{#if onlineLoading}
 			<p class="empty">{t('add.searchingOnline')}</p>
 		{:else if online}

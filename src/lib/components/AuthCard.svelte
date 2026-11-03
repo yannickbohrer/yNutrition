@@ -38,6 +38,6 @@
 		line-height: 1.4;
 	}
 	:global(.auth .error) {
-		color: var(--danger);
+		color: var(--danger-text);
 	}
 </style>

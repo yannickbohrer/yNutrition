@@ -17,11 +17,13 @@
 	--sep: rgba(60, 60, 67, 0.22);
 	--fill: rgba(120, 120, 128, 0.12);
 	--fill-2: rgba(120, 120, 128, 0.2);
-	--tint: #007aff;
+	--tint: #0066d6; /* iOS blue, deepened slightly for ≥ 4.5:1 text contrast */
 	--tint-press: #0062cc;
 	--tab-active: #0062cc; /* small tab labels need 4.5:1 */
 	--on-tint: #ffffff;
 	--danger: #ff3b30;
+	--danger-text: #d70015; /* red for text: ≥ 4.5:1 on white */
+	--over-text: #d70015;
 	--success: #248a3d;
 	--warning: #b25000;
 
@@ -61,6 +63,8 @@
 		--tint-press: #409cff;
 		--tab-active: #0a84ff;
 		--danger: #ff453a;
+		--danger-text: #ff6961;
+		--over-text: #ff6961;
 		--success: #30d158;
 		--warning: #ff9f0a;
 		--kcal: #30d158;
@@ -256,6 +260,7 @@ a.row:active {
 	flex: none;
 }
 .row-title {
+	display: block;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -314,7 +319,7 @@ a.row:active {
 }
 .btn.danger {
 	background: var(--fill);
-	color: var(--danger);
+	color: var(--danger-text);
 }
 .btn.small {
 	min-height: 36px;
@@ -330,7 +335,7 @@ a.row:active {
 	gap: 4px;
 	padding: 2px 7px;
 	border-radius: 6px;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	letter-spacing: 0.02em;
 	background: var(--fill);

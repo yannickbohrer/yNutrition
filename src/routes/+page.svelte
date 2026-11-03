@@ -288,7 +288,13 @@
 		</button>
 	</div>
 	{#if showAll}
-		<NutrientTable nutrients={day.totals} missing={day.missing} count={day.count} />
+		<h2 class="visually-hidden">{t('day.nutrients')}</h2>
+		<NutrientTable
+			nutrients={day.totals}
+			missing={day.missing}
+			count={day.count}
+			targets={app.settings.targets.extra}
+		/>
 	{/if}
 </main>
 
@@ -353,7 +359,7 @@
 	}
 	.remain.over,
 	.remain-label.over {
-		color: var(--over);
+		color: var(--over-text);
 	}
 	.summary-side {
 		flex: 1;
@@ -393,7 +399,7 @@
 		white-space: nowrap;
 	}
 	.m-val.over {
-		color: var(--over);
+		color: var(--over-text);
 	}
 	.incomplete {
 		display: flex;

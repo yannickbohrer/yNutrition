@@ -561,7 +561,7 @@
 		color: var(--label-2);
 	}
 	.after.over {
-		color: var(--over);
+		color: var(--over-text);
 		font-weight: 500;
 	}
 	.preview .hint {

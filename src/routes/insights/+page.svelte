@@ -4,6 +4,7 @@
 	import Icon from '#lib/components/Icon.svelte';
 	import { api, type Breakdown } from '#lib/api.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
+	import { toast } from '#lib/stores/ui.svelte.ts';
 	import { cssVar } from '#lib/charts.ts';
 	import { addDays, addMonths, endOfMonth, startOfMonth, startOfWeek } from '#lib/dates.ts';
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
@@ -126,6 +127,17 @@
 				}
 			}
 		};
+	}
+
+	let quickKg = $state<number | null>(null);
+	async function quickWeight(e: Event) {
+		e.preventDefault();
+		if (!quickKg) return;
+		await api.addWeight({ date: app.today, kg: Number(quickKg) });
+		quickKg = null;
+		toast(t('weight.saved'));
+		const { from, to } = range;
+		data = await api.insights(from, to);
 	}
 
 	const macroColors = {
@@ -283,6 +295,25 @@
 			<p class="empty">{t('insights.noData')}</p>
 		{/if}
 	{/if}
+
+	<h2 class="section-header">{t('weight.quickAdd')}</h2>
+	<form class="group quick" onsubmit={quickWeight}>
+		<div class="row">
+			<label class="grow" for="quick-kg">{t('weight.title')} ({t('day.today')})</label>
+			<input
+				id="quick-kg"
+				type="number"
+				inputmode="decimal"
+				step="0.1"
+				min="20"
+				max="400"
+				placeholder="kg"
+				bind:value={quickKg}
+				data-testid="quick-weight"
+			/>
+			<button class="btn small" type="submit" disabled={!quickKg}>{t('app.save')}</button>
+		</div>
+	</form>
 
 	<div class="group links">
 		<a class="row" href="/insights/weight" data-testid="weight-link"
@@ -447,6 +478,12 @@
 	}
 	.links {
 		margin-top: 28px;
+	}
+	.quick input {
+		max-width: 90px;
+		background: var(--fill) !important;
+		border-radius: 8px;
+		padding: 6px 8px !important;
 	}
 	.links .row {
 		color: var(--tint);

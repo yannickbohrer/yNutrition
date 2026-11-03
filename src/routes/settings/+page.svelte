@@ -132,6 +132,6 @@
 		display: block;
 	}
 	.logout {
-		color: var(--danger);
+		color: var(--danger-text);
 	}
 </style>

@@ -294,12 +294,12 @@
 	.del {
 		border: 0;
 		background: none;
-		color: var(--danger);
+		color: var(--danger-text);
 		font-size: 22px;
 		width: 32px;
 	}
 	.error {
-		color: var(--danger);
+		color: var(--danger-text);
 		margin: 12px 4px 0;
 	}
 	.submit {

@@ -114,7 +114,7 @@
 		flex: none;
 	}
 	.mini.danger {
-		color: var(--danger);
+		color: var(--danger-text);
 	}
 	.mini:disabled {
 		opacity: 0.35;

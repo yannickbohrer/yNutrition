@@ -301,3 +301,29 @@ test('recovery CLI prints a one-time link that registers a new passkey', async (
 	await expect(page.getByRole('alert')).toBeVisible();
 	await ctx.close();
 });
+
+test('optional nutrient limits are shown against day totals; quick weight from insights', async ({
+	page
+}) => {
+	await page.request.patch('/api/settings', {
+		data: {
+			targets: {
+				energy_kcal: 2200,
+				protein: 100,
+				carbs: 230,
+				fat: 70,
+				extra: { sugars: { max: 1 }, fiber: { min: 30 } }
+			}
+		}
+	});
+	await page.goto('/');
+	await page.getByRole('button', { name: 'Alle Nährwerte' }).click();
+	await expect(page.locator('.target.bad').first()).toBeVisible();
+	await expect(page.getByText('/ ≤ 1')).toBeVisible();
+	await page.goto('/insights');
+	await page.getByTestId('quick-weight').fill('77.7');
+	await page.getByTestId('quick-weight').press('Enter');
+	await expect(page.getByText('Gewicht gesichert')).toBeVisible();
+	const w = await (await page.request.get('/api/weights')).json();
+	expect(w[0].kg).toBe(77.7);
+});

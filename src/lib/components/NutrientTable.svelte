@@ -8,6 +8,7 @@
 		type Nutrients
 	} from '#lib/nutrients.ts';
 	import { fmt, fmtAmount, t } from '#lib/i18n/index.svelte.ts';
+	import type { NutrientTarget } from '#lib/types.ts';
 
 	let {
 		nutrients,
@@ -15,7 +16,8 @@
 		missing,
 		count = 0,
 		showUnknown = false,
-		keys
+		keys,
+		targets
 	}: {
 		nutrients: Nutrients;
 		partial?: NutrientKey[];
@@ -24,11 +26,13 @@
 		count?: number;
 		showUnknown?: boolean;
 		keys?: NutrientKey[];
+		/** optional goals (min) / limits (max) to compare against (day totals) */
+		targets?: Partial<Record<NutrientKey, NutrientTarget>>;
 	} = $props();
 
 	const list = $derived(
 		(keys ?? NUTRIENT_KEYS.filter((k) => k !== 'energy_kj')).filter(
-			(k) => showUnknown || nutrients[k] !== undefined
+			(k) => showUnknown || nutrients[k] !== undefined || !!targets?.[k]
 		)
 	);
 	const groups = $derived(
@@ -57,6 +61,17 @@
 						{def.unit === 'kcal' || def.unit === 'kJ' ? fmt(v) : fmtAmount(v)}
 						{def.unit}
 					{/if}
+					{#if targets?.[k]}
+						{@const tg = targets[k]!}
+						{@const cur = v ?? 0}
+						<span
+							class="target"
+							class:bad={(tg.max != null && cur > tg.max) || (tg.min != null && cur < tg.min)}
+							class:good={tg.min != null && cur >= tg.min && (tg.max == null || cur <= tg.max)}
+						>
+							{tg.max != null ? `/ ≤ ${fmtAmount(tg.max)}` : `/ ≥ ${fmtAmount(tg.min)}`}
+						</span>
+					{/if}
 				</span>
 			</li>
 		{/each}
@@ -81,6 +96,18 @@
 	.val.unknown {
 		color: var(--label-3);
 		font-size: 13px;
+	}
+	.target {
+		font-size: 13px;
+		margin-left: 4px;
+		color: var(--label-2);
+	}
+	.target.bad {
+		color: var(--over-text);
+		font-weight: 600;
+	}
+	.target.good {
+		color: var(--success);
 	}
 	.partial {
 		color: var(--warning);
