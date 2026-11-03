@@ -4,15 +4,17 @@
 	import EntryRow from '#lib/components/EntryRow.svelte';
 	import NutrientTable from '#lib/components/NutrientTable.svelte';
 	import Icon from '#lib/components/Icon.svelte';
+	import AddPanel from '#lib/components/AddPanel.svelte';
 	import { api } from '#lib/api.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
 	import { bumpData, dataVersion, openAddSheet, toast } from '#lib/stores/ui.svelte.ts';
-	import { editEntry } from '#lib/logging.ts';
+	import { editEntry, logFood } from '#lib/logging.ts';
+	import { viewport } from '#lib/stores/viewport.svelte.ts';
 	import { fmt, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import { addDays } from '#lib/dates.ts';
 	import { KJ_PER_KCAL } from '#lib/nutrition.ts';
 	import { MACRO_KEYS, type NutrientKey } from '#lib/nutrients.ts';
-	import type { DaySummary, EntryDTO } from '#lib/types.ts';
+	import type { DaySummary, EntryDTO, FoodDTO, FoodSummary } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -86,6 +88,16 @@
 		openAddSheet(date);
 	}
 
+	// iPad landscape: the add panel sits next to the log instead of in a sheet
+	const addTitle = $derived(
+		isToday
+			? t('add.title')
+			: t('add.addTo', { date: fmtDate(date, { day: 'numeric', month: 'short' }) })
+	);
+	async function inlineSelect(f: FoodSummary | FoodDTO) {
+		await logFood('portions' in f ? f : f.id, date);
+	}
+
 	async function onDelete(entry: EntryDTO) {
 		day = { ...day, entries: day.entries.filter((x) => x.id !== entry.id) };
 		try {
@@ -144,157 +156,166 @@
 
 <svelte:head><title>{title} · Nutrition</title></svelte:head>
 
-<main class="page">
-	<div class="nav-row">
-		<button
-			class="nav-btn"
-			onclick={() => go(addDays(date, -1))}
-			aria-label={t('day.prev')}
-			data-testid="prev-day"
-		>
-			<Icon name="chevronLeft" />
-		</button>
-		<div class="nav-center">
-			{#if !isToday}
-				<button class="nav-btn today-btn" onclick={() => go(app.today)}>{t('day.goToday')}</button>
-			{/if}
-		</div>
-		<div class="nav-right">
-			<span class="date-wrap">
-				<button class="nav-btn" onclick={pickDate} aria-label={t('day.pickDate')}
-					><Icon name="calendar" /></button
-				>
-				<input
-					bind:this={dateInput}
-					class="date-input"
-					type="date"
-					value={date}
-					onchange={(ev) => ev.currentTarget.value && go(ev.currentTarget.value)}
-					aria-label={t('day.pickDate')}
-					tabindex="-1"
-				/>
-			</span>
+<main class="page day-page">
+	<div class="day-main">
+		<div class="nav-row">
 			<button
 				class="nav-btn"
-				onclick={() => go(addDays(date, 1))}
-				aria-label={t('day.next')}
-				data-testid="next-day"
+				onclick={() => go(addDays(date, -1))}
+				aria-label={t('day.prev')}
+				data-testid="prev-day"
 			>
-				<Icon name="chevronRight" />
+				<Icon name="chevronLeft" />
+			</button>
+			<div class="nav-center">
+				{#if !isToday}
+					<button class="nav-btn today-btn" onclick={() => go(app.today)}>{t('day.goToday')}</button
+					>
+				{/if}
+			</div>
+			<div class="nav-right">
+				<span class="date-wrap">
+					<button class="nav-btn" onclick={pickDate} aria-label={t('day.pickDate')}
+						><Icon name="calendar" /></button
+					>
+					<input
+						bind:this={dateInput}
+						class="date-input"
+						type="date"
+						value={date}
+						onchange={(ev) => ev.currentTarget.value && go(ev.currentTarget.value)}
+						aria-label={t('day.pickDate')}
+						tabindex="-1"
+					/>
+				</span>
+				<button
+					class="nav-btn"
+					onclick={() => go(addDays(date, 1))}
+					aria-label={t('day.next')}
+					data-testid="next-day"
+				>
+					<Icon name="chevronRight" />
+				</button>
+			</div>
+		</div>
+
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<header class="day-header" onpointerdown={hdrDown} onpointerup={hdrUp}>
+			<h1 class="large-title" data-testid="day-title">{title}</h1>
+			<p class="subtitle">{subtitle}</p>
+		</header>
+
+		<section class="summary" aria-label={t('day.nutrients')}>
+			<Ring
+				value={kcal}
+				target={targets.energy_kcal}
+				color="var(--kcal)"
+				size={148}
+				width={14}
+				label={t('a11y.ring', {
+					label: t('macros.energy_kcal'),
+					value: fmt(e(kcal)),
+					target: fmt(e(targets.energy_kcal))
+				})}
+			>
+				<span class="remain tabular" class:over={remaining < 0} data-testid="kcal-remaining"
+					>{fmt(e(Math.abs(remaining)))}</span
+				>
+				<span class="remain-label" class:over={remaining < 0}
+					>{unit} {remaining < 0 ? t('day.over') : t('day.remaining')}</span
+				>
+			</Ring>
+			<div class="summary-side">
+				<div class="kcal-line tabular">
+					<strong>{fmt(e(kcal))}</strong> / {fmt(e(targets.energy_kcal))}
+					{unit}
+					{#if app.settings.showKj && unit === 'kcal'}<span class="kj"
+							>· {fmt(kcal * KJ_PER_KCAL)} kJ</span
+						>{/if}
+				</div>
+				{#each MACRO_KEYS as k (k)}
+					{@const v = day.totals[k] ?? 0}
+					{@const tgt = targets[k]}
+					<div class="macro-row">
+						<Ring
+							value={v}
+							target={tgt}
+							color={macroColor[k]}
+							size={34}
+							width={5}
+							label={t('a11y.ring', { label: t(`macros.${k}`), value: fmt(v), target: fmt(tgt) })}
+						/>
+						<div class="macro-text">
+							<span class="m-name">{t(`macros.${k}`)}</span>
+							<span class="m-val tabular" class:over={v > tgt * 1.05}>{fmt(v)} / {fmt(tgt)} g</span>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</section>
+
+		{#if coreMissing.length}
+			<p class="incomplete" data-testid="incomplete-hint">
+				<Icon name="warn" size={15} />
+				{coreMissing
+					.map((m) =>
+						m.n === 1
+							? t('day.incompleteHintOne', { nutrient: t(`nutrient.${m.k}`) })
+							: t('day.incompleteHint', { n: m.n, nutrient: t(`nutrient.${m.k}`) })
+					)
+					.join(' ')}
+			</p>
+		{/if}
+
+		{#if day.entries.length}
+			<ul class="group timeline" data-testid="timeline">
+				{#each day.entries as entry (entry.id)}
+					<EntryRow
+						{entry}
+						onedit={onEdit}
+						ondelete={onDelete}
+						oncopy={isToday ? undefined : onCopy}
+						copyLabel={t('day.copyToToday')}
+					/>
+				{/each}
+			</ul>
+			<p class="section-footer">{t('day.swipeHint')}</p>
+		{:else}
+			<div class="empty-card">
+				<p class="empty-title">{t('day.empty')}</p>
+				<p class="hint">{t('day.emptyHint')}</p>
+			</div>
+		{/if}
+
+		<div class="group links">
+			<a class="row" href="/copy?to={date}" data-testid="copy-entries-link">
+				<Icon name="copy" />
+				<span class="grow">{t('day.copyEntries')}</span>
+				<span class="chev"><Icon name="chevronRight" size={16} /></span>
+			</a>
+			<button class="row" onclick={() => (showAll = !showAll)} aria-expanded={showAll}>
+				<Icon name="info" />
+				<span class="grow">{t('day.showAll')}</span>
+				<span class="chev" style:transform={showAll ? 'rotate(90deg)' : undefined}
+					><Icon name="chevronRight" size={16} /></span
+				>
 			</button>
 		</div>
+		{#if showAll}
+			<h2 class="visually-hidden">{t('day.nutrients')}</h2>
+			<NutrientTable
+				nutrients={day.totals}
+				missing={day.missing}
+				count={day.count}
+				targets={app.settings.targets.extra}
+			/>
+		{/if}
 	</div>
-
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<header class="day-header" onpointerdown={hdrDown} onpointerup={hdrUp}>
-		<h1 class="large-title" data-testid="day-title">{title}</h1>
-		<p class="subtitle">{subtitle}</p>
-	</header>
-
-	<section class="summary" aria-label={t('day.nutrients')}>
-		<Ring
-			value={kcal}
-			target={targets.energy_kcal}
-			color="var(--kcal)"
-			size={148}
-			width={14}
-			label={t('a11y.ring', {
-				label: t('macros.energy_kcal'),
-				value: fmt(e(kcal)),
-				target: fmt(e(targets.energy_kcal))
-			})}
-		>
-			<span class="remain tabular" class:over={remaining < 0} data-testid="kcal-remaining"
-				>{fmt(e(Math.abs(remaining)))}</span
-			>
-			<span class="remain-label" class:over={remaining < 0}
-				>{unit} {remaining < 0 ? t('day.over') : t('day.remaining')}</span
-			>
-		</Ring>
-		<div class="summary-side">
-			<div class="kcal-line tabular">
-				<strong>{fmt(e(kcal))}</strong> / {fmt(e(targets.energy_kcal))}
-				{unit}
-				{#if app.settings.showKj && unit === 'kcal'}<span class="kj"
-						>· {fmt(kcal * KJ_PER_KCAL)} kJ</span
-					>{/if}
-			</div>
-			{#each MACRO_KEYS as k (k)}
-				{@const v = day.totals[k] ?? 0}
-				{@const tgt = targets[k]}
-				<div class="macro-row">
-					<Ring
-						value={v}
-						target={tgt}
-						color={macroColor[k]}
-						size={34}
-						width={5}
-						label={t('a11y.ring', { label: t(`macros.${k}`), value: fmt(v), target: fmt(tgt) })}
-					/>
-					<div class="macro-text">
-						<span class="m-name">{t(`macros.${k}`)}</span>
-						<span class="m-val tabular" class:over={v > tgt * 1.05}>{fmt(v)} / {fmt(tgt)} g</span>
-					</div>
-				</div>
-			{/each}
-		</div>
-	</section>
-
-	{#if coreMissing.length}
-		<p class="incomplete" data-testid="incomplete-hint">
-			<Icon name="warn" size={15} />
-			{coreMissing
-				.map((m) =>
-					m.n === 1
-						? t('day.incompleteHintOne', { nutrient: t(`nutrient.${m.k}`) })
-						: t('day.incompleteHint', { n: m.n, nutrient: t(`nutrient.${m.k}`) })
-				)
-				.join(' ')}
-		</p>
-	{/if}
-
-	{#if day.entries.length}
-		<ul class="group timeline" data-testid="timeline">
-			{#each day.entries as entry (entry.id)}
-				<EntryRow
-					{entry}
-					onedit={onEdit}
-					ondelete={onDelete}
-					oncopy={isToday ? undefined : onCopy}
-					copyLabel={t('day.copyToToday')}
-				/>
-			{/each}
-		</ul>
-		<p class="section-footer">{t('day.swipeHint')}</p>
-	{:else}
-		<div class="empty-card">
-			<p class="empty-title">{t('day.empty')}</p>
-			<p class="hint">{t('day.emptyHint')}</p>
-		</div>
-	{/if}
-
-	<div class="group links">
-		<a class="row" href="/copy?to={date}" data-testid="copy-entries-link">
-			<Icon name="copy" />
-			<span class="grow">{t('day.copyEntries')}</span>
-			<span class="chev"><Icon name="chevronRight" size={16} /></span>
-		</a>
-		<button class="row" onclick={() => (showAll = !showAll)} aria-expanded={showAll}>
-			<Icon name="info" />
-			<span class="grow">{t('day.showAll')}</span>
-			<span class="chev" style:transform={showAll ? 'rotate(90deg)' : undefined}
-				><Icon name="chevronRight" size={16} /></span
-			>
-		</button>
-	</div>
-	{#if showAll}
-		<h2 class="visually-hidden">{t('day.nutrients')}</h2>
-		<NutrientTable
-			nutrients={day.totals}
-			missing={day.missing}
-			count={day.count}
-			targets={app.settings.targets.extra}
-		/>
+	{#if viewport.wide}
+		<aside class="day-add" aria-label={addTitle} data-testid="inline-add">
+			<h2 class="add-title">{addTitle}</h2>
+			<AddPanel onselect={inlineSelect} inputId="inline-search" />
+		</aside>
 	{/if}
 </main>
 
@@ -460,9 +481,74 @@
 	.fab:active {
 		transform: scale(0.92);
 	}
-	@media (min-width: 760px) {
+
+	/* ---------- iPad portrait ---------- */
+	.day-main {
+		container-type: inline-size;
+		min-width: 0;
+	}
+	@media (min-width: 640px) and (min-height: 560px) {
 		.fab {
-			right: calc(50% - 360px + 20px);
+			right: calc(max(0px, (100vw - var(--page-max)) / 2) + var(--gutter) + var(--safe-right));
+			bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 6px);
+			width: 64px;
+			height: 64px;
+			border-radius: 32px;
+		}
+	}
+	/* summary card: when there's room, the three macros sit side by side under the kcal line */
+	@container (min-width: 600px) {
+		.summary {
+			gap: 28px;
+			padding: 22px 26px;
+		}
+		.summary-side {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 14px 18px;
+		}
+		.kcal-line {
+			grid-column: 1 / -1;
+			font-size: 17px;
+		}
+		.kcal-line strong {
+			font-size: 22px;
+		}
+		.macro-row {
+			background: var(--bg-elev-2);
+			border-radius: var(--radius);
+			padding: 10px 12px;
+		}
+		.m-val {
+			font-size: 17px;
+		}
+	}
+
+	/* ---------- iPad landscape: log | add panel ---------- */
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+		.day-page {
+			--page-max: 1280px;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+			gap: 28px;
+			align-items: start;
+		}
+		.fab {
+			display: none;
+		}
+		.day-add {
+			position: sticky;
+			top: 0;
+			max-height: 100dvh;
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			padding: calc(var(--safe-top) + 12px) 0 24px;
+			margin-top: calc(-8px - var(--safe-top));
+		}
+		.add-title {
+			font-size: 22px;
+			font-weight: 700;
+			margin: 4px 0 10px;
 		}
 	}
 </style>

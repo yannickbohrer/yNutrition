@@ -1,7 +1,8 @@
 # Nutrition
 
 A self-hosted, single-user calorie and nutrition tracker. It runs as a PWA and is built for
-an iPhone installed to the home screen, but works on desktop too. German (Swiss) and English.
+an iPhone installed to the home screen, with dedicated iPad layouts for portrait and
+landscape, and it works on desktop too. German (Swiss) and English.
 
 - **Passkey login only** (Face ID / Touch ID via WebAuthn). No passwords.
 - **Fast local food search** over the Swiss Food Composition Database (≈1'250 generic foods,
@@ -24,6 +25,15 @@ an iPhone installed to the home screen, but works on desktop too. German (Swiss)
 | Today                                    | Portion picker                                    | Search                                    | Insights (dark)                            |
 | ---------------------------------------- | ------------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
 | ![](docs/screenshots/light-01-today.png) | ![](docs/screenshots/light-04-portion-picker.png) | ![](docs/screenshots/light-03-search.png) | ![](docs/screenshots/dark-08-insights.png) |
+
+**iPad**: portrait uses a floating tab bar, centred form sheets and two-column insights.
+Landscape adds sidebar navigation, a Today split view with the food search inline, and
+split-view settings.
+
+| iPad landscape                                            | iPad portrait                                            |
+| --------------------------------------------------------- | -------------------------------------------------------- |
+| ![](docs/screenshots/ipad-landscape-light-01-today.png)   | ![](docs/screenshots/ipad-portrait-light-01-today.png)   |
+| ![](docs/screenshots/ipad-landscape-dark-04-insights.png) | ![](docs/screenshots/ipad-portrait-dark-04-insights.png) |
 
 All screens, light and dark: [`docs/screenshots/`](docs/screenshots).
 
@@ -51,20 +61,20 @@ allow WebAuthn on `localhost` without HTTPS.
 
 ### Scripts
 
-| Script                            | Purpose                                                                               |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| `npm run dev`                     | Vite dev server                                                                       |
-| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                          |
-| `npm run check`                   | `svelte-check` (TypeScript)                                                           |
-| `npm run lint` / `npm run format` | Prettier + ESLint                                                                     |
-| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)          |
-| `npm run test:e2e`                | Playwright E2E on an emulated iPhone (Chromium with a virtual WebAuthn authenticator) |
-| `npm run screenshots`             | Capture every main screen in light and dark mode into `docs/screenshots`              |
-| `npm run import:swissfcd`         | Import the Swiss food DB (`--download` refreshes the official XLSX files)             |
-| `npm run recovery`                | Print a one-time passkey registration link                                            |
-| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                          |
-| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                     |
-| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                         |
+| Script                            | Purpose                                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| `npm run dev`                     | Vite dev server                                                                          |
+| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                             |
+| `npm run check`                   | `svelte-check` (TypeScript)                                                              |
+| `npm run lint` / `npm run format` | Prettier + ESLint                                                                        |
+| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)             |
+| `npm run test:e2e`                | Playwright E2E on emulated iPhone and iPad (portrait + landscape), Chromium + WebAuthn   |
+| `npm run screenshots`             | Capture every main screen (iPhone + iPad) in light and dark mode into `docs/screenshots` |
+| `npm run import:swissfcd`         | Import the Swiss food DB (`--download` refreshes the official XLSX files)                |
+| `npm run recovery`                | Print a one-time passkey registration link                                               |
+| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |
+| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                        |
+| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                            |
 
 ## Deployment
 

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import Icon, { type IconName } from '#lib/components/Icon.svelte';
+	import SettingsNav from '#lib/components/SettingsNav.svelte';
 	import { api } from '#lib/api.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
-	import { setLang, t, type MessageKey } from '#lib/i18n/index.svelte.ts';
+	import { viewport } from '#lib/stores/viewport.svelte.ts';
+	import { setLang, t } from '#lib/i18n/index.svelte.ts';
 	import type { UserSettings } from '#lib/types.ts';
 
 	async function update(patch: Partial<UserSettings>) {
@@ -12,36 +13,19 @@
 		await api.settings(patch);
 		await invalidateAll();
 	}
-
-	async function logout() {
-		await api.auth.logout();
-		location.href = '/login';
-	}
-
-	const links: { href: string; icon: IconName; label: MessageKey; hint?: MessageKey }[] = [
-		{
-			href: '/settings/targets',
-			icon: 'target',
-			label: 'settings.targets',
-			hint: 'settings.targetsHint'
-		},
-		{
-			href: '/settings/passkeys',
-			icon: 'key',
-			label: 'settings.passkeys',
-			hint: 'settings.passkeysHint'
-		},
-		{ href: '/settings/data', icon: 'download', label: 'settings.data', hint: 'settings.dataHint' },
-		{ href: '/settings/about', icon: 'info', label: 'settings.about' }
-	];
 </script>
 
 <svelte:head><title>{t('settings.title')} · Nutrition</title></svelte:head>
 
 <main class="page">
-	<h1 class="large-title">{t('settings.title')}</h1>
-
-	<h2 class="section-header">{t('settings.general')}</h2>
+	{#if viewport.wide}
+		<!-- split view: the section list (with the page title) is in the left column -->
+		<div class="nav-row" aria-hidden="true"></div>
+		<h2 class="large-title">{t('settings.general')}</h2>
+	{:else}
+		<h1 class="large-title">{t('settings.title')}</h1>
+		<h2 class="section-header">{t('settings.general')}</h2>
+	{/if}
 	<ul class="group">
 		<li class="row">
 			<span class="grow">{t('settings.language')}</span>
@@ -85,53 +69,14 @@
 		{/if}
 	</ul>
 
-	<ul class="group spaced">
-		{#each links as l (l.href)}
-			<li>
-				<a class="row" href={l.href}>
-					<span class="ico"><Icon name={l.icon} size={20} /></span>
-					<span class="grow">
-						<span class="row-title">{t(l.label)}</span>
-						{#if l.hint}<span class="row-sub">{t(l.hint)}</span>{/if}
-					</span>
-					<span class="chev"><Icon name="chevronRight" size={16} /></span>
-				</a>
-			</li>
-		{/each}
-	</ul>
-
-	<ul class="group spaced">
-		<li>
-			<button class="row logout" onclick={logout}
-				><Icon name="logout" size={20} /> <span class="grow">{t('settings.logout')}</span></button
-			>
-		</li>
-	</ul>
+	{#if !viewport.wide}
+		<SettingsNav />
+	{/if}
 </main>
 
 <style>
 	.seg {
 		width: 170px;
 		flex: none;
-	}
-	.spaced {
-		margin-top: 28px;
-	}
-	.ico {
-		width: 30px;
-		height: 30px;
-		border-radius: 7px;
-		background: var(--tint);
-		color: #fff;
-		display: grid;
-		place-items: center;
-		flex: none;
-	}
-	.row-title,
-	.row-sub {
-		display: block;
-	}
-	.logout {
-		color: var(--danger-text);
 	}
 </style>

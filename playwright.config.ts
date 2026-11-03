@@ -23,6 +23,18 @@ const iphone = {
 	defaultBrowserType: 'chromium' as const
 };
 
+// iPad in both orientations (Chromium for the same reason)
+const ipadPortrait = {
+	...devices['iPad Pro 11'],
+	browserName: 'chromium' as const,
+	defaultBrowserType: 'chromium' as const
+};
+const ipadLandscape = {
+	...devices['iPad Pro 11 landscape'],
+	browserName: 'chromium' as const,
+	defaultBrowserType: 'chromium' as const
+};
+
 export default defineConfig({
 	testDir: 'e2e',
 	testMatch: '**/*.e2e.ts',
@@ -45,9 +57,21 @@ export default defineConfig({
 		{ name: 'setup', testMatch: /auth\.setup\.e2e\.ts/, use: iphone },
 		{
 			name: 'iphone',
-			testIgnore: [/auth\.setup\.e2e\.ts/, /screenshots\.e2e\.ts/],
+			testIgnore: [/auth\.setup\.e2e\.ts/, /screenshots\.e2e\.ts/, /ipad\.e2e\.ts/],
 			dependencies: ['setup'],
 			use: { ...iphone, storageState: 'e2e/.tmp/state.json' }
+		},
+		{
+			name: 'ipad-portrait',
+			testMatch: /ipad\.e2e\.ts/,
+			dependencies: ['setup'],
+			use: { ...ipadPortrait, storageState: 'e2e/.tmp/state.json' }
+		},
+		{
+			name: 'ipad-landscape',
+			testMatch: /ipad\.e2e\.ts/,
+			dependencies: ['setup'],
+			use: { ...ipadLandscape, storageState: 'e2e/.tmp/state.json' }
 		},
 		{
 			name: 'screenshots',

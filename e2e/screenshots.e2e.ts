@@ -1,8 +1,9 @@
 /**
- * Captures every main screen in light and dark mode (iPhone viewport) into docs/screenshots.
+ * Captures every main screen in light and dark mode (iPhone viewport) into docs/screenshots,
+ * plus the main iPad screens in portrait and landscape (docs/screenshots/ipad-*).
  * Run: npx playwright test --project=screenshots
  */
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, devices, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import { zurichDate } from './helpers';
 
@@ -153,4 +154,57 @@ for (const scheme of ['light', 'dark'] as const) {
 		await p2.screenshot({ path: `${OUT}/${scheme}-16-login.png` });
 		await ctx.close();
 	});
+}
+
+for (const [orientation, device] of [
+	['portrait', devices['iPad Pro 11']],
+	['landscape', devices['iPad Pro 11 landscape']]
+] as const) {
+	for (const scheme of ['light', 'dark'] as const) {
+		test(`iPad ${orientation} (${scheme})`, async ({ browser }) => {
+			const ctx = await browser.newContext({
+				...device,
+				locale: 'de-CH',
+				timezoneId: 'Europe/Zurich',
+				storageState: 'e2e/.tmp/state.json',
+				colorScheme: scheme
+			});
+			const page = await ctx.newPage();
+			const shot = async (name: string) => {
+				await page.waitForTimeout(450);
+				await page.screenshot({ path: `${OUT}/ipad-${orientation}-${scheme}-${name}.png` });
+			};
+
+			await page.goto('/');
+			await expect(page.getByTestId('timeline')).toBeVisible();
+			await shot('01-today');
+
+			if (orientation === 'portrait') {
+				await page.getByTestId('fab-add').click();
+				await page.locator('#sheet-search').fill('apf');
+				await expect(page.getByTestId('local-results')).toBeVisible();
+				await page.locator('#sheet-search').blur();
+				await shot('02-add');
+				await page.getByTestId('food-row').filter({ hasText: 'Apfel, roh' }).first().click();
+			} else {
+				await page.locator('#inline-search').fill('apf');
+				await expect(page.getByTestId('local-results')).toBeVisible();
+				await page.locator('#inline-search').blur();
+				await shot('02-add');
+				await page.getByTestId('food-row').filter({ hasText: 'Apfel, roh' }).first().click();
+			}
+			await expect(page.getByTestId('portion-picker')).toBeVisible();
+			await shot('03-portion-picker');
+			await page.keyboard.press('Escape');
+			await page.keyboard.press('Escape');
+
+			await page.goto('/insights');
+			await expect(page.locator('canvas').first()).toBeVisible();
+			await shot('04-insights');
+
+			await page.goto('/settings/targets');
+			await shot('05-settings-targets');
+			await ctx.close();
+		});
+	}
 }

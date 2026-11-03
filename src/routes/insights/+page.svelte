@@ -5,6 +5,7 @@
 	import { api, type Breakdown } from '#lib/api.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
 	import { toast } from '#lib/stores/ui.svelte.ts';
+	import { viewport } from '#lib/stores/viewport.svelte.ts';
 	import { cssVar } from '#lib/charts.ts';
 	import { addDays, addMonths, endOfMonth, startOfMonth, startOfWeek } from '#lib/dates.ts';
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
@@ -150,184 +151,202 @@
 
 <svelte:head><title>{t('insights.title')} · Nutrition</title></svelte:head>
 
-<main class="page">
+<main class="page insights-page">
 	<h1 class="large-title">{t('insights.title')}</h1>
 
-	<div class="segmented" role="group">
-		<button
-			aria-pressed={mode === 'week'}
-			onclick={() => ((mode = 'week'), (offset = 0))}
-			data-testid="mode-week">{t('insights.week')}</button
-		>
-		<button
-			aria-pressed={mode === 'month'}
-			onclick={() => ((mode = 'month'), (offset = 0))}
-			data-testid="mode-month">{t('insights.month')}</button
-		>
-	</div>
-	<div class="nav-row period">
-		<button class="nav-btn" onclick={() => offset--} aria-label={t('insights.prev')}
-			><Icon name="chevronLeft" /></button
-		>
-		<strong>{label}</strong>
-		<button
-			class="nav-btn"
-			onclick={() => offset++}
-			disabled={offset >= 0}
-			aria-label={t('insights.next')}><Icon name="chevronRight" /></button
-		>
+	<div class="period-bar">
+		<div class="segmented" role="group">
+			<button
+				aria-pressed={mode === 'week'}
+				onclick={() => ((mode = 'week'), (offset = 0))}
+				data-testid="mode-week">{t('insights.week')}</button
+			>
+			<button
+				aria-pressed={mode === 'month'}
+				onclick={() => ((mode = 'month'), (offset = 0))}
+				data-testid="mode-month">{t('insights.month')}</button
+			>
+		</div>
+		<div class="nav-row period">
+			<button class="nav-btn" onclick={() => offset--} aria-label={t('insights.prev')}
+				><Icon name="chevronLeft" /></button
+			>
+			<strong>{label}</strong>
+			<button
+				class="nav-btn"
+				onclick={() => offset++}
+				disabled={offset >= 0}
+				aria-label={t('insights.next')}><Icon name="chevronRight" /></button
+			>
+		</div>
 	</div>
 
-	{#if data}
-		<section class="card">
-			<div class="card-head">
-				<h2>{t('insights.kcalChart')}</h2>
-				{#if hasWeights}
-					<label class="toggle"
-						><input type="checkbox" class="switch small" bind:checked={showWeight} />
-						{t('insights.showWeight')}</label
-					>
-				{/if}
+	<div class="ins-grid">
+		{#if data}
+			<section class="card a-chart">
+				<div class="card-head">
+					<h2>{t('insights.kcalChart')}</h2>
+					{#if hasWeights}
+						<label class="toggle"
+							><input type="checkbox" class="switch small" bind:checked={showWeight} />
+							{t('insights.showWeight')}</label
+						>
+					{/if}
+				</div>
+				{#key showWeight}
+					<ChartCanvas
+						config={chartConfig}
+						label={t('insights.kcalChart')}
+						height={viewport.wide ? 340 : viewport.tablet ? 300 : 220}
+					/>
+				{/key}
+				<p class="hint">
+					{t('insights.loggedDays', { n: data.loggedDays, total: data.days.length })}
+				</p>
+			</section>
+
+			<div class="a-tiles">
+				<div class="tiles">
+					<div class="tile" data-testid="avg-kcal">
+						<span class="t-label">{t('insights.avgPerDay')}</span>
+						<span class="t-val tabular">{fmt(data.avg.kcal)}</span>
+						<span class="t-sub">/ {fmt(data.targets.kcal)} kcal</span>
+					</div>
+					<div class="tile">
+						<span class="t-label">{t('insights.adherence')}</span>
+						<span class="t-val tabular"
+							>{data.loggedDays ? fmt((data.onTargetDays / data.loggedDays) * 100) : '–'}<small
+								>%</small
+							></span
+						>
+						<span class="t-sub"
+							>{data.onTargetDays}
+							{t('insights.onTarget')} · {data.overDays}
+							{t('insights.over')} · {data.underDays}
+							{t('insights.under')}</span
+						>
+					</div>
+				</div>
+				<p class="section-footer">{t('insights.adherenceHint')}</p>
 			</div>
-			{#key showWeight}
-				<ChartCanvas config={chartConfig} label={t('insights.kcalChart')} />
-			{/key}
-			<p class="hint">
-				{t('insights.loggedDays', { n: data.loggedDays, total: data.days.length })}
-			</p>
+
+			<section class="a-macros">
+				<h2 class="section-header">{t('insights.macros')}</h2>
+				<ul class="group">
+					{#each ['protein', 'carbs', 'fat'] as const as k (k)}
+						{@const v = data.avg[k]}
+						{@const tg = data.targets[k]}
+						<li class="row macro">
+							<span class="dot" style:background={macroColors[k]}></span>
+							<span class="grow">{t(`macros.${k}`)}</span>
+							<span class="tabular">{fmt(v)} / {fmt(tg)} g</span>
+							<span class="share tabular">{fmt(data.energyShares[k])}%</span>
+						</li>
+						<li class="bar-li">
+							<div class="bar">
+								<div
+									style:width="{Math.min(100, (v / tg) * 100)}%"
+									style:background={macroColors[k]}
+								></div>
+							</div>
+						</li>
+					{/each}
+				</ul>
+				<p class="section-footer">
+					{t('insights.energyShare')}: P {fmt(data.energyShares.protein)}% · KH {fmt(
+						data.energyShares.carbs
+					)}% · F {fmt(data.energyShares.fat)}%
+				</p>
+			</section>
+		{:else}
+			<p class="empty a-chart">{t('app.loading')}</p>
+		{/if}
+
+		<section class="a-bd">
+			<h2 class="section-header">{t('insights.breakdown')}</h2>
+			<div class="bd-controls">
+				<select
+					bind:value={nutrient}
+					aria-label={t('insights.nutrient')}
+					data-testid="breakdown-nutrient"
+				>
+					{#each NUTRIENT_KEYS.filter((k) => k !== 'energy_kj') as k (k)}<option value={k}
+							>{t(`nutrient.${k}`)}</option
+						>{/each}
+				</select>
+				<div class="segmented">
+					<button aria-pressed={bdPeriod === 'day'} onclick={() => (bdPeriod = 'day')}
+						>{t('insights.day')}</button
+					>
+					<button aria-pressed={bdPeriod === 'range'} onclick={() => (bdPeriod = 'range')}
+						>{mode === 'week' ? t('insights.week') : t('insights.month')}</button
+					>
+				</div>
+			</div>
+			{#if bd}
+				{#if bd.items.length}
+					<ul class="group" data-testid="breakdown-list">
+						{#each bd.items.slice(0, 12) as it, i (it.key)}
+							<li class="row bd-row">
+								<span class="rank tabular">{i + 1}</span>
+								<span class="grow">
+									<span class="row-title">{it.label}</span>
+									<span class="share-bar"><span style:width="{it.share}%"></span></span>
+								</span>
+								<span class="bd-val tabular"
+									>{fmtAmount(it.value)} {unitOf(nutrient)}<small>{fmt(it.share, 1)}%</small></span
+								>
+							</li>
+						{/each}
+					</ul>
+					<p class="section-footer">
+						{t('insights.total')}: {fmtAmount(bd.total)}
+						{unitOf(nutrient)}
+						{#if bd.missing}· <span class="warn"
+								>{t('insights.missingEntries', { n: bd.missing })}</span
+							>{/if}
+					</p>
+				{:else}
+					<p class="empty">{t('insights.noData')}</p>
+				{/if}
+			{/if}
 		</section>
 
-		<div class="tiles">
-			<div class="tile" data-testid="avg-kcal">
-				<span class="t-label">{t('insights.avgPerDay')}</span>
-				<span class="t-val tabular">{fmt(data.avg.kcal)}</span>
-				<span class="t-sub">/ {fmt(data.targets.kcal)} kcal</span>
-			</div>
-			<div class="tile">
-				<span class="t-label">{t('insights.adherence')}</span>
-				<span class="t-val tabular"
-					>{data.loggedDays ? fmt((data.onTargetDays / data.loggedDays) * 100) : '–'}<small>%</small
-					></span
+		<section class="a-side">
+			<h2 class="section-header">{t('weight.quickAdd')}</h2>
+			<form class="group quick" onsubmit={quickWeight}>
+				<div class="row">
+					<label class="grow" for="quick-kg">{t('weight.title')} ({t('day.today')})</label>
+					<input
+						id="quick-kg"
+						type="number"
+						inputmode="decimal"
+						step="0.1"
+						min="20"
+						max="400"
+						placeholder="kg"
+						bind:value={quickKg}
+						data-testid="quick-weight"
+					/>
+					<button class="btn small" type="submit" disabled={!quickKg}>{t('app.save')}</button>
+				</div>
+			</form>
+
+			<div class="group links">
+				<a class="row" href="/insights/weight" data-testid="weight-link"
+					><Icon name="scale" /><span class="grow">{t('insights.weightLink')}</span><Icon
+						name="chevronRight"
+						size={16}
+					/></a
 				>
-				<span class="t-sub"
-					>{data.onTargetDays}
-					{t('insights.onTarget')} · {data.overDays}
-					{t('insights.over')} · {data.underDays}
-					{t('insights.under')}</span
+				<a class="row" href="/settings/data"
+					><Icon name="download" /><span class="grow">{t('insights.export')}</span><Icon
+						name="chevronRight"
+						size={16}
+					/></a
 				>
 			</div>
-		</div>
-		<p class="section-footer">{t('insights.adherenceHint')}</p>
-
-		<h2 class="section-header">{t('insights.macros')}</h2>
-		<ul class="group">
-			{#each ['protein', 'carbs', 'fat'] as const as k (k)}
-				{@const v = data.avg[k]}
-				{@const tg = data.targets[k]}
-				<li class="row macro">
-					<span class="dot" style:background={macroColors[k]}></span>
-					<span class="grow">{t(`macros.${k}`)}</span>
-					<span class="tabular">{fmt(v)} / {fmt(tg)} g</span>
-					<span class="share tabular">{fmt(data.energyShares[k])}%</span>
-				</li>
-				<li class="bar-li">
-					<div class="bar">
-						<div
-							style:width="{Math.min(100, (v / tg) * 100)}%"
-							style:background={macroColors[k]}
-						></div>
-					</div>
-				</li>
-			{/each}
-		</ul>
-		<p class="section-footer">
-			{t('insights.energyShare')}: P {fmt(data.energyShares.protein)}% · KH {fmt(
-				data.energyShares.carbs
-			)}% · F {fmt(data.energyShares.fat)}%
-		</p>
-	{:else}
-		<p class="empty">{t('app.loading')}</p>
-	{/if}
-
-	<h2 class="section-header">{t('insights.breakdown')}</h2>
-	<div class="bd-controls">
-		<select
-			bind:value={nutrient}
-			aria-label={t('insights.nutrient')}
-			data-testid="breakdown-nutrient"
-		>
-			{#each NUTRIENT_KEYS.filter((k) => k !== 'energy_kj') as k (k)}<option value={k}
-					>{t(`nutrient.${k}`)}</option
-				>{/each}
-		</select>
-		<div class="segmented">
-			<button aria-pressed={bdPeriod === 'day'} onclick={() => (bdPeriod = 'day')}
-				>{t('insights.day')}</button
-			>
-			<button aria-pressed={bdPeriod === 'range'} onclick={() => (bdPeriod = 'range')}
-				>{mode === 'week' ? t('insights.week') : t('insights.month')}</button
-			>
-		</div>
-	</div>
-	{#if bd}
-		{#if bd.items.length}
-			<ul class="group" data-testid="breakdown-list">
-				{#each bd.items.slice(0, 12) as it, i (it.key)}
-					<li class="row bd-row">
-						<span class="rank tabular">{i + 1}</span>
-						<span class="grow">
-							<span class="row-title">{it.label}</span>
-							<span class="share-bar"><span style:width="{it.share}%"></span></span>
-						</span>
-						<span class="bd-val tabular"
-							>{fmtAmount(it.value)} {unitOf(nutrient)}<small>{fmt(it.share, 1)}%</small></span
-						>
-					</li>
-				{/each}
-			</ul>
-			<p class="section-footer">
-				{t('insights.total')}: {fmtAmount(bd.total)}
-				{unitOf(nutrient)}
-				{#if bd.missing}· <span class="warn">{t('insights.missingEntries', { n: bd.missing })}</span
-					>{/if}
-			</p>
-		{:else}
-			<p class="empty">{t('insights.noData')}</p>
-		{/if}
-	{/if}
-
-	<h2 class="section-header">{t('weight.quickAdd')}</h2>
-	<form class="group quick" onsubmit={quickWeight}>
-		<div class="row">
-			<label class="grow" for="quick-kg">{t('weight.title')} ({t('day.today')})</label>
-			<input
-				id="quick-kg"
-				type="number"
-				inputmode="decimal"
-				step="0.1"
-				min="20"
-				max="400"
-				placeholder="kg"
-				bind:value={quickKg}
-				data-testid="quick-weight"
-			/>
-			<button class="btn small" type="submit" disabled={!quickKg}>{t('app.save')}</button>
-		</div>
-	</form>
-
-	<div class="group links">
-		<a class="row" href="/insights/weight" data-testid="weight-link"
-			><Icon name="scale" /><span class="grow">{t('insights.weightLink')}</span><Icon
-				name="chevronRight"
-				size={16}
-			/></a
-		>
-		<a class="row" href="/settings/data"
-			><Icon name="download" /><span class="grow">{t('insights.export')}</span><Icon
-				name="chevronRight"
-				size={16}
-			/></a
-		>
+		</section>
 	</div>
 </main>
 
@@ -490,5 +509,86 @@
 	}
 	.links .grow {
 		color: var(--label);
+	}
+
+	/* ---------- iPad portrait: chart on top, then two columns ---------- */
+	@media (min-width: 640px) and (min-height: 560px) {
+		.period-bar {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+		}
+		.period-bar .segmented {
+			width: 240px;
+			flex: none;
+		}
+		.period {
+			flex: 1;
+			margin: 0;
+		}
+		.ins-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			grid-template-areas:
+				'chart chart'
+				'tiles macros'
+				'bd side';
+			gap: 0 24px;
+			align-items: start;
+			margin-top: 8px;
+		}
+		.a-chart {
+			grid-area: chart;
+		}
+		.a-tiles {
+			grid-area: tiles;
+		}
+		.a-macros {
+			grid-area: macros;
+		}
+		.a-bd {
+			grid-area: bd;
+		}
+		.a-side {
+			grid-area: side;
+		}
+		/* align the column tops: tiles and macros start together, as do breakdown and weight */
+		.a-tiles .tiles {
+			margin-top: 24px;
+		}
+		.a-macros > .section-header:first-child {
+			margin-top: 24px;
+		}
+		.a-tiles .tiles {
+			grid-template-columns: 1fr;
+		}
+		.a-side .links {
+			margin-top: 24px;
+		}
+	}
+
+	/* ---------- iPad landscape: chart + breakdown left, figures right ---------- */
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+		.insights-page {
+			--page-max: 1240px;
+		}
+		.ins-grid {
+			grid-template-columns: minmax(0, 3fr) minmax(300px, 2fr);
+			grid-template-areas:
+				'chart tiles'
+				'chart macros'
+				'bd side';
+			gap: 0 28px;
+		}
+		.a-chart {
+			margin-top: 0;
+		}
+		.a-tiles .tiles {
+			margin-top: 0;
+			grid-template-columns: 1fr 1fr;
+		}
+		.a-macros > .section-header:first-child {
+			margin-top: 24px;
+		}
 	}
 </style>

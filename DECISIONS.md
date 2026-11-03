@@ -116,11 +116,38 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   ZXing WASM ponyfill. The WASM binary is **self-hosted** (the library defaults to a CDN). A
   code must be read twice identically and pass its check digit to be accepted.
 
+## iPad layouts
+
+- **Three layout classes, CSS first** (breakpoints in `src/app.css`, mirrored in
+  `src/lib/stores/viewport.svelte.ts`):
+  - _phone_ (unchanged): bottom tab bar, bottom sheets, single column.
+  - _tablet_ = `min-width: 640px and min-height: 560px` (iPad portrait, Split View): floating
+    tab bar, centred form sheets, wider cards, two-column Insights.
+  - _wide_ = tablet + `min-width: 900px` + landscape (iPad landscape): sidebar navigation,
+    Today as a split view with the add panel inline, Settings as a master/detail split view.
+- **Why these numbers**: the `min-height` keeps iPhones in landscape (≤ 932 × 430) on the phone
+  UI. 640/900 rather than 744/1024 because Playwright's "iPad (gen 11)" profile reports
+  656 × 944 CSS px, and iPad Split View windows get narrow too. At 944 px the Today log column
+  is still ≥ 343 px wide, the iPhone SE content width the phone layout already handles.
+- Layout is pure CSS. The JS flags only decide whether **extra panes are mounted** (inline add
+  panel, settings list), so phones never load or render hidden UI. SSR renders the phone
+  markup and the panes mount on hydration. Rotating the device switches layouts live.
+- Today's summary card uses a **container query**, so it widens in portrait but keeps the
+  compact layout inside the narrower landscape log column.
+- **Stacked sheets** (portion picker over the add sheet): on iPad the sheet behind is
+  recessed (scaled and dimmed) like iPadOS, because two same-sized form sheets look broken.
+- The sidebar's **quick add** logs to the day being viewed on Today, otherwise to today.
+
 ## Testing
 
 - E2E runs Chromium with **iPhone 14 emulation** (viewport, touch, UA), because the CDP virtual
   WebAuthn authenticator is Chromium-only. Real iOS Safari behaviour (Face ID, camera) still
   needs a manual check on the device.
+- The iPad layouts run in two extra projects, `ipad-portrait` and `ipad-landscape` (iPad Pro 11,
+  Chromium). `e2e/ipad.e2e.ts` checks geometry (sidebar, floating bar, form sheets, grid
+  placement, no horizontal scroll), logging through the inline panel, the settings split view,
+  live rotation, the smallest iPad landscape (944 × 656) and that iPhone landscape stays on the
+  phone layout.
 - The camera is mocked via Chromium's fake media stream plus a test hook
   (`window.__NUTRITION_TEST_BARCODE__`) that stands in for the detector.
 - `deploy.sh` was tested end-to-end against a simulated Debian 12 VM (privileged container with

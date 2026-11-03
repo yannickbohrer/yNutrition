@@ -1,14 +1,15 @@
 <script lang="ts" module>
 	/** stack of open sheets — Escape closes only the topmost one */
-	const stack: symbol[] = [];
+	const stack: symbol[] = $state([]);
 </script>
 
 <script lang="ts">
 	/**
-	 * iOS-style bottom sheet. Drag the grabber/header down to dismiss.
+	 * iOS-style bottom sheet (iPhone) / centred form sheet (iPad). Drag the grabber/header down
+	 * to dismiss.
 	 * The page behind is locked while the sheet is open (no rubber-band scrolling glitches).
 	 */
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, untrack, type Snippet } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 
@@ -55,13 +56,18 @@
 	const me = Symbol('sheet');
 	$effect(() => {
 		if (open) {
-			stack.push(me);
-			return () => {
-				const i = stack.lastIndexOf(me);
-				if (i >= 0) stack.splice(i, 1);
-			};
+			// untracked: this effect must depend on `open` only, not on the (reactive) stack
+			untrack(() => stack.push(me));
+			return () =>
+				untrack(() => {
+					const i = stack.lastIndexOf(me);
+					if (i >= 0) stack.splice(i, 1);
+				});
 		}
 	});
+
+	// another sheet is stacked on top of this one (iPad recesses it, like iPadOS)
+	const behind = $derived(open && stack.length > 0 && stack[stack.length - 1] !== me);
 
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape' && open && stack[stack.length - 1] === me) {
@@ -112,11 +118,12 @@
 		class="sheet"
 		class:full={height === 'full'}
 		class:dragging
+		class:behind
 		role="dialog"
 		aria-modal="true"
 		aria-label={label}
 		bind:this={sheetEl}
-		style:transform={dragY ? `translateY(${dragY}px)` : undefined}
+		style:--drag-y={dragY ? `${dragY}px` : undefined}
 		transition:fly={{ y: 600, duration: 320, easing: cubicOut, opacity: 1 }}
 	>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -159,6 +166,7 @@
 		box-shadow: var(--shadow);
 		display: flex;
 		flex-direction: column;
+		transform: translateY(var(--drag-y, 0px));
 		transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
 		max-width: 720px;
 		margin: 0 auto;
@@ -166,6 +174,31 @@
 	}
 	.sheet.full {
 		height: calc(100dvh - var(--safe-top) - 12px);
+	}
+	/* iPad (both orientations): centred form sheet like UIModalPresentationFormSheet */
+	@media (min-width: 640px) and (min-height: 560px) {
+		.sheet {
+			top: 50%;
+			bottom: auto;
+			left: 50%;
+			right: auto;
+			width: min(620px, calc(100vw - 48px));
+			max-width: none;
+			max-height: min(calc(100dvh - var(--safe-top) - var(--safe-bottom) - 48px), 900px);
+			margin: 0;
+			border-radius: var(--sheet-radius);
+			transform: translate(-50%, calc(-50% + var(--drag-y, 0px)));
+		}
+		.sheet.full {
+			height: min(calc(100dvh - var(--safe-top) - var(--safe-bottom) - 48px), 860px);
+		}
+		.content {
+			padding-bottom: 20px;
+		}
+		.sheet.behind {
+			transform: translate(-50%, calc(-50% - 14px)) scale(0.94);
+			filter: brightness(0.92);
+		}
 	}
 	.sheet.dragging {
 		transition: none;

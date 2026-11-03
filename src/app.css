@@ -45,6 +45,39 @@
 	--safe-right: env(safe-area-inset-right, 0px);
 	--tabbar-h: 50px;
 	--gutter: 16px;
+	/* width of the iPad landscape sidebar (0 elsewhere) */
+	--nav-w: 0px;
+	--page-max: 720px;
+}
+
+/*
+ * iPad layouts. Breakpoints (keep in sync with src/lib/stores/viewport.svelte.ts):
+ *   tablet = (min-width: 640px) and (min-height: 560px)        → iPad portrait (and up)
+ *   wide   = tablet and (min-width: 900px) and landscape      → iPad landscape
+ * The min-height keeps iPhones in landscape (≤ 932 × 430) on the phone layout.
+ */
+@media (min-width: 640px) and (min-height: 560px) {
+	:root {
+		--gutter: 28px;
+		--page-max: 860px;
+	}
+	/* floating tab bar: 56 px pill + 14 px gap below it */
+	:root:has(.tabbar) {
+		--tabbar-h: 70px;
+	}
+}
+@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	:root {
+		--page-max: 980px;
+	}
+	:root:has(.tabbar) {
+		--tabbar-h: 0px;
+		--nav-w: calc(220px + var(--safe-left));
+	}
+	/* sidebar takes the left edge (incl. safe area) */
+	.app-shell.with-nav {
+		padding-left: var(--nav-w);
+	}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -155,8 +188,14 @@ a {
 .page {
 	padding: calc(var(--safe-top) + 8px) calc(var(--gutter) + var(--safe-right))
 		calc(var(--tabbar-h) + var(--safe-bottom) + 96px) calc(var(--gutter) + var(--safe-left));
-	max-width: 720px;
+	max-width: var(--page-max);
 	margin: 0 auto;
+}
+@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+	.with-nav .page {
+		padding-left: var(--gutter);
+		padding-bottom: 64px;
+	}
 }
 
 .large-title {

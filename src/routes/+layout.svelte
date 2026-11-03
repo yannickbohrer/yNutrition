@@ -44,7 +44,9 @@
 
 <input class="focus-proxy" id="focus-proxy" aria-hidden="true" tabindex="-1" />
 
-{@render children()}
+<div class="app-shell" class:with-nav={!bare}>
+	{@render children()}
+</div>
 
 {#if !bare}
 	<TabBar />

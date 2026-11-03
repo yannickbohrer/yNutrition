@@ -23,7 +23,7 @@
 <style>
 	.toasts {
 		position: fixed;
-		left: 0;
+		left: var(--nav-w);
 		right: 0;
 		bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 84px);
 		z-index: 200;
@@ -62,6 +62,12 @@
 		min-height: 36px;
 		padding: 0 10px;
 		border-radius: 14px;
+	}
+	/* iPad landscape: no FAB, no tab bar at the bottom */
+	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape) {
+		.toasts {
+			bottom: calc(var(--safe-bottom) + 28px);
+		}
 	}
 	@media (prefers-color-scheme: dark) {
 		.toast {
