@@ -17,7 +17,11 @@ const env = {
 };
 
 // iPhone viewport/touch emulation, but on Chromium (needed for the CDP virtual authenticator)
-const iphone = { ...devices['iPhone 14'], browserName: 'chromium' as const, defaultBrowserType: 'chromium' as const };
+const iphone = {
+	...devices['iPhone 14'],
+	browserName: 'chromium' as const,
+	defaultBrowserType: 'chromium' as const
+};
 
 export default defineConfig({
 	testDir: 'e2e',
@@ -33,7 +37,9 @@ export default defineConfig({
 		locale: 'de-CH',
 		timezoneId: 'Europe/Zurich',
 		trace: 'retain-on-failure',
-		launchOptions: { args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] }
+		launchOptions: {
+			args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
+		}
 	},
 	projects: [
 		{ name: 'setup', testMatch: /auth\.setup\.e2e\.ts/, use: iphone },

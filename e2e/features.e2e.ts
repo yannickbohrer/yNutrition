@@ -82,7 +82,7 @@ test('favorites appear before typing', async ({ page }) => {
 	await page.reload();
 	await page.getByTestId('fab-add').click();
 	await expect(page.getByTestId('favorites-list')).toContainText('Ruchbrot');
-	await expect(page.getByTestId('recent-list')).toContainText('Banane, roh');
+	await expect(page.locator('.add-panel')).toContainText('Banane, roh');
 	// last used amount becomes the default
 	await page.getByTestId('favorites-list').getByTestId('food-row').first().click();
 	await expect(page.getByTestId('amount-display')).toContainText('40');

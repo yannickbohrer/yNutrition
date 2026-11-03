@@ -15,10 +15,7 @@
 	let { data }: PageProps = $props();
 	const food = $derived(data.food);
 	let editing = $state(false);
-	let favorite = $state(false);
-	$effect(() => {
-		favorite = data.food.favorite;
-	});
+	let favorite = $derived(data.food.favorite);
 
 	async function toggleFav() {
 		favorite = !favorite;
@@ -99,10 +96,11 @@
 				class="btn secondary fav"
 				onclick={toggleFav}
 				aria-pressed={favorite}
+				aria-label={favorite ? t('food.unfavorite') : t('food.favorite')}
 				data-testid="food-favorite"
 			>
 				<Icon name="star" fill={favorite} size={20} />
-				{favorite ? t('food.unfavorite') : t('food.favorite')}
+				{t('a11y.favorite')}
 			</button>
 		</div>
 
@@ -167,6 +165,10 @@
 	}
 	.actions .btn {
 		flex: 1;
+	}
+	.actions .fav {
+		flex: none;
+		width: auto;
 	}
 	.fav[aria-pressed='true'] {
 		color: #c79a00;

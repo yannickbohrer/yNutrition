@@ -17,12 +17,9 @@
 
 	let { data }: PageProps = $props();
 
-	// svelte-ignore state_referenced_locally
-	let day = $state<DaySummary>(data.day);
+	// writable derived: follows navigation, can be overwritten by local refreshes
+	let day = $derived<DaySummary>(data.day);
 	let showAll = $state(false);
-	$effect(() => {
-		day = data.day;
-	});
 
 	// refresh when log data changes elsewhere (add sheet, picker)
 	let seenVersion = dataVersion.v;

@@ -46,6 +46,8 @@
 	});
 
 	function toggle(id: number) {
+		// selections are replaced immutably, so a plain Set is fine
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const s = new Set(selected);
 		if (s.has(id)) s.delete(id);
 		else s.add(id);
@@ -53,6 +55,8 @@
 	}
 	function toggleGroup(entries: EntryDTO[]) {
 		const all = entries.every((e) => selected.has(e.id));
+		// selections are replaced immutably, so a plain Set is fine
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const s = new Set(selected);
 		for (const e of entries) {
 			if (all) s.delete(e.id);

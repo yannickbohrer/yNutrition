@@ -112,7 +112,6 @@
 	aria-label={t('scan.title')}
 	data-testid="scanner"
 >
-	<!-- svelte-ignore a11y_media_has_caption -->
 	<video bind:this={video} playsinline muted autoplay></video>
 	<div class="overlay">
 		<div class="top">

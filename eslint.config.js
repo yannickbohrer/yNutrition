@@ -36,6 +36,10 @@ export default defineConfig(
 	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// The app is always served at the domain root (no `paths.base`), so wrapping every
+			// link in resolve() adds noise without benefit.
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );

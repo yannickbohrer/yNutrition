@@ -13,7 +13,7 @@
 	import { api } from '#lib/api.ts';
 	import { scaleNutrients, KJ_PER_KCAL } from '#lib/nutrition.ts';
 	import { accelerate, parseAmount, sliderMax } from '#lib/slider.ts';
-	import { fmt, fmtAmount, t } from '#lib/i18n/index.svelte.ts';
+	import { fmt, t } from '#lib/i18n/index.svelte.ts';
 	import { nowTimeLocal } from '#lib/dates.ts';
 	import type { Portion } from '#lib/types.ts';
 
@@ -265,7 +265,9 @@
 						data-testid="preset-chip"
 					>
 						<span class="chip-label">{p.label}</span>
-						<span class="chip-amt tabular">{fmt(p.amount, 1)} {unit}</span>
+						{#if p.kind !== 'default' || !p.label.includes(String(p.amount))}
+							<span class="chip-amt tabular">{fmt(p.amount, 1)} {unit}</span>
+						{/if}
 					</button>
 				{/each}
 			</div>
@@ -280,7 +282,7 @@
 						<div class="macro">
 							<span class="dot" style:background={color}></span>
 							<span class="m-val tabular"
-								>{scaled[k] === undefined ? '–' : fmtAmount(scaled[k])} g</span
+								>{scaled[k] === undefined ? '–' : fmt(scaled[k]!, scaled[k]! >= 100 ? 0 : 1)} g</span
 							>
 							<span class="m-label">{t(label)}</span>
 						</div>
@@ -477,6 +479,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
+		justify-content: center;
 		gap: 1px;
 		min-height: 48px;
 		padding: 6px 12px;

@@ -129,6 +129,15 @@
 		return online.results.filter((f) => !seen.has(f.id));
 	});
 	const usdaHint = $derived(app.usdaEnabled ? ' & USDA' : '');
+	// avoid listing the same food in several suggestion sections
+	const frequentList = $derived.by(() => {
+		const fav = new Set(suggestions?.favorites.map((f) => f.id));
+		return (suggestions?.frequent ?? []).filter((f) => !fav.has(f.id)).slice(0, 5);
+	});
+	const recentList = $derived.by(() => {
+		const seen = new Set([...(suggestions?.favorites ?? []), ...frequentList].map((f) => f.id));
+		return (suggestions?.recent ?? []).filter((f) => !seen.has(f.id));
+	});
 </script>
 
 <div class="add-panel">
@@ -210,16 +219,16 @@
 					{#each suggestions.favorites as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
 			{/if}
-			{#if suggestions.frequent.length}
+			{#if frequentList.length}
 				<h3 class="section-header">{t('add.frequent')}</h3>
 				<div class="group">
-					{#each suggestions.frequent.slice(0, 5) as f (f.id)}<FoodRow food={f} {onselect} />{/each}
+					{#each frequentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
 			{/if}
-			{#if suggestions.recent.length}
+			{#if recentList.length}
 				<h3 class="section-header">{t('add.recent')}</h3>
 				<div class="group" data-testid="recent-list">
-					{#each suggestions.recent as f (f.id)}<FoodRow food={f} {onselect} />{/each}
+					{#each recentList as f (f.id)}<FoodRow food={f} {onselect} />{/each}
 				</div>
 			{/if}
 		{:else if suggestions}
@@ -312,6 +321,7 @@
 	}
 	.search-field {
 		flex: 1;
+		min-width: 0;
 		display: flex;
 		align-items: center;
 		gap: 6px;

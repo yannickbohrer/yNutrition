@@ -36,6 +36,8 @@ export function locale(lang: Lang = i18n.lang): string {
 	return lang === 'de' ? 'de-CH' : 'en-CH';
 }
 
+// plain (non-reactive) memo cache — intentionally not a SvelteMap
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
 const nfCache = new Map<string, Intl.NumberFormat>();
 export function fmt(n: number | null | undefined, decimals = 0, lang: Lang = i18n.lang): string {
 	if (n === null || n === undefined || !Number.isFinite(n)) return '–';
@@ -63,9 +65,10 @@ export function fmtDate(
 	opts: Intl.DateTimeFormatOptions,
 	lang: Lang = i18n.lang
 ): string {
-	return new Intl.DateTimeFormat(locale(lang), { timeZone: 'UTC', ...opts }).format(
-		new Date(date + 'T00:00:00Z')
-	);
+	// throwaway Date value (not state)
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	const d = new Date(date + 'T00:00:00Z');
+	return new Intl.DateTimeFormat(locale(lang), { timeZone: 'UTC', ...opts }).format(d);
 }
 
 export { de, en };

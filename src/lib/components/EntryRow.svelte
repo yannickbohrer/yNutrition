@@ -82,7 +82,11 @@
 </script>
 
 <li class="entry" bind:clientWidth={width} data-testid="entry-row">
-	<div class="actions" aria-hidden={x === 0}>
+	<div
+		class="actions"
+		aria-hidden={x === 0}
+		style:visibility={x === 0 && !tracking ? 'hidden' : undefined}
+	>
 		{#if oncopy}
 			<button
 				class="act copy"
