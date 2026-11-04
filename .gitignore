@@ -31,6 +31,9 @@ data/*.db
 data/*.db-*
 data/swissfcd.json
 data/swissfcd/
+
+# generated before each build
+static/third-party-licenses.txt
 backups/
 local.db*
 

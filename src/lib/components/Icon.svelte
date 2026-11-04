@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	// Minimal stroke icon set (24×24), SF-Symbols-like.
+	// Minimal stroke icon set (24×24), drawn for this project.
 	const PATHS = {
 		today: 'M4 5.5h16v14H4zM4 9.5h16M8 3v4M16 3v4M8 13h3v3H8z',
 		plus: 'M12 5v14M5 12h14',

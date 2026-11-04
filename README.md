@@ -146,3 +146,9 @@ Key design points:
 
 The project's code license does not cover this data: see [DATA_NOTICE.md](DATA_NOTICE.md).
 Credits are shown in the app under _Einstellungen → Über & Quellen_. Details: [DECISIONS.md](DECISIONS.md).
+
+## License
+
+The source code is under the [MIT License](LICENSE). Food data, test fixtures and the data shown in
+screenshots are not: see [DATA_NOTICE.md](DATA_NOTICE.md). Each build generates the license texts
+of the bundled third-party software, which the app links to under _Über & Quellen_.

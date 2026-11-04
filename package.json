@@ -1,10 +1,12 @@
 {
 	"name": "ynutrition",
 	"private": true,
+	"license": "MIT",
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"prebuild": "node scripts/dev/third-party-notices.mjs",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",

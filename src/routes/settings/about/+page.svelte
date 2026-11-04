@@ -45,6 +45,9 @@
 		<section>
 			<h3>{t('about.software')}</h3>
 			<p>{t('about.softwareText')}</p>
+			<a href="/third-party-licenses.txt" target="_blank" rel="noopener"
+				>{t('about.thirdPartyLicenses')}</a
+			>
 		</section>
 	</div>
 	<p class="section-footer">{t('about.disclaimer')}</p>

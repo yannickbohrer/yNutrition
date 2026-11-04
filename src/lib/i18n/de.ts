@@ -409,6 +409,7 @@ export const de = {
 			'Persönlicher Kalorien- und Nährwerttracker. Selbst gehostet, keine Werbung, kein Tracking.',
 		sources: 'Datenquellen',
 		swissfcd: 'Schweizer Nährwertdatenbank',
+		thirdPartyLicenses: 'Lizenzen von Drittanbietern',
 		swissfcdText:
 			'Quelle: Schweizer Nährwertdatenbank, Bundesamt für Lebensmittelsicherheit und Veterinärwesen BLV (naehrwertdaten.ch). Version {version}. Werte für diese App aufbereitet: Spuren und Werte unter der Nachweisgrenze zählen als 0.',
 		off: 'Open Food Facts',

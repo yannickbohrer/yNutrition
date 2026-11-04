@@ -403,6 +403,7 @@ export const en: Messages = {
 		description: 'Personal calorie and nutrition tracker. Self-hosted, no ads, no tracking.',
 		sources: 'Data sources',
 		swissfcd: 'Swiss Food Composition Database',
+		thirdPartyLicenses: 'Third-party licenses',
 		swissfcdText:
 			'Source: Swiss Food Composition Database, Federal Food Safety and Veterinary Office FSVO (naehrwertdaten.ch). Version {version}. Values are converted for this app: trace amounts and values below the detection limit count as 0.',
 		off: 'Open Food Facts',
