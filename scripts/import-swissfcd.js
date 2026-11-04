@@ -11,7 +11,12 @@
  *
  * The XLSX files are parsed at build time (exceljs is a dev dependency); the runtime image only
  * needs the normalized JSON.
+ *
+ * The XLSX files are not part of this repository (see DATA_NOTICE.md). Missing files are downloaded
+ * from the FSVO and checked against the pinned SHA-256. SWISSFCD_URL_DE / SWISSFCD_URL_EN replace
+ * a download URL, for example after the FSVO publishes a new version; the pin is skipped for those.
  */
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, getSetting, loadDotEnv, openAndMigrate, setSetting } from './lib/db.js';
@@ -22,23 +27,61 @@ const XLSX_DE = path.join(DIR, 'Schweizer_Nahrwertdatenbank.xlsx');
 const XLSX_EN = path.join(DIR, 'Swiss_food_composition_database.xlsx');
 const JSON_OUT = path.join(ROOT, 'data', 'swissfcd.json');
 const ALIASES = path.join(ROOT, 'data', 'search-aliases.json');
-const DOWNLOADS = {
-	[XLSX_DE]:
-		'https://naehrwertdaten.ch/wp-content/uploads/2026/07/Schweizer_Nahrwertdatenbank.xlsx',
-	[XLSX_EN]:
-		'https://naehrwertdaten.ch/wp-content/uploads/2026/07/Swiss_food_composition_database.xlsx'
-};
+const DOWNLOADS_PAGE = 'https://naehrwertdaten.ch/en/downloads/';
+const DOWNLOADS = [
+	{
+		file: XLSX_DE,
+		envVar: 'SWISSFCD_URL_DE',
+		url: 'https://naehrwertdaten.ch/wp-content/uploads/2026/07/Schweizer_Nahrwertdatenbank.xlsx',
+		sha256: 'f4bb854944ef811f9b8463984389f8121e73278c4fd24fc3e8d16336cb711270'
+	},
+	{
+		file: XLSX_EN,
+		envVar: 'SWISSFCD_URL_EN',
+		url: 'https://naehrwertdaten.ch/wp-content/uploads/2026/07/Swiss_food_composition_database.xlsx',
+		sha256: '323bae2eecd639d2c3b3bf3797d30b1426ccb0253fb62810f522778b38089196'
+	}
+];
 
 const args = new Set(process.argv.slice(2));
 const log = (/** @type {string} */ m) => console.log(`[swissfcd] ${m}`);
 
-async function download() {
+/** @param {typeof DOWNLOADS[number]} item */
+async function downloadFile({ file, envVar, url: pinnedUrl, sha256 }) {
+	const url = process.env[envVar] || pinnedUrl;
+	const hint = `Check ${DOWNLOADS_PAGE} and set ${envVar} to the current file URL.`;
+	log(`downloading ${url}`);
+	/** @type {Buffer} */
+	let body;
+	try {
+		const res = await fetch(url, {
+			headers: { 'User-Agent': 'yNutrition/1.0 (dataset import)' },
+			signal: AbortSignal.timeout(120_000)
+		});
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		body = Buffer.from(await res.arrayBuffer());
+	} catch (e) {
+		throw new Error(`download failed for ${url}: ${e instanceof Error ? e.message : e}. ${hint}`, {
+			cause: e
+		});
+	}
+	if (url === pinnedUrl) {
+		const actual = createHash('sha256').update(body).digest('hex');
+		if (actual !== sha256) {
+			throw new Error(`checksum mismatch for ${url}: got ${actual}. ${hint}`);
+		}
+	}
+	// write next to the target, then rename: a failed run never leaves a partial XLSX behind
+	const tmp = `${file}.download`;
+	fs.writeFileSync(tmp, body);
+	fs.renameSync(tmp, file);
+}
+
+/** @param {boolean} refresh also replace files that already exist */
+async function download(refresh) {
 	fs.mkdirSync(DIR, { recursive: true });
-	for (const [file, url] of Object.entries(DOWNLOADS)) {
-		log(`downloading ${url}`);
-		const res = await fetch(url, { headers: { 'User-Agent': 'Nutrition/1.0 (dataset import)' } });
-		if (!res.ok) throw new Error(`download failed: ${res.status} ${url}`);
-		fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+	for (const item of DOWNLOADS) {
+		if (refresh || !fs.existsSync(item.file)) await downloadFile(item);
 	}
 }
 
@@ -75,9 +118,7 @@ async function readWorkbook(file) {
 }
 
 async function convert() {
-	if (!fs.existsSync(XLSX_DE) || !fs.existsSync(XLSX_EN)) {
-		throw new Error(`XLSX files missing in ${DIR}; run with --download`);
-	}
+	await download(false);
 	log('parsing XLSX (de + en)…');
 	const [de, en] = await Promise.all([readWorkbook(XLSX_DE), readWorkbook(XLSX_EN)]);
 	const foods = [];
@@ -160,7 +201,7 @@ function load(data) {
 
 async function main() {
 	loadDotEnv();
-	if (args.has('--download')) await download();
+	if (args.has('--download')) await download(true);
 	const onlyLoad = args.has('--load');
 	const onlyConvert = args.has('--convert');
 	let data;
@@ -169,7 +210,7 @@ async function main() {
 			args.has('--download') ||
 			onlyConvert ||
 			!fs.existsSync(JSON_OUT) ||
-			fs.statSync(XLSX_EN).mtimeMs > fs.statSync(JSON_OUT).mtimeMs;
+			(fs.existsSync(XLSX_EN) && fs.statSync(XLSX_EN).mtimeMs > fs.statSync(JSON_OUT).mtimeMs);
 		if (needs) data = await convert();
 	}
 	if (onlyConvert) return;

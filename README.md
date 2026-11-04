@@ -56,7 +56,7 @@ known arborist bug with this dependency tree.
 npx npm@11 install
 cp .env.example .env          # then set ORIGIN=http://localhost:5173, RP_ID=localhost,
                               # SETUP_TOKEN=dev-setup-token, DATABASE_PATH=data/nutrition.db
-npm run import:swissfcd       # XLSX → data/swissfcd.json → SQLite (idempotent)
+npm run import:swissfcd       # download XLSX → data/swissfcd.json → SQLite (idempotent)
 npm run dev                   # http://localhost:5173
 ```
 
@@ -65,20 +65,20 @@ allow WebAuthn on `localhost` without HTTPS.
 
 ### Scripts
 
-| Script                            | Purpose                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
-| `npm run dev`                     | Vite dev server                                                                         |
-| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                            |
-| `npm run check`                   | `svelte-check` (TypeScript)                                                             |
-| `npm run lint` / `npm run format` | Prettier + ESLint                                                                       |
-| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)            |
-| `npm run test:e2e`                | Playwright E2E on emulated iPhone, iPad, laptop and ultrawide, Chromium + WebAuthn      |
-| `npm run screenshots`             | Capture the main screens on every device class, light and dark, into `docs/screenshots` |
-| `npm run import:swissfcd`         | Import the Swiss food DB (`--download` refreshes the official XLSX files)               |
-| `npm run recovery`                | Print a one-time passkey registration link                                              |
-| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                            |
-| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                       |
-| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                           |
+| Script                            | Purpose                                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| `npm run dev`                     | Vite dev server                                                                          |
+| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                             |
+| `npm run check`                   | `svelte-check` (TypeScript)                                                              |
+| `npm run lint` / `npm run format` | Prettier + ESLint                                                                        |
+| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)             |
+| `npm run test:e2e`                | Playwright E2E on emulated iPhone, iPad, laptop and ultrawide, Chromium + WebAuthn       |
+| `npm run screenshots`             | Capture the main screens on every device class, light and dark, into `docs/screenshots`  |
+| `npm run import:swissfcd`         | Import the Swiss food DB, downloading the XLSX files if missing (`--download` refreshes) |
+| `npm run recovery`                | Print a one-time passkey registration link                                               |
+| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |
+| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                        |
+| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                            |
 
 ## Deployment
 
@@ -86,7 +86,7 @@ The app ships as a Docker image. On any Docker host:
 
 ```sh
 cp .env.example .env          # set ORIGIN, RP_ID and SESSION_SECRET
-docker compose up -d --build
+docker compose up -d --build  # downloads the Swiss food data from the FSVO during the build
 ```
 
 Passkeys need HTTPS, so put the container behind a TLS-terminating reverse proxy that forwards
@@ -136,11 +136,13 @@ Key design points:
 
 - **Swiss Food Composition Database**, Federal Food Safety and Veterinary Office (FSVO/BLV),
   [naehrwertdaten.ch](https://naehrwertdaten.ch). Free use, including in apps, with source
-  credited.
+  credited. The files are not in this repository: they are downloaded from the FSVO at import
+  or build time.
 - **Open Food Facts**: [ODbL](https://opendatacommons.org/licenses/odbl/1-0/), individual
   contents under DbCL. The app follows the
   [API rules](https://openfoodfacts.github.io/openfoodfacts-server/api/): custom User-Agent,
   stays under the rate limits, no search-as-you-type, and caches results.
 - **USDA FoodData Central**: public domain (CC0). Cited as source.
 
+The project's code license does not cover this data: see [DATA_NOTICE.md](DATA_NOTICE.md).
 Credits are shown in the app under _Einstellungen → Über & Quellen_. Details: [DECISIONS.md](DECISIONS.md).

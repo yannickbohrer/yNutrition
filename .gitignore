@@ -30,6 +30,7 @@ test-results
 data/*.db
 data/*.db-*
 data/swissfcd.json
+data/swissfcd/
 backups/
 local.db*
 

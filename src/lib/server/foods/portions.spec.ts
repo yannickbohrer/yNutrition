@@ -75,8 +75,7 @@ describe('portion presets seed file', () => {
 		expect(matchSeedRule(null, 'Bananas, raw')?.id).toBe('banana');
 	});
 
-	it('every generic Swiss food gets a preset', () => {
-		if (!fs.existsSync('data/swissfcd.json')) return expect(true).toBe(true);
+	it.skipIf(!fs.existsSync('data/swissfcd.json'))('every generic Swiss food gets a preset', () => {
 		const data = JSON.parse(fs.readFileSync('data/swissfcd.json', 'utf8')) as {
 			foods: { sourceId: string; nameDe: string; nameEn: string }[];
 		};

@@ -27,8 +27,12 @@ Decisions made during implementation, especially where the brief left room or re
 - **Nutrients as JSON per 100 g/ml** (`foods.nutrients`). Missing key = unknown (never 0).
   Aggregates report the per-key missing count, recipes carry a `partial` list, and the UI
   shows `≥` / "unvollständig" hints.
-- **Swiss Food Composition DB v7.1**: the official German and English XLSX files are committed
-  (≈2 MB) and joined by ID. Value mapping: `n.d.`/`k.A.` → unknown, `Sp.`/`tr.` (traces) → 0,
+- **Swiss Food Composition DB v7.1**: the official German and English XLSX files are joined by ID.
+  They are not committed: the FSVO's terms allow use in apps with attribution, but its legal page
+  requires written permission to reproduce material and the data cites third-party tables, so
+  they are downloaded from the FSVO on import and checked against pinned SHA-256 hashes
+  (`SWISSFCD_URL_DE`/`_EN` override the URLs). For the same reason, don't publish prebuilt
+  images, which contain the converted data, without the FSVO's agreement. Value mapping: `n.d.`/`k.A.` → unknown, `Sp.`/`tr.` (traces) → 0,
   `<x` (below detection limit) → 0. Generic and branded sheets are imported (1'246 foods).
   XLSX → JSON conversion runs at Docker build time (exceljs stays a dev dependency), and
   JSON → SQLite at container start, idempotent by dataset version.

@@ -410,7 +410,7 @@ export const de = {
 		sources: 'Datenquellen',
 		swissfcd: 'Schweizer Nährwertdatenbank',
 		swissfcdText:
-			'Quelle: Schweizer Nährwertdatenbank, Bundesamt für Lebensmittelsicherheit und Veterinärwesen BLV (naehrwertdaten.ch). Version {version}.',
+			'Quelle: Schweizer Nährwertdatenbank, Bundesamt für Lebensmittelsicherheit und Veterinärwesen BLV (naehrwertdaten.ch). Version {version}. Werte für diese App aufbereitet: Spuren und Werte unter der Nachweisgrenze zählen als 0.',
 		off: 'Open Food Facts',
 		offText:
 			'Produktdaten von Open Food Facts (openfoodfacts.org), verfügbar unter der Open Database License (ODbL); einzelne Inhalte unter der Database Contents License. Jedes Produkt verlinkt auf seine Seite bei Open Food Facts.',

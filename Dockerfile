@@ -12,7 +12,11 @@ WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --no-fund --no-audit
 COPY . .
-# build the app and convert the official Swiss food DB (XLSX → JSON) at build time
+# optional replacements for the dataset URLs (see scripts/import-swissfcd.js)
+ARG SWISSFCD_URL_DE
+ARG SWISSFCD_URL_EN
+# build the app and convert the official Swiss food DB (XLSX → JSON) at build time; the XLSX
+# files are downloaded from the FSVO unless they are already in data/swissfcd/
 RUN npm run build \
 	&& node scripts/import-swissfcd.js --convert \
 	&& npm prune --omit=dev --no-fund --no-audit

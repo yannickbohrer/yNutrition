@@ -404,7 +404,7 @@ export const en: Messages = {
 		sources: 'Data sources',
 		swissfcd: 'Swiss Food Composition Database',
 		swissfcdText:
-			'Source: Swiss Food Composition Database, Federal Food Safety and Veterinary Office FSVO (naehrwertdaten.ch). Version {version}.',
+			'Source: Swiss Food Composition Database, Federal Food Safety and Veterinary Office FSVO (naehrwertdaten.ch). Version {version}. Values are converted for this app: trace amounts and values below the detection limit count as 0.',
 		off: 'Open Food Facts',
 		offText:
 			'Product data from Open Food Facts (openfoodfacts.org), available under the Open Database License (ODbL); individual contents under the Database Contents License. Each product links to its Open Food Facts page.',

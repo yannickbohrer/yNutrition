@@ -118,7 +118,7 @@ export default defineConfig({
 		},
 		{
 			command:
-				'rm -rf e2e/.tmp && mkdir -p e2e/.tmp && node scripts/import-swissfcd.js --load && node build/index.js',
+				'rm -rf e2e/.tmp && mkdir -p e2e/.tmp && node scripts/import-swissfcd.js && node build/index.js',
 			url: `http://localhost:${PORT}/api/health`,
 			reuseExistingServer: false,
 			env,
