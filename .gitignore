@@ -39,5 +39,17 @@ playwright-report/
 e2e/.tmp/
 e2e/.tmp/
 
-# local deploy config (server address)
+# private setup: deploy script, server config, notes (local only, never published)
+/private/
 deploy.env
+deploy.env.*
+
+# keys and credentials
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+secrets/

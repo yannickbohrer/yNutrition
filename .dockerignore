@@ -5,6 +5,9 @@ build
 .env
 .env.*
 !.env.example
+private
+deploy.env
+deploy.env.*
 data/*.db
 data/*.db-*
 data/swissfcd.json

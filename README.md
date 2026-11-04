@@ -82,9 +82,17 @@ allow WebAuthn on `localhost` without HTTPS.
 
 ## Deployment
 
-`./deploy.sh` does the whole deployment to a Debian/Ubuntu VM: it installs Docker, uploads the
-project, creates the secrets, builds and starts the container and prints the setup link.
-See **[DEPLOYMENT.md](DEPLOYMENT.md)**, including the reverse proxy and Let's Encrypt setup.
+The app ships as a Docker image. On any Docker host:
+
+```sh
+cp .env.example .env          # set ORIGIN, RP_ID and SESSION_SECRET
+docker compose up -d --build
+```
+
+Passkeys need HTTPS, so put the container behind a TLS-terminating reverse proxy that forwards
+`X-Forwarded-For` and `X-Forwarded-Proto`. `ORIGIN` and `RP_ID` must match the public URL. On first
+start, open `/setup?token=<SETUP_TOKEN>` to register a passkey. If `SETUP_TOKEN` is empty, a random
+one is printed to the container logs.
 
 ## Architecture
 
