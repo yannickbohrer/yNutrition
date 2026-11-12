@@ -209,4 +209,17 @@
 			margin-top: 6px;
 		}
 	}
+
+	/* ---------- ultra: food | nutrients in up to three columns ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.food-page {
+			--page-max: 2400px;
+		}
+		.food-cols {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+		}
+		.food-right {
+			container: nutrients / inline-size;
+		}
+	}
 </style>

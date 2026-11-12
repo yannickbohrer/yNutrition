@@ -592,4 +592,10 @@
 			margin-top: 14px;
 		}
 	}
+	/* ultrawide: the log stops growing (names drift away from their kcal); nutrients take the rest */
+	@media (min-width: 2560px) and (orientation: landscape) {
+		.day-page {
+			grid-template-columns: minmax(0, 960px) minmax(0, 1fr) 420px;
+		}
+	}
 </style>

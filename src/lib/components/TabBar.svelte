@@ -163,7 +163,7 @@
 		.tabbar {
 			top: 0;
 			bottom: 0;
-			left: var(--shell-inset);
+			left: 0;
 			transform: none;
 			width: var(--nav-w);
 			display: flex;
@@ -219,13 +219,6 @@
 			padding: 0 12px;
 			font-size: 16px;
 			white-space: nowrap;
-		}
-	}
-
-	/* centred shell: the sidebar no longer touches the screen edge */
-	@media (min-width: 2561px) and (orientation: landscape) {
-		.tabbar {
-			border-left: 0.5px solid var(--sep);
 		}
 	}
 

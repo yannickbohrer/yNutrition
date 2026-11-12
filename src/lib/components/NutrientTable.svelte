@@ -127,4 +127,9 @@
 			break-inside: avoid;
 		}
 	}
+	@container nutrients (min-width: 1300px) {
+		.nt {
+			columns: 3;
+		}
+	}
 </style>

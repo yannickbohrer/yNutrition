@@ -36,8 +36,8 @@ split-view settings.
 | ![](docs/screenshots/ipad-landscape-dark-04-insights.png) | ![](docs/screenshots/ipad-portrait-dark-04-insights.png) |
 
 **Laptop and monitor**: the iPad landscape layout, with two-column detail pages from 1400 px. From
-1800 px Today adds an all-nutrients pane and Insights uses three columns, and past 2560 px the
-whole app is centred.
+1800 px Today adds an all-nutrients pane, Insights uses three columns and the detail pages widen;
+on an ultrawide the app uses the full width.
 
 All screens, light and dark: [`docs/screenshots/`](docs/screenshots).
 

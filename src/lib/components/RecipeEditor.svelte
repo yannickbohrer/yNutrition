@@ -365,4 +365,11 @@
 			margin-top: 0;
 		}
 	}
+
+	/* ---------- ultra: wider ingredients and details ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.recipe-page {
+			--page-max: 2000px;
+		}
+	}
 </style>

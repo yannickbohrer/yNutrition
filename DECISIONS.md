@@ -151,9 +151,12 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   - _ultra_ = `min-width: 1800px`: Today gets a third pane (all nutrients), Insights three columns.
 - **Why 1400**: the largest iPad is 1376 CSS px wide (iPad Pro 13"), so no iPad can reach these
   tiers. Laptops below 1400 px simply get the iPad landscape layout.
-- **Centred shell past 2560 px**: without it, an ultrawide leaves the sidebar about 1000 px away
-  from the content. Sidebar and content are centred together via `--shell-inset`. Settings and
-  forms keep their width caps, because forms don't improve by getting wider.
+- **Full-width shell on ultrawides**: an earlier version centred the whole app past 2560 px, which
+  left empty bands on both sides and a detached-looking sidebar on a 3440 px monitor. The sidebar
+  now stays at the left edge; Today and Insights fill the width, and from 1800 px the detail pages
+  get larger caps (Add 2200, food 2400 with nutrients in three columns, recipe and weight 2000).
+  Past 2560 px Today's log stops at 960 px so names stay near their kcal. Settings and forms keep
+  their width caps, because forms don't improve by getting wider.
 - **`min-width: 1000px` clause on tablet and wide**: a 1280 × 720 laptop can drop below the 560 px
   height gate once browser chrome is counted, and got the phone UI. No phone is that wide (largest
   iPhone landscape: 956 px).

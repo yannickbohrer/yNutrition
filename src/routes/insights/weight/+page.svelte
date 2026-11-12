@@ -166,7 +166,7 @@
 						{#key list}<ChartCanvas
 								config={chartConfig}
 								label={t('weight.trend')}
-								height={viewport.desktop ? 320 : 200}
+								height={viewport.ultra ? 440 : viewport.desktop ? 320 : 200}
 							/>{/key}
 					</section>
 				{/if}
@@ -271,6 +271,13 @@
 		}
 		.w-history > .section-header:first-child {
 			margin-top: 0;
+		}
+	}
+
+	/* ---------- ultra: wider entry, trend and history ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.weight-page {
+			--page-max: 2000px;
 		}
 	}
 </style>

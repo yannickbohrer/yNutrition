@@ -19,6 +19,9 @@
 	let nutrient = $state<NutrientKey>('energy_kcal');
 	let bdPeriod = $state<'day' | 'range'>('range');
 	let bd = $state<Breakdown | null>(null);
+	let innerHeight = $state(0);
+	// ultra: the chart takes the window height left under the title, period bar and card chrome
+	const ultraChartHeight = $derived(Math.min(900, Math.max(480, innerHeight - 330)));
 
 	const range = $derived.by(() => {
 		if (mode === 'week') {
@@ -150,6 +153,7 @@
 </script>
 
 <svelte:head><title>{t('insights.title')} · Nutrition</title></svelte:head>
+<svelte:window bind:innerHeight />
 
 <main class="page insights-page">
 	<h1 class="large-title">{t('insights.title')}</h1>
@@ -198,7 +202,7 @@
 						config={chartConfig}
 						label={t('insights.kcalChart')}
 						height={viewport.ultra
-							? 480
+							? ultraChartHeight
 							: viewport.desktop
 								? 420
 								: viewport.wide
@@ -598,6 +602,18 @@
 		}
 		.a-macros > .section-header:first-child {
 			margin-top: 24px;
+		}
+	}
+
+	/* ---------- laptops and up: arrows next to the date, not at both ends of the page ---------- */
+	@media (min-width: 1400px) and (orientation: landscape) {
+		.period {
+			flex: none;
+			gap: 4px;
+		}
+		.period strong {
+			min-width: 220px;
+			text-align: center;
 		}
 	}
 

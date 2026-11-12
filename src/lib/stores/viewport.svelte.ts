@@ -4,7 +4,7 @@
  *  - tablet:  iPad portrait (≥ 640 px; Split View too) — wider floating bar, cards and grids
  *  - wide:    iPad landscape, small laptops (≥ 900 px, landscape) — sidebar, split views
  *  - desktop: laptops (≥ 1400 px, above every iPad) — two-column detail pages, taller charts
- *  - ultra:   monitors and ultrawide (≥ 1800 px) — third pane, centred app shell
+ *  - ultra:   monitors and ultrawide (≥ 1800 px) — third pane, full-width pages
  *
  * Layout itself is pure CSS; these flags only decide whether extra panes are *mounted*
  * (e.g. the inline add panel on Today), so phones don't pay for hidden UI.

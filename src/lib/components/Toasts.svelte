@@ -23,8 +23,8 @@
 <style>
 	.toasts {
 		position: fixed;
-		left: calc(var(--nav-w) + var(--shell-inset));
-		right: var(--shell-inset);
+		left: var(--nav-w);
+		right: 0;
 		bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 84px);
 		z-index: 200;
 		display: flex;

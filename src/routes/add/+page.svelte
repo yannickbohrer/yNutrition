@@ -37,4 +37,11 @@
 			align-items: start;
 		}
 	}
+
+	/* ---------- ultra: wider suggestion columns ---------- */
+	@media (min-width: 1800px) and (orientation: landscape) {
+		.add-page {
+			--page-max: 2200px;
+		}
+	}
 </style>

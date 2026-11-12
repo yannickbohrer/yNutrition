@@ -54,15 +54,14 @@ test('no route scrolls sideways, and the sidebar stays beside the content', asyn
 	}
 });
 
-test('the shell is capped and centred, with the sidebar next to the content', async ({ page }) => {
+test('the shell spans the full width, with the sidebar at the left edge', async ({ page }) => {
 	await page.goto(`/?date=${DAY}`);
 	const vw = page.viewportSize()!.width;
-	const inset = Math.max(0, (vw - 2560) / 2);
 	const nav = await box(page, 'nav.tabbar');
-	expect(Math.abs(nav.x - inset)).toBeLessThan(10); // scrollbar gutter tolerance
+	expect(nav.x).toBeLessThan(10); // scrollbar gutter tolerance
 	const main = await box(page, 'main');
 	expect(main.x - (nav.x + nav.width)).toBeLessThan(40);
-	expect(main.x + main.width).toBeLessThanOrEqual(vw - inset + 10);
+	expect(main.x + main.width).toBeGreaterThan(vw - 120);
 });
 
 test('today: panes follow the tier', async ({ page }) => {
