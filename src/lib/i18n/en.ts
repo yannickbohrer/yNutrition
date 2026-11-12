@@ -62,9 +62,11 @@ export const en: Messages = {
 		protein: 'Protein',
 		carbs: 'Carbs',
 		fat: 'Fat',
+		fiber: 'Fibre',
 		proteinShort: 'Protein',
 		carbsShort: 'Carbs',
-		fatShort: 'Fat'
+		fatShort: 'Fat',
+		fiberShort: 'Fibre'
 	},
 	nutrient: {
 		energy_kcal: 'Energy',
@@ -362,6 +364,7 @@ export const en: Messages = {
 		protein: 'Protein',
 		carbs: 'Carbohydrates',
 		fat: 'Fat',
+		fiber: 'Fibre (at least)',
 		macroCheck: 'Macros add up to {kcal}',
 		extra: 'More targets & limits',
 		extraHint: 'Optional: a minimum (goal) or maximum (limit) for other nutrients.',

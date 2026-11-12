@@ -315,7 +315,7 @@
 					<span class="kcal-unit">{energyUnit}</span>
 				</div>
 				<div class="macros">
-					{#each [['protein', 'var(--protein)', 'macros.proteinShort'], ['carbs', 'var(--carbs)', 'macros.carbsShort'], ['fat', 'var(--fat)', 'macros.fatShort']] as const as [k, color, label] (k)}
+					{#each [['protein', 'var(--protein)', 'macros.proteinShort'], ['carbs', 'var(--carbs)', 'macros.carbsShort'], ['fat', 'var(--fat)', 'macros.fatShort'], ['fiber', 'var(--fiber)', 'macros.fiberShort']] as const as [k, color, label] (k)}
 						<div class="macro">
 							<span class="dot" style:background={color}></span>
 							<span class="m-val tabular"
@@ -598,9 +598,15 @@
 	}
 	.macros {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		/* phone: 2 × 2, so "Ballaststoffe" fits; one row of four from tablet width */
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 8px;
 		margin-top: 12px;
+	}
+	@media (min-width: 640px) {
+		.macros {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
 	}
 	.macro {
 		display: grid;
@@ -622,6 +628,9 @@
 		font-size: 12px;
 		color: var(--label-2);
 		grid-column: 2;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.after {
 		margin: 12px 0 0;

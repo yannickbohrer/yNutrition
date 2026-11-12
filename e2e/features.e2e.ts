@@ -39,6 +39,12 @@ test('search → portion picker → log', async ({ page }) => {
 	const row = page.getByTestId('entry-row').filter({ hasText: 'Banane, roh' });
 	await expect(row).toContainText('150 g');
 	await expect(page.getByTestId('kcal-remaining')).not.toHaveText(/^2['’]000$/);
+
+	// fibre sits next to the macros, against its 30 g default goal
+	const fiber = page.getByTestId('macro-fiber');
+	await expect(fiber).toContainText('Ballaststoffe');
+	await expect(fiber).toContainText('/ 30 g');
+	await expect(fiber.locator('.m-val')).not.toHaveText(/^0 \//); // the banana counted
 });
 
 test('slider scale stays fixed while dragging and changes only through the scale control', async ({

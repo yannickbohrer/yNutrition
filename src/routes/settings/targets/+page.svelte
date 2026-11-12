@@ -13,6 +13,7 @@
 	let protein = $state(cur.protein);
 	let carbs = $state(cur.carbs);
 	let fat = $state(cur.fat);
+	let fiber = $state(cur.fiber);
 	let extra = $state<{ key: NutrientKey; min: number | null; max: number | null }[]>(
 		Object.entries(cur.extra).map(([k, v]) => ({
 			key: k as NutrientKey,
@@ -26,7 +27,7 @@
 	const available = $derived(
 		NUTRIENT_KEYS.filter(
 			(k) =>
-				!['energy_kcal', 'energy_kj', 'protein', 'carbs', 'fat'].includes(k) &&
+				!['energy_kcal', 'energy_kj', 'protein', 'carbs', 'fat', 'fiber'].includes(k) &&
 				!extra.some((e) => e.key === k)
 		)
 	);
@@ -42,7 +43,7 @@
 		for (const e of extra)
 			if (e.min || e.max) ex[e.key] = { min: e.min || null, max: e.max || null };
 		const s = await api.settings({
-			targets: { energy_kcal: kcal, protein, carbs, fat, extra: ex }
+			targets: { energy_kcal: kcal, protein, carbs, fat, fiber, extra: ex }
 		});
 		app.settings = s;
 		await invalidateAll();
@@ -94,6 +95,16 @@
 				inputmode="numeric"
 				min="0"
 				bind:value={fat}
+			/><span class="u">g</span>
+		</li>
+		<li class="row">
+			<label class="grow" for="t-fib">{t('targets.fiber')}</label><input
+				id="t-fib"
+				type="number"
+				inputmode="numeric"
+				min="0"
+				bind:value={fiber}
+				data-testid="target-fiber"
 			/><span class="u">g</span>
 		</li>
 	</ul>

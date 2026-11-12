@@ -66,9 +66,11 @@ export const de = {
 		protein: 'Protein',
 		carbs: 'Kohlenhydrate',
 		fat: 'Fett',
+		fiber: 'Ballaststoffe',
 		proteinShort: 'Protein',
 		carbsShort: 'KH',
-		fatShort: 'Fett'
+		fatShort: 'Fett',
+		fiberShort: 'Ballaststoffe'
 	},
 	nutrient: {
 		energy_kcal: 'Energie',
@@ -77,7 +79,7 @@ export const de = {
 		carbs: 'Kohlenhydrate',
 		sugars: 'davon Zucker',
 		starch: 'davon Stärke',
-		fiber: 'Nahrungsfasern',
+		fiber: 'Ballaststoffe',
 		fat: 'Fett',
 		sat_fat: 'davon gesättigte Fettsäuren',
 		mono_fat: 'davon einfach ungesättigte',
@@ -367,6 +369,7 @@ export const de = {
 		protein: 'Protein',
 		carbs: 'Kohlenhydrate',
 		fat: 'Fett',
+		fiber: 'Ballaststoffe (mindestens)',
 		macroCheck: 'Makros ergeben {kcal}',
 		extra: 'Weitere Ziele & Limiten',
 		extraHint: 'Optional: Mindestmenge (Ziel) oder Obergrenze (Limit) für weitere Nährstoffe.',

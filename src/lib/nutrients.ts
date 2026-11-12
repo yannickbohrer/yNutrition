@@ -117,6 +117,9 @@ export const NUTRIENTS: Record<NutrientKey, NutrientDef> = {
 
 export const MACRO_KEYS = ['protein', 'carbs', 'fat'] as const;
 export type MacroKey = (typeof MACRO_KEYS)[number];
+/** Highlighted next to energy (rings, picker preview, insights): the macros plus fibre. */
+export const HEADLINE_KEYS = [...MACRO_KEYS, 'fiber'] as const;
+export type HeadlineKey = (typeof HEADLINE_KEYS)[number];
 
 /** Nutrients shown in the "main" nutrition panel (EU label order). */
 export const LABEL_KEYS: NutrientKey[] = [

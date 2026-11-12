@@ -12,6 +12,7 @@ export interface InsightDay {
 	protein: number | null;
 	carbs: number | null;
 	fat: number | null;
+	fiber: number | null;
 	entries: number;
 	weight: number | null;
 }
@@ -20,9 +21,9 @@ export interface InsightsDTO {
 	from: string;
 	to: string;
 	days: InsightDay[];
-	targets: { kcal: number; protein: number; carbs: number; fat: number };
+	targets: { kcal: number; protein: number; carbs: number; fat: number; fiber: number };
 	/** averages over logged days only */
-	avg: { kcal: number; protein: number; carbs: number; fat: number };
+	avg: { kcal: number; protein: number; carbs: number; fat: number; fiber: number };
 	energyShares: { protein: number; carbs: number; fat: number };
 	loggedDays: number;
 	/** days within ±10 % of the kcal target, among logged days */
@@ -57,14 +58,21 @@ export function insights(from: string, to: string, db: DB = getDb()): InsightsDT
 			protein: v('protein'),
 			carbs: v('carbs'),
 			fat: v('fat'),
+			fiber: v('fiber'),
 			entries: list.length,
 			weight: wByDay.get(date) ?? null
 		};
 	});
 	const logged = days.filter((d) => d.entries > 0);
-	const avg = (k: 'kcal' | 'protein' | 'carbs' | 'fat') =>
+	const avg = (k: 'kcal' | 'protein' | 'carbs' | 'fat' | 'fiber') =>
 		logged.length ? r1(logged.reduce((sum, d) => sum + (d[k] ?? 0), 0) / logged.length) : 0;
-	const a = { kcal: avg('kcal'), protein: avg('protein'), carbs: avg('carbs'), fat: avg('fat') };
+	const a = {
+		kcal: avg('kcal'),
+		protein: avg('protein'),
+		carbs: avg('carbs'),
+		fat: avg('fat'),
+		fiber: avg('fiber')
+	};
 	let on = 0,
 		over = 0,
 		under = 0;
@@ -78,7 +86,13 @@ export function insights(from: string, to: string, db: DB = getDb()): InsightsDT
 		from,
 		to,
 		days,
-		targets: { kcal: t.energy_kcal, protein: t.protein, carbs: t.carbs, fat: t.fat },
+		targets: {
+			kcal: t.energy_kcal,
+			protein: t.protein,
+			carbs: t.carbs,
+			fat: t.fat,
+			fiber: t.fiber
+		},
 		avg: a,
 		energyShares: macroEnergyShares({ protein: a.protein, carbs: a.carbs, fat: a.fat }),
 		loggedDays: logged.length,

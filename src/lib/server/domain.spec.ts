@@ -13,7 +13,7 @@ import { getFoodDTO, setFavorite } from './foods/repo';
 import { addWeight, listWeights } from './weights';
 import { breakdown, insights } from './insights';
 import { entriesCsv, exportBackup, importBackup, weightsCsv } from './backup';
-import { updateUserSettings, getUserSettings } from './settings';
+import { updateUserSettings, getUserSettings, setSetting } from './settings';
 import { addDays, endOfMonth, startOfWeek, todayLocal } from '../dates';
 
 let db: DB;
@@ -182,7 +182,7 @@ describe('custom foods & recipes', () => {
 describe('insights', () => {
 	it('computes daily series, averages and adherence', () => {
 		updateUserSettings(
-			{ targets: { energy_kcal: 100, protein: 10, carbs: 10, fat: 10, extra: {} } },
+			{ targets: { energy_kcal: 100, protein: 10, carbs: 10, fat: 10, fiber: 25, extra: {} } },
 			db
 		);
 		addEntry({ foodId: bread, amount: 40, date: '2026-03-02', time: '08:00' }, 'de', db); // 96 kcal → on target
@@ -193,12 +193,41 @@ describe('insights', () => {
 		expect(i.days).toHaveLength(7);
 		expect(i.loggedDays).toBe(2);
 		expect(i.avg.kcal).toBe(168);
+		expect(i.targets.fiber).toBe(25);
+		expect(i.avg.fiber).toBe(0); // the bread fixture has no fibre value
 		expect(i.onTargetDays).toBe(1);
 		expect(i.overDays).toBe(1);
 		expect(i.days[0].weight).toBe(80);
 		expect(i.weightTrend.map((w) => w.value)).toEqual([80, 79.5]);
 		const b = breakdown('2026-03-01', '2026-03-31', 'energy_kcal', db);
 		expect(b.items[0]).toMatchObject({ label: 'Ruchbrot', share: 100 });
+	});
+});
+
+describe('targets', () => {
+	it('fibre is a main target, defaulting to 30 g', () => {
+		expect(getUserSettings(db).targets.fiber).toBe(30);
+		updateUserSettings({ targets: { ...getUserSettings(db).targets, fiber: 40 } }, db);
+		expect(getUserSettings(db).targets.fiber).toBe(40);
+	});
+	it('takes over an old extra fibre goal and drops it from the extras', () => {
+		setSetting(
+			'user',
+			{
+				targets: {
+					energy_kcal: 2000,
+					protein: 100,
+					carbs: 230,
+					fat: 70,
+					extra: { fiber: { min: 28, max: null }, sugars: { min: null, max: 50 } }
+				}
+			},
+			db
+		);
+		const t = getUserSettings(db).targets;
+		expect(t.fiber).toBe(28);
+		expect(t.extra.fiber).toBeUndefined();
+		expect(t.extra.sugars?.max).toBe(50);
 	});
 });
 
@@ -212,6 +241,7 @@ describe('backup', () => {
 					protein: 120,
 					carbs: 180,
 					fat: 60,
+					fiber: 35,
 					extra: { sugars: { max: 50 } }
 				}
 			},
@@ -264,6 +294,7 @@ describe('backup', () => {
 		);
 		expect(listWeights(10, db2)[0]).toMatchObject({ kg: 81.2, note: 'morgens' });
 		expect(getUserSettings(db2).targets.extra.sugars?.max).toBe(50);
+		expect(getUserSettings(db2).targets.fiber).toBe(35);
 		expect(getUserSettings(db2).lang).toBe('en');
 		const again = exportBackup(db2);
 		expect(again.entries).toHaveLength(2);

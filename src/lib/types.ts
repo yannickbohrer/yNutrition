@@ -76,6 +76,8 @@ export interface Targets {
 	protein: number;
 	carbs: number;
 	fat: number;
+	/** a goal to reach, not a limit */
+	fiber: number;
 	/** optional extra targets / limits */
 	extra: Partial<Record<NutrientKey, NutrientTarget>>;
 }

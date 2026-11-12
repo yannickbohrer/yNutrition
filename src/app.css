@@ -31,6 +31,7 @@
 	--protein: #ff2d55;
 	--carbs: #ff9500;
 	--fat: #5856d6;
+	--fiber: #a2845e;
 	--over: #ff3b30;
 	--ring-track: rgba(120, 120, 128, 0.16);
 
@@ -113,6 +114,7 @@
 		--protein: #ff375f;
 		--carbs: #ff9f0a;
 		--fat: #7d7aff;
+		--fiber: #ac8e68;
 		--over: #ff453a;
 		--ring-track: rgba(118, 118, 128, 0.28);
 		--shadow: 0 6px 30px rgba(0, 0, 0, 0.6);

@@ -13,7 +13,7 @@
 	import { fmt, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import { addDays } from '#lib/dates.ts';
 	import { KJ_PER_KCAL } from '#lib/nutrition.ts';
-	import { MACRO_KEYS, type NutrientKey } from '#lib/nutrients.ts';
+	import { HEADLINE_KEYS, type NutrientKey } from '#lib/nutrients.ts';
 	import type { DaySummary, EntryDTO, FoodDTO, FoodSummary } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
@@ -69,8 +69,11 @@
 	const macroColor: Record<string, string> = {
 		protein: 'var(--protein)',
 		carbs: 'var(--carbs)',
-		fat: 'var(--fat)'
+		fat: 'var(--fat)',
+		fiber: 'var(--fiber)'
 	};
+	// the nutrient table shows the fibre goal like the extra targets
+	const tableTargets = $derived({ ...targets.extra, fiber: { min: targets.fiber, max: null } });
 
 	const coreMissing = $derived(
 		(['energy_kcal', 'protein', 'carbs', 'fat'] as NutrientKey[])
@@ -233,21 +236,25 @@
 							>· {fmt(kcal * KJ_PER_KCAL)} kJ</span
 						>{/if}
 				</div>
-				{#each MACRO_KEYS as k (k)}
+				{#each HEADLINE_KEYS as k (k)}
 					{@const v = day.totals[k] ?? 0}
 					{@const tgt = targets[k]}
-					<div class="macro-row">
+					{@const goal = k === 'fiber'}
+					<div class="macro-row" data-testid="macro-{k}">
 						<Ring
 							value={v}
 							target={tgt}
 							color={macroColor[k]}
+							{goal}
 							size={34}
 							width={5}
 							label={t('a11y.ring', { label: t(`macros.${k}`), value: fmt(v), target: fmt(tgt) })}
 						/>
 						<div class="macro-text">
 							<span class="m-name">{t(`macros.${k}`)}</span>
-							<span class="m-val tabular" class:over={v > tgt * 1.05}>{fmt(v)} / {fmt(tgt)} g</span>
+							<span class="m-val tabular" class:over={!goal && v > tgt * 1.05}
+								>{fmt(v)} / {fmt(tgt)} g</span
+							>
 						</div>
 					</div>
 				{/each}
@@ -311,7 +318,7 @@
 				nutrients={day.totals}
 				missing={day.missing}
 				count={day.count}
-				targets={app.settings.targets.extra}
+				targets={tableTargets}
 			/>
 		{/if}
 	</div>
@@ -323,7 +330,7 @@
 					nutrients={day.totals}
 					missing={day.missing}
 					count={day.count}
-					targets={app.settings.targets.extra}
+					targets={tableTargets}
 				/>
 			{:else}
 				<p class="empty">{t('day.empty')}</p>
@@ -515,7 +522,7 @@
 			border-radius: 32px;
 		}
 	}
-	/* summary card: when there's room, the three macros sit side by side under the kcal line */
+	/* summary card: when there's room, the macros sit in tiles under the kcal line */
 	@container (min-width: 600px) {
 		.summary {
 			gap: 28px;
@@ -523,7 +530,7 @@
 		}
 		.summary-side {
 			display: grid;
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(2, 1fr);
 			gap: 14px 18px;
 		}
 		.kcal-line {
@@ -540,6 +547,11 @@
 		}
 		.m-val {
 			font-size: 17px;
+		}
+	}
+	@container (min-width: 820px) {
+		.summary-side {
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 

@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 	lang: 'de',
 	energyUnit: 'kcal',
 	showKj: false,
-	targets: { energy_kcal: 2000, protein: 100, carbs: 230, fat: 70, extra: {} }
+	targets: { energy_kcal: 2000, protein: 100, carbs: 230, fat: 70, fiber: 30, extra: {} }
 };
 
 export function getSetting<T>(key: string, db: DB = getDb()): T | undefined {
@@ -25,13 +25,21 @@ export function setSetting(key: string, value: unknown, db: DB = getDb()) {
 
 export function getUserSettings(db: DB = getDb()): UserSettings {
 	const s = getSetting<Partial<UserSettings>>('user', db) ?? {};
+	const extra = { ...(s.targets?.extra ?? {}) };
+	// fibre used to be an optional extra target: carry its goal over to the main target
+	let fiber = s.targets?.fiber;
+	if (fiber === undefined && extra.fiber) {
+		fiber = extra.fiber.min ?? undefined;
+		delete extra.fiber;
+	}
 	return {
 		...DEFAULT_SETTINGS,
 		...s,
 		targets: {
 			...DEFAULT_SETTINGS.targets,
 			...(s.targets ?? {}),
-			extra: { ...(s.targets?.extra ?? {}) }
+			fiber: fiber ?? DEFAULT_SETTINGS.targets.fiber,
+			extra
 		}
 	};
 }
@@ -48,7 +56,7 @@ export function sanitizeTargets(
 	const i = (input ?? {}) as Partial<Targets>;
 	const extra: Partial<Record<string, NutrientTarget>> = {};
 	for (const [k, v] of Object.entries(i.extra ?? {})) {
-		if (!isNutrientKey(k) || !v || typeof v !== 'object') continue;
+		if (!isNutrientKey(k) || k === 'fiber' || !v || typeof v !== 'object') continue;
 		const min = sanitizeNutrients({ [k]: (v as NutrientTarget).min })[k];
 		const max = sanitizeNutrients({ [k]: (v as NutrientTarget).max })[k];
 		if (min === undefined && max === undefined) continue;
@@ -59,6 +67,7 @@ export function sanitizeTargets(
 		protein: posNum(i.protein, fallback.protein),
 		carbs: posNum(i.carbs, fallback.carbs),
 		fat: posNum(i.fat, fallback.fat),
+		fiber: posNum(i.fiber, fallback.fiber),
 		extra
 	};
 }

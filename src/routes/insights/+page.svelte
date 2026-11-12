@@ -9,7 +9,7 @@
 	import { cssVar } from '#lib/charts.ts';
 	import { addDays, addMonths, endOfMonth, startOfMonth, startOfWeek } from '#lib/dates.ts';
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
-	import { NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
+	import { HEADLINE_KEYS, NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
 	import type { InsightsDTO } from '#lib/server/insights.ts';
 
 	let mode = $state<'week' | 'month'>('week');
@@ -147,7 +147,8 @@
 	const macroColors = {
 		protein: 'var(--protein)',
 		carbs: 'var(--carbs)',
-		fat: 'var(--fat)'
+		fat: 'var(--fat)',
+		fiber: 'var(--fiber)'
 	} as const;
 	const unitOf = (k: NutrientKey) => NUTRIENTS[k].unit;
 </script>
@@ -245,14 +246,17 @@
 			<section class="a-macros">
 				<h2 class="section-header">{t('insights.macros')}</h2>
 				<ul class="group">
-					{#each ['protein', 'carbs', 'fat'] as const as k (k)}
+					{#each HEADLINE_KEYS as k (k)}
 						{@const v = data.avg[k]}
 						{@const tg = data.targets[k]}
 						<li class="row macro">
 							<span class="dot" style:background={macroColors[k]}></span>
 							<span class="grow">{t(`macros.${k}`)}</span>
 							<span class="tabular">{fmt(v)} / {fmt(tg)} g</span>
-							<span class="share tabular">{fmt(data.energyShares[k])}%</span>
+							<!-- fibre has no energy share: keep the column for alignment -->
+							<span class="share tabular"
+								>{k === 'fiber' ? '' : `${fmt(data.energyShares[k])}%`}</span
+							>
 						</li>
 						<li class="bar-li">
 							<div class="bar">
