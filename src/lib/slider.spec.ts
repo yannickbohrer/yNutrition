@@ -15,6 +15,9 @@ describe('slider', () => {
 		expect(sliderMax([250, 400], 250)).toBe(1200);
 		expect(sliderMax([40], 500)).toBe(700);
 		expect(sliderMax([40], 40, 1)).toBe(600);
+		expect(sliderMax([40], 40, -1)).toBe(150);
+		expect(sliderMax([40], 40, -4)).toBe(50); // floor
+		expect(sliderMax([40], 40, 10)).toBe(20000); // limit
 	});
 	it('snaps magnetically within the radius, free values otherwise', () => {
 		// 1 px per gram → radius 14 g

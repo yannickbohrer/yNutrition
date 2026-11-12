@@ -24,6 +24,10 @@
 	let time = $state('12:00');
 	let date = $state('');
 	let extended = $state(0);
+	/** The amount the picker opened with: the slider range is fixed to it (see sliderMax). */
+	let baseAmount = $state(100);
+	/** The scale control is rarely needed, so it stays behind a link. */
+	let scaleOpen = $state(false);
 	let editing = $state(false);
 	let inputValue = $state('');
 	let showMore = $state(false);
@@ -38,11 +42,13 @@
 		if (req && req !== lastReq) {
 			lastReq = req;
 			amount = req.amount ?? req.food.defaultAmount;
+			baseAmount = amount;
 			time = req.time ?? nowTimeLocal();
 			date = req.date;
 			extended = 0;
 			editing = false;
 			showMore = false;
+			scaleOpen = false;
 			favorite = req.food.favorite;
 			portions = req.food.portions;
 			consumedKcal = null;
@@ -62,13 +68,16 @@
 	}
 
 	const unit = $derived(food?.basis ?? 'g');
-	const max = $derived(
+	// the range changes only through the scale control, never by dragging or typing
+	const scaleAt = (ext: number) =>
 		sliderMax(
 			portions.map((p) => p.amount),
-			amount,
-			extended
-		)
-	);
+			baseAmount,
+			ext
+		);
+	const max = $derived(scaleAt(extended));
+	const canShrink = $derived(scaleAt(extended - 1) < max);
+	const canGrow = $derived(scaleAt(extended + 1) > max);
 	const scaled = $derived(food ? scaleNutrients(food.nutrients, amount) : {});
 	const kcal = $derived(scaled.energy_kcal);
 	const target = $derived(app.settings.targets.energy_kcal);
@@ -82,7 +91,6 @@
 
 	function setAmount(v: number) {
 		amount = Math.max(0, Math.min(20000, Math.round(v * 10) / 10));
-		if (amount > max * 0.95) extended++;
 	}
 
 	// +/- buttons with long-press acceleration
@@ -253,7 +261,36 @@
 
 			<PortionSlider bind:value={amount} {max} points={portions} {unit} />
 			<div class="slider-foot">
-				<button class="link" onclick={() => extended++}>{t('picker.extend')} ›</button>
+				{#if scaleOpen}
+					<div class="scale-ctl" role="group" aria-label={t('picker.scale')}>
+						<span class="scale-label">{t('picker.scale')}</span>
+						<button
+							class="scale-btn"
+							onclick={() => extended--}
+							disabled={!canShrink}
+							aria-label={t('picker.scaleDown')}
+							data-testid="scale-down"><Icon name="minus" size={14} /></button
+						>
+						<span class="scale-val tabular" data-testid="scale-max">{fmt(max)} {unit}</span>
+						<button
+							class="scale-btn"
+							onclick={() => extended++}
+							disabled={!canGrow}
+							aria-label={t('picker.scaleUp')}
+							data-testid="scale-up"><Icon name="plus" size={14} /></button
+						>
+					</div>
+					<button class="link" onclick={() => (scaleOpen = false)} data-testid="scale-close"
+						>{t('app.done')}</button
+					>
+				{:else}
+					<button
+						class="link"
+						onclick={() => (scaleOpen = true)}
+						aria-expanded="false"
+						data-testid="scale-open">{t('picker.adjustScale')} ›</button
+					>
+				{/if}
 			</div>
 
 			<div class="chips" role="group" aria-label={t('picker.presets')}>
@@ -446,7 +483,38 @@
 	.slider-foot {
 		display: flex;
 		justify-content: flex-end;
-		margin-top: -2px;
+		align-items: center;
+		gap: 6px;
+		margin-top: 2px;
+		font-size: 13px;
+		color: var(--label-2);
+	}
+	.scale-ctl {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.scale-label {
+		margin-right: 2px;
+	}
+	.scale-val {
+		min-width: 64px;
+		text-align: center;
+		color: var(--label);
+	}
+	.scale-btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 16px;
+		border: 0;
+		padding: 0;
+		display: grid;
+		place-items: center;
+		background: var(--fill);
+		color: var(--tint);
+	}
+	.scale-btn:disabled {
+		color: var(--label-3);
 	}
 	.link {
 		background: none;

@@ -5,13 +5,21 @@ export interface SnapPoint {
 	label: string;
 }
 
-/** Slider range: 0 … max(300, 3 × largest preset), rounded up to a "nice" number, ≥ 1.25 × value. */
+/** Smallest and largest slider range the scale control can reach. */
+export const SLIDER_MIN = 50;
+export const SLIDER_LIMIT = 20000;
+
+/**
+ * Slider range: 0 … max(300, 3 × largest preset, 1.25 × value), doubled or halved per `extended`
+ * step and rounded up to a "nice" number. Pass the amount the picker opened with, never the live
+ * value: a range that follows the thumb grows under the pointer while dragging.
+ */
 export function sliderMax(presets: number[], value: number, extended = 0): number {
 	const largest = presets.length ? Math.max(...presets) : 100;
 	let max = Math.max(300, largest * 3, value * 1.25);
 	max *= 2 ** extended;
 	const nice = max <= 500 ? 50 : max <= 2000 ? 100 : 500;
-	return Math.ceil(max / nice) * nice;
+	return Math.min(SLIDER_LIMIT, Math.max(SLIDER_MIN, Math.ceil(max / nice) * nice));
 }
 
 /** Step for free (non-snapped) values: finer for small ranges. */

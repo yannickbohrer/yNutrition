@@ -41,6 +41,72 @@ test('search → portion picker → log', async ({ page }) => {
 	await expect(page.getByTestId('kcal-remaining')).not.toHaveText(/^2['’]000$/);
 });
 
+test('slider scale stays fixed while dragging and changes only through the scale control', async ({
+	page
+}) => {
+	await page.goto('/');
+	await searchFood(page, 'banane');
+	await pickFood(page, 'Banane, roh');
+	const slider = page.getByTestId('portion-slider');
+	// opened at 120 g, largest preset 150 g → 0 … 450 g
+	await expect(slider).toHaveAttribute('aria-valuemax', '450');
+
+	// the scale control is hidden until asked for
+	await expect(page.getByTestId('scale-open')).toBeVisible();
+	await expect(page.getByTestId('scale-up')).toBeHidden();
+
+	// drag across the whole track and past its end: the range never grows under the pointer
+	await page.waitForTimeout(500); // sheet animation
+	const b = (await slider.boundingBox())!;
+	const y = b.y + b.height / 2;
+	await page.mouse.move(b.x + 16, y);
+	await page.mouse.down();
+	for (let f = 0.1; f <= 1.0001; f += 0.1) {
+		await page.mouse.move(b.x + b.width * f, y, { steps: 4 });
+		await expect(slider).toHaveAttribute('aria-valuemax', '450');
+	}
+	await page.mouse.move(b.x + b.width + 150, y, { steps: 4 });
+	await page.mouse.up();
+	await expect(slider).toHaveAttribute('aria-valuemax', '450');
+	await expect(slider).toHaveAttribute('aria-valuenow', '450');
+
+	// typing a larger amount does not grow the scale either
+	await page.getByTestId('amount-display').click();
+	await page.getByTestId('amount-input').fill('1000');
+	await page.getByTestId('amount-input').press('Enter');
+	await expect(page.getByTestId('amount-display')).toContainText('1');
+	await expect(slider).toHaveAttribute('aria-valuemax', '450');
+
+	// open the control: + doubles, − halves, down to a 50 g floor
+	await page.getByTestId('scale-open').click();
+	await expect(page.getByTestId('scale-max')).toHaveText('450 g');
+	await page.getByTestId('scale-up').click();
+	await expect(slider).toHaveAttribute('aria-valuemax', '900');
+	await page.getByTestId('scale-down').click();
+	await page.getByTestId('scale-down').click();
+	await expect(slider).toHaveAttribute('aria-valuemax', '250');
+	for (const step of ['150 g', '100 g', '50 g']) {
+		await page.getByTestId('scale-down').click();
+		await expect(page.getByTestId('scale-max')).toHaveText(step);
+	}
+	await expect(page.getByTestId('scale-down')).toBeDisabled();
+
+	// "Fertig" hides it again; the chosen scale stays
+	await page.getByTestId('scale-close').click();
+	await expect(page.getByTestId('scale-up')).toBeHidden();
+	await expect(slider).toHaveAttribute('aria-valuemax', '50');
+
+	// a new picker starts with the default scale and the control closed
+	await page.keyboard.press('Escape');
+	await expect(page.getByTestId('portion-picker')).toBeHidden();
+	await pickFood(page, 'Banane, roh');
+	await expect(slider).toHaveAttribute('aria-valuemax', '450');
+	await expect(page.getByTestId('scale-up')).toBeHidden();
+	await page.keyboard.press('Escape');
+	await expect(page.getByTestId('portion-picker')).toBeHidden();
+	await closeAddSheet(page);
+});
+
 test('edit, delete and undo an entry', async ({ page }) => {
 	await page.goto('/');
 	const row = page.getByTestId('entry-row').filter({ hasText: 'Banane, roh' });
