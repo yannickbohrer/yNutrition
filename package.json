@@ -22,7 +22,6 @@
 		"import:swissfcd": "node scripts/import-swissfcd.js",
 		"recovery": "node scripts/recovery.js",
 		"backup": "node scripts/backup.js",
-		"screenshots": "npm run build && playwright test --project=screenshots",
 		"icons": "node scripts/dev/make-icons.mjs"
 	},
 	"devDependencies": {

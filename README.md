@@ -39,8 +39,6 @@ split-view settings.
 1800 px Today adds an all-nutrients pane, Insights uses three columns and the detail pages widen;
 on an ultrawide the app uses the full width.
 
-All screens, light and dark: [`docs/screenshots/`](docs/screenshots).
-
 ## Stack
 
 SvelteKit 3 (Svelte 5 runes, TypeScript, `adapter-node`) · SQLite (`better-sqlite3`) + Drizzle
@@ -73,7 +71,6 @@ allow WebAuthn on `localhost` without HTTPS.
 | `npm run lint` / `npm run format` | Prettier + ESLint                                                                        |
 | `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)             |
 | `npm run test:e2e`                | Playwright E2E on emulated iPhone, iPad, laptop and ultrawide, Chromium + WebAuthn       |
-| `npm run screenshots`             | Capture the main screens on every device class, light and dark, into `docs/screenshots`  |
 | `npm run import:swissfcd`         | Import the Swiss food DB, downloading the XLSX files if missing (`--download` refreshes) |
 | `npm run recovery`                | Print a one-time passkey registration link                                               |
 | `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |

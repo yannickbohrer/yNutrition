@@ -63,12 +63,7 @@ export default defineConfig({
 		{ name: 'setup', testMatch: /auth\.setup\.e2e\.ts/, use: iphone },
 		{
 			name: 'iphone',
-			testIgnore: [
-				/auth\.setup\.e2e\.ts/,
-				/screenshots\.e2e\.ts/,
-				/ipad\.e2e\.ts/,
-				/desktop\.e2e\.ts/
-			],
+			testIgnore: [/auth\.setup\.e2e\.ts/, /ipad\.e2e\.ts/, /desktop\.e2e\.ts/],
 			dependencies: ['setup'],
 			use: { ...iphone, storageState: 'e2e/.tmp/state.json' }
 		},
@@ -101,12 +96,6 @@ export default defineConfig({
 			testMatch: /desktop\.e2e\.ts/,
 			dependencies: ['setup'],
 			use: { ...desktopAt(3440, 1440), storageState: 'e2e/.tmp/state.json' }
-		},
-		{
-			name: 'screenshots',
-			testMatch: /screenshots\.e2e\.ts/,
-			dependencies: ['setup'],
-			use: { ...iphone, storageState: 'e2e/.tmp/state.json' }
 		}
 	],
 	webServer: [
