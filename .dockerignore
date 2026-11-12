@@ -6,6 +6,7 @@ build
 .env.*
 !.env.example
 private
+deploy.sh
 deploy.env
 deploy.env.*
 data/*.db

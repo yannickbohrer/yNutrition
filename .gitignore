@@ -45,6 +45,7 @@ e2e/.tmp/
 
 # private setup: deploy script, server config, notes (local only, never published)
 /private/
+/deploy.sh
 deploy.env
 deploy.env.*
 
