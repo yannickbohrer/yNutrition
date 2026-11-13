@@ -558,24 +558,35 @@
 	/* ---------- iPad landscape: log | add panel ---------- */
 	@media (min-width: 900px) and (min-height: 560px) and (orientation: landscape),
 		(min-width: 1000px) and (orientation: landscape) {
-		.day-page {
+		/* the window never scrolls here: the page is exactly one viewport tall and each column
+		   scrolls on its own, so there is never a page scrollbar next to the add panel's */
+		:global(html:has(main.day-page)) {
+			overflow: hidden;
+			scrollbar-gutter: auto;
+		}
+		main.day-page {
 			--page-max: 1280px;
 			display: grid;
 			grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
 			gap: 28px;
-			align-items: start;
+			height: 100dvh;
+			padding-top: 0;
+			padding-bottom: 0;
 		}
 		.fab {
 			display: none;
 		}
+		.day-main,
 		.day-add {
-			position: sticky;
-			top: 0;
-			max-height: 100dvh;
+			min-height: 0;
 			overflow-y: auto;
 			overscroll-behavior: contain;
+		}
+		.day-main {
+			padding: calc(var(--safe-top) + 8px) 0 64px;
+		}
+		.day-add {
 			padding: calc(var(--safe-top) + 12px) 0 24px;
-			margin-top: calc(-8px - var(--safe-top));
 		}
 		.add-title {
 			font-size: 22px;
@@ -586,19 +597,16 @@
 
 	/* ---------- ultra: log | all nutrients | add panel ---------- */
 	@media (min-width: 1800px) and (orientation: landscape) {
-		.day-page {
+		main.day-page {
 			--page-max: none;
 			grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(340px, 420px);
 		}
 		.day-nutrients {
 			container: nutrients / inline-size;
-			position: sticky;
-			top: 0;
-			max-height: 100dvh;
+			min-height: 0;
 			overflow-y: auto;
 			overscroll-behavior: contain;
 			padding: calc(var(--safe-top) + 12px) 0 24px;
-			margin-top: calc(-8px - var(--safe-top));
 		}
 		.day-nutrients :global(.nt-group:first-child .section-header) {
 			margin-top: 14px;
@@ -606,7 +614,7 @@
 	}
 	/* ultrawide: the log stops growing (names drift away from their kcal); nutrients take the rest */
 	@media (min-width: 2560px) and (orientation: landscape) {
-		.day-page {
+		main.day-page {
 			grid-template-columns: minmax(0, 960px) minmax(0, 1fr) 420px;
 		}
 	}

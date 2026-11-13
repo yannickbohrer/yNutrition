@@ -72,6 +72,12 @@ test('today: panes follow the tier', async ({ page }) => {
 	const log = await box(page, '.day-main');
 	const panel = (await add.boundingBox())!;
 	expect(panel.x).toBeGreaterThan(log.x + log.width - 1);
+	// the window itself never scrolls; only the columns do
+	const doc = await page.evaluate(() => ({
+		sh: document.documentElement.scrollHeight,
+		ch: document.documentElement.clientHeight
+	}));
+	expect(doc.sh).toBeLessThanOrEqual(doc.ch);
 
 	const pane = page.getByTestId('nutrients-pane');
 	if (isUltra()) {
