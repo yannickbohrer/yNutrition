@@ -195,28 +195,113 @@ export function movingAverage(
 export interface Contribution {
 	key: string;
 	label: string;
+	/** summed nutrient */
 	value: number;
+	/** % of the total */
 	share: number;
+	/** times eaten: every log entry of the food in the range */
+	count: number;
+	/** g or ml eaten in total */
+	amount: number;
+	basis: 'g' | 'ml';
+	/** last date eaten, YYYY-MM-DD */
+	last: string;
+	/** nutrient per entry, over the entries that state the nutrient */
+	perServing: number;
+	/** nutrient per 100 g/ml, over the entries that state the nutrient */
+	per100: number;
 }
 
-/** Rank contributors for one nutrient: group by `key`, sum, sort desc, share in %. */
+export interface ContributionInput {
+	key: string;
+	label: string;
+	nutrients: Nutrients;
+	amount?: number;
+	basis?: 'g' | 'ml';
+	date?: string;
+}
+
+/**
+ * Rank contributors for one nutrient: group by `key`, sum, sort desc, share in %.
+ * Only foods that provide some of the nutrient are listed; their count and amount still
+ * include entries of the same food that lack the value.
+ */
 export function rankContributions(
-	items: { key: string; label: string; nutrients: Nutrients }[],
+	items: ContributionInput[],
 	nutrient: NutrientKey
 ): { total: number; items: Contribution[] } {
-	const map = new Map<string, Contribution>();
+	const map = new Map<string, Contribution & { known: number; knownAmount: number }>();
 	for (const it of items) {
+		const c = map.get(it.key) ?? {
+			key: it.key,
+			label: it.label,
+			value: 0,
+			share: 0,
+			count: 0,
+			amount: 0,
+			basis: it.basis ?? 'g',
+			last: '',
+			perServing: 0,
+			per100: 0,
+			known: 0,
+			knownAmount: 0
+		};
+		const amount = it.amount ?? 0;
+		c.count++;
+		c.amount += amount;
+		if (it.date && it.date >= c.last) {
+			c.last = it.date;
+			c.label = it.label;
+			if (it.basis) c.basis = it.basis;
+		}
 		const v = it.nutrients[nutrient];
-		if (v === undefined || v <= 0) continue;
-		const c = map.get(it.key) ?? { key: it.key, label: it.label, value: 0, share: 0 };
-		c.value += v;
+		if (v !== undefined) {
+			c.value += v;
+			c.known++;
+			c.knownAmount += amount;
+		}
 		map.set(it.key, c);
 	}
-	const list = [...map.values()].sort((a, b) => b.value - a.value);
+	const list = [...map.values()].filter((c) => c.value > 0).sort((a, b) => b.value - a.value);
 	const total = list.reduce((s, c) => s + c.value, 0);
-	for (const c of list) {
-		c.value = round(c.value, 3);
-		c.share = total > 0 ? round((c.value / total) * 100, 1) : 0;
-	}
-	return { total: round(total, 3), items: list };
+	const out: Contribution[] = list.map(({ known, knownAmount, ...c }) => ({
+		...c,
+		value: round(c.value, 3),
+		share: total > 0 ? round((c.value / total) * 100, 1) : 0,
+		amount: round(c.amount, 1),
+		perServing: round(c.value / known, 3),
+		per100: knownAmount > 0 ? round((c.value / knownAmount) * 100, 3) : 0
+	}));
+	return { total: round(total, 3), items: out };
+}
+
+export type SourceSort = 'value' | 'count' | 'amount' | 'perServing' | 'per100' | 'last';
+export const SOURCE_SORTS: SourceSort[] = [
+	'value',
+	'count',
+	'amount',
+	'perServing',
+	'per100',
+	'last'
+];
+
+/**
+ * Order contributors by one metric. `desc` puts the highest (or most recent) first;
+ * ties fall back to the nutrient value, then the name, so the order is stable.
+ */
+export function sortContributions(
+	items: Contribution[],
+	by: SourceSort,
+	dir: 'asc' | 'desc' = 'desc'
+): Contribution[] {
+	const sign = dir === 'desc' ? -1 : 1;
+	const metric = (c: Contribution) => c[by];
+	return [...items].sort((a, b) => {
+		const ma = metric(a);
+		const mb = metric(b);
+		const primary = typeof ma === 'string' ? ma.localeCompare(mb as string) : ma - (mb as number);
+		if (primary !== 0) return sign * primary;
+		if (a.value !== b.value) return b.value - a.value;
+		return a.label.localeCompare(b.label);
+	});
 }

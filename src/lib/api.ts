@@ -14,6 +14,7 @@ import type {
 } from './types';
 import type { InsightsDTO } from './server/insights';
 import type { NutrientKey } from './nutrients';
+import type { Contribution } from './nutrition';
 
 export class ApiError extends Error {
 	constructor(
@@ -70,7 +71,7 @@ export interface Breakdown {
 	to: string;
 	nutrient: NutrientKey;
 	total: number;
-	items: { key: string; label: string; value: number; share: number }[];
+	items: Contribution[];
 	entries: number;
 	missing: number;
 }
@@ -122,8 +123,13 @@ export const api = {
 
 	insights: (from: string, to: string) =>
 		req<InsightsDTO>('GET', `/api/insights?from=${from}&to=${to}`),
-	breakdown: (from: string, to: string, nutrient: NutrientKey) =>
-		req<Breakdown>('GET', `/api/insights/breakdown?from=${from}&to=${to}&nutrient=${nutrient}`),
+	breakdown: (range: { from: string; to: string } | 'all', nutrient: NutrientKey) =>
+		req<Breakdown>(
+			'GET',
+			range === 'all'
+				? `/api/insights/breakdown?scope=all&nutrient=${nutrient}`
+				: `/api/insights/breakdown?from=${range.from}&to=${range.to}&nutrient=${nutrient}`
+		),
 
 	settings: (patch: Partial<UserSettings>) => req<UserSettings>('PATCH', '/api/settings', patch),
 	importBackup: (data: unknown) =>

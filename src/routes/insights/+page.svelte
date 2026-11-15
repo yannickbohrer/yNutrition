@@ -11,14 +11,27 @@
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import { HEADLINE_KEYS, NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
 	import type { InsightsDTO } from '#lib/server/insights.ts';
+	import { onMount } from 'svelte';
+	import {
+		SOURCE_SORTS,
+		sortContributions,
+		type Contribution,
+		type SourceSort
+	} from '#lib/nutrition.ts';
 
 	let mode = $state<'week' | 'month'>('week');
 	let offset = $state(0);
 	let data = $state<InsightsDTO | null>(null);
 	let showWeight = $state(false);
 	let nutrient = $state<NutrientKey>('energy_kcal');
-	let bdPeriod = $state<'day' | 'range'>('range');
+	type BdPeriod = 'day' | 'range' | 'all';
+	let bdPeriod = $state<BdPeriod>('range');
+	let bdSort = $state<SourceSort>('value');
+	let bdDir = $state<'asc' | 'desc'>('desc');
 	let bd = $state<Breakdown | null>(null);
+	// the saved choice is read on mount (SSR renders the defaults), so wait for it before fetching
+	let prefsReady = $state(false);
+	const PREFS_KEY = 'insights.breakdown';
 	let innerHeight = $state(0);
 	// ultra: the chart takes the window height left under the title, period bar and card chrome
 	const ultraChartHeight = $derived(Math.min(900, Math.max(480, innerHeight - 330)));
@@ -36,11 +49,78 @@
 		const { from, to } = range;
 		api.insights(from, to).then((d) => (data = d));
 	});
-	$effect(() => {
-		const n = nutrient;
-		const { from, to } = bdPeriod === 'day' ? { from: app.today, to: app.today } : range;
-		api.breakdown(from, to, n).then((b) => (bd = b));
+	onMount(() => {
+		try {
+			const p = JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}');
+			if (['day', 'range', 'all'].includes(p.period)) bdPeriod = p.period;
+			if (SOURCE_SORTS.includes(p.sort)) bdSort = p.sort;
+			if (p.dir === 'asc' || p.dir === 'desc') bdDir = p.dir;
+		} catch {
+			// storage blocked or garbled: keep the defaults
+		}
+		prefsReady = true;
 	});
+	$effect(() => {
+		if (!prefsReady) return;
+		const prefs = JSON.stringify({ period: bdPeriod, sort: bdSort, dir: bdDir });
+		try {
+			localStorage.setItem(PREFS_KEY, prefs);
+		} catch {
+			// not persisted; the page works the same
+		}
+	});
+	$effect(() => {
+		if (!prefsReady) return;
+		const n = nutrient;
+		const r =
+			bdPeriod === 'all' ? 'all' : bdPeriod === 'day' ? { from: app.today, to: app.today } : range;
+		api.breakdown(r, n).then((b) => (bd = b));
+	});
+
+	const bdItems = $derived(bd ? sortContributions(bd.items, bdSort, bdDir).slice(0, 12) : []);
+	const dirLabel = $derived(
+		t(
+			bdSort === 'last'
+				? bdDir === 'desc'
+					? 'insights.sortDir.newest'
+					: 'insights.sortDir.oldest'
+				: `insights.sortDir.${bdDir}`
+		)
+	);
+	function setSort(s: SourceSort) {
+		bdSort = s;
+		// a new metric starts from its natural order (highest / most recent first)
+		bdDir = 'desc';
+	}
+	function fmtQty(v: number, basis: 'g' | 'ml') {
+		if (v >= 1000) return `${fmt(v / 1000, 1)} ${basis === 'g' ? 'kg' : 'l'}`;
+		return `${fmtAmount(v)} ${basis}`;
+	}
+	function metricLine(it: Contribution): string | null {
+		const u = unitOf(nutrient);
+		switch (bdSort) {
+			case 'count':
+				return t('insights.metric.count', { n: it.count });
+			case 'amount':
+				return t('insights.metric.amount', { v: fmtQty(it.amount, it.basis) });
+			case 'perServing':
+				return t('insights.metric.perServing', { v: `${fmtAmount(it.perServing)} ${u}` });
+			case 'per100':
+				return t('insights.metric.per100', { v: `${fmtAmount(it.per100)} ${u}`, b: it.basis });
+			case 'last': {
+				const sameYear = it.last.slice(0, 4) === app.today.slice(0, 4);
+				return t('insights.metric.last', {
+					d: fmtDate(it.last, {
+						day: 'numeric',
+						month: 'short',
+						...(sameYear ? {} : { year: 'numeric' })
+					})
+				});
+			}
+			default:
+				return null;
+		}
+	}
 
 	const label = $derived(
 		mode === 'week'
@@ -290,23 +370,51 @@
 							>{t(`nutrient.${k}`)}</option
 						>{/each}
 				</select>
-				<div class="segmented">
+				<div class="segmented" role="group" aria-label={t('insights.period')}>
 					<button aria-pressed={bdPeriod === 'day'} onclick={() => (bdPeriod = 'day')}
 						>{t('insights.day')}</button
 					>
 					<button aria-pressed={bdPeriod === 'range'} onclick={() => (bdPeriod = 'range')}
 						>{mode === 'week' ? t('insights.week') : t('insights.month')}</button
 					>
+					<button
+						aria-pressed={bdPeriod === 'all'}
+						onclick={() => (bdPeriod = 'all')}
+						data-testid="breakdown-all">{t('insights.allTime')}</button
+					>
 				</div>
+			</div>
+			<div class="bd-controls">
+				<label class="bd-sort">
+					<span class="bd-sort-label">{t('insights.sortBy')}</span>
+					<select
+						value={bdSort}
+						onchange={(e) => setSort(e.currentTarget.value as SourceSort)}
+						data-testid="breakdown-sort"
+					>
+						{#each SOURCE_SORTS as s (s)}<option value={s}>{t(`insights.sort.${s}`)}</option>{/each}
+					</select>
+				</label>
+				<button
+					class="bd-dir"
+					onclick={() => (bdDir = bdDir === 'desc' ? 'asc' : 'desc')}
+					aria-label={dirLabel}
+					title={dirLabel}
+					data-testid="breakdown-dir"
+				>
+					<Icon name={bdDir === 'desc' ? 'sortDesc' : 'sortAsc'} size={20} />
+				</button>
 			</div>
 			{#if bd}
 				{#if bd.items.length}
 					<ul class="group" data-testid="breakdown-list">
-						{#each bd.items.slice(0, 12) as it, i (it.key)}
+						{#each bdItems as it, i (it.key)}
+							{@const line = metricLine(it)}
 							<li class="row bd-row">
 								<span class="rank tabular">{i + 1}</span>
 								<span class="grow">
 									<span class="row-title">{it.label}</span>
+									{#if line}<span class="row-sub tabular">{line}</span>{/if}
 									<span class="share-bar"><span style:width="{it.share}%"></span></span>
 								</span>
 								<span class="bd-val tabular"
@@ -475,8 +583,40 @@
 		padding: 0 10px;
 	}
 	.bd-controls .segmented {
-		width: 160px;
+		width: 228px;
 		flex: none;
+	}
+	.bd-sort {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-height: 36px;
+		border-radius: 9px;
+		background: var(--bg-elev);
+		padding-left: 10px;
+	}
+	.bd-sort-label {
+		color: var(--label-2);
+		font-size: 14px;
+		white-space: nowrap;
+		flex: none;
+	}
+	.bd-controls .bd-sort select {
+		padding-left: 0;
+		font-weight: 500;
+	}
+	.bd-dir {
+		flex: none;
+		width: 36px;
+		height: 36px;
+		display: grid;
+		place-items: center;
+		border: 0;
+		border-radius: 9px;
+		background: var(--bg-elev);
+		color: var(--tint);
 	}
 	.bd-row {
 		min-height: 54px;

@@ -9,6 +9,8 @@
 		chevronLeft: 'M15 5l-7 7 7 7',
 		chevronRight: 'M9 5l7 7-7 7',
 		chevronDown: 'M5 9l7 7 7-7',
+		sortDesc: 'M7 4v16M3.5 16.5 7 20l3.5-3.5M13 6h8M13 11h6M13 16h4',
+		sortAsc: 'M7 20V4M3.5 7.5 7 4l3.5 3.5M13 6h4M13 11h6M13 16h8',
 		close: 'M6 6l12 12M18 6 6 18',
 		barcode: 'M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12',
 		star: 'M12 3.8l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L12 16.4l-5.1 2.8 1.1-5.6-4.2-3.9 5.7-.7z',

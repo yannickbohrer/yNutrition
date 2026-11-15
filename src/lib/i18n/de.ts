@@ -320,6 +320,29 @@ export const de = {
 		showWeight: 'Gewicht einblenden',
 		breakdown: 'Wer liefert was?',
 		breakdownHint: 'Grösste Quellen für einen Nährstoff',
+		allTime: 'Gesamt',
+		sortBy: 'Sortieren nach',
+		sort: {
+			value: 'Nährstoffmenge',
+			count: 'Häufigkeit',
+			amount: 'Verzehrte Menge',
+			perServing: 'Pro Portion',
+			per100: 'Pro 100 g/ml',
+			last: 'Zuletzt gegessen'
+		},
+		sortDir: {
+			desc: 'Höchste zuerst',
+			asc: 'Niedrigste zuerst',
+			newest: 'Neueste zuerst',
+			oldest: 'Älteste zuerst'
+		},
+		metric: {
+			count: '{n}× gegessen',
+			amount: '{v} gegessen',
+			perServing: 'Ø {v} pro Portion',
+			per100: '{v} pro 100 {b}',
+			last: 'zuletzt am {d}'
+		},
 		period: 'Zeitraum',
 		day: 'Tag',
 		nutrient: 'Nährstoff',

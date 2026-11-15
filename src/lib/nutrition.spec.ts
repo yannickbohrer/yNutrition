@@ -7,6 +7,7 @@ import {
 	macroEnergyShares,
 	movingAverage,
 	rankContributions,
+	sortContributions,
 	scaleNutrients
 } from './nutrition';
 import { sanitizeNutrients } from './nutrients';
@@ -153,6 +154,52 @@ describe('helpers', () => {
 			['a', 83.3],
 			['b', 16.7]
 		]);
+	});
+	it('collects count, amount, last date and per-serving / per-100 values', () => {
+		const r = rankContributions(
+			[
+				{ key: 'a', label: 'Apfel', nutrients: { sugars: 10 }, amount: 100, date: '2026-03-01' },
+				{ key: 'a', label: 'Apfel', nutrients: { sugars: 20 }, amount: 200, date: '2026-03-05' },
+				// same food without a sugar value: counted as eaten, kept out of the averages
+				{ key: 'a', label: 'Apfel', nutrients: {}, amount: 150, date: '2026-03-03' },
+				{
+					key: 'm',
+					label: 'Milch',
+					nutrients: { sugars: 5 },
+					amount: 100,
+					basis: 'ml',
+					date: '2026-03-02'
+				},
+				// no sugar at all: not a source, so not listed
+				{ key: 'k', label: 'Käse', nutrients: { sugars: 0 }, amount: 50, date: '2026-03-04' }
+			],
+			'sugars'
+		);
+		expect(r.items.map((i) => i.key)).toEqual(['a', 'm']);
+		expect(r.items[0]).toMatchObject({
+			value: 30,
+			count: 3,
+			amount: 450,
+			last: '2026-03-05',
+			perServing: 15,
+			per100: 10
+		});
+		expect(r.items[1]).toMatchObject({ basis: 'ml', count: 1, per100: 5 });
+	});
+	it('sorts contributions by any metric, both ways', () => {
+		const base = { share: 0, amount: 0, basis: 'g' as const, perServing: 0, per100: 0 };
+		const items = [
+			{ ...base, key: 'a', label: 'Apfel', value: 30, count: 2, last: '2026-03-05' },
+			{ ...base, key: 'b', label: 'Brot', value: 10, count: 7, last: '2026-03-01' },
+			{ ...base, key: 'c', label: 'Chips', value: 20, count: 2, last: '2026-03-09' }
+		];
+		const keys = (s: Parameters<typeof sortContributions>) =>
+			sortContributions(...s).map((i) => i.key);
+		expect(keys([items, 'value'])).toEqual(['a', 'c', 'b']);
+		expect(keys([items, 'count'])).toEqual(['b', 'a', 'c']); // tie a/c falls back to value
+		expect(keys([items, 'count', 'asc'])).toEqual(['a', 'c', 'b']);
+		expect(keys([items, 'last'])).toEqual(['c', 'a', 'b']);
+		expect(keys([items, 'last', 'asc'])).toEqual(['b', 'a', 'c']);
 	});
 	it('sanitizes nutrient input', () => {
 		expect(

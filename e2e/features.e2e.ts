@@ -293,6 +293,16 @@ test('weight entry and insights render', async ({ page }) => {
 	await expect(page.getByTestId('breakdown-list')).toBeVisible();
 	await page.getByTestId('breakdown-nutrient').selectOption('protein');
 	await expect(page.getByTestId('breakdown-list')).toContainText('%');
+
+	// sort by times eaten over the whole history; the choice survives a reload
+	await page.getByTestId('breakdown-sort').selectOption('count');
+	await page.getByTestId('breakdown-all').click();
+	await expect(page.getByTestId('breakdown-list')).toContainText('×');
+	await page.getByTestId('breakdown-dir').click();
+	await page.reload();
+	await expect(page.getByTestId('breakdown-sort')).toHaveValue('count');
+	await expect(page.getByTestId('breakdown-all')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('breakdown-list')).toContainText('×');
 });
 
 test('export / import round-trip', async ({ page }, info) => {

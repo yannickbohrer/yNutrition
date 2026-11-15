@@ -315,6 +315,29 @@ export const en: Messages = {
 		showWeight: 'Show weight',
 		breakdown: 'Top sources',
 		breakdownHint: 'Biggest contributors for a nutrient',
+		allTime: 'All time',
+		sortBy: 'Sort by',
+		sort: {
+			value: 'Nutrient amount',
+			count: 'Times eaten',
+			amount: 'Amount eaten',
+			perServing: 'Per serving',
+			per100: 'Per 100 g/ml',
+			last: 'Last eaten'
+		},
+		sortDir: {
+			desc: 'Highest first',
+			asc: 'Lowest first',
+			newest: 'Most recent first',
+			oldest: 'Oldest first'
+		},
+		metric: {
+			count: '{n}× eaten',
+			amount: '{v} eaten',
+			perServing: 'avg {v} per serving',
+			per100: '{v} per 100 {b}',
+			last: 'last on {d}'
+		},
 		period: 'Period',
 		day: 'Day',
 		nutrient: 'Nutrient',

@@ -113,7 +113,10 @@ export function breakdown(from: string, to: string, nutrient: NutrientKey, db: D
 		entries.map((e) => ({
 			key: e.foodId !== null ? `f${e.foodId}` : `n${e.name}`,
 			label: e.name,
-			nutrients: e.nutrients
+			nutrients: e.nutrients,
+			amount: e.amount,
+			basis: e.basis,
+			date: e.date
 		})),
 		nutrient
 	);
