@@ -17,6 +17,8 @@
 	--sep: rgba(60, 60, 67, 0.22);
 	--fill: rgba(120, 120, 128, 0.12);
 	--fill-2: rgba(120, 120, 128, 0.2);
+	/* scroll indicator thumb (follows the label colour, so it works in both themes) */
+	--scroll-thumb: color-mix(in srgb, var(--label) 28%, transparent);
 	--tint: #0066d6; /* iOS blue, deepened slightly for ≥ 4.5:1 text contrast */
 	--tint-press: #0062cc;
 	--tab-active: #0062cc; /* small tab labels need 4.5:1 */
@@ -467,6 +469,21 @@ a.row:active {
 
 .warn {
 	color: var(--warning);
+}
+
+/*
+ * Panes that scroll on their own (wide Today layout): a thin scroll indicator that stays invisible
+ * at rest and appears while the pane is hovered or scrolled (see src/lib/scroll.ts). The gutter is
+ * reserved, so showing it never moves the content. Touch devices keep their overlay indicators.
+ */
+.pane-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
+	scrollbar-gutter: stable;
+}
+.pane-scroll:hover,
+.pane-scroll.is-scrolling {
+	scrollbar-color: var(--scroll-thumb) transparent;
 }
 
 /* mouse and trackpad: hover feedback only, nothing here may change the layout */

@@ -78,6 +78,20 @@ test('today: panes follow the tier', async ({ page }) => {
 		ch: document.documentElement.clientHeight
 	}));
 	expect(doc.sh).toBeLessThanOrEqual(doc.ch);
+	// the columns never scroll sideways, and their scrollbars stay hidden until hovered or scrolled
+	const panes = await page.evaluate(() =>
+		[...document.querySelectorAll<HTMLElement>('.pane-scroll')]
+			.filter((el) => el.offsetParent !== null)
+			.map((el) => ({
+				over: el.scrollWidth - el.clientWidth,
+				color: getComputedStyle(el).scrollbarColor
+			}))
+	);
+	expect(panes.length).toBeGreaterThan(1);
+	for (const p of panes) {
+		expect(p.over).toBeLessThanOrEqual(0);
+		expect(p.color).toMatch(/transparent|rgba\(0, 0, 0, 0\)/);
+	}
 
 	const pane = page.getByTestId('nutrients-pane');
 	if (isUltra()) {

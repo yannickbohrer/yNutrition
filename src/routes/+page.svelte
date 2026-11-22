@@ -6,6 +6,7 @@
 	import Icon from '#lib/components/Icon.svelte';
 	import AddPanel from '#lib/components/AddPanel.svelte';
 	import { api } from '#lib/api.ts';
+	import { scrollIndicator } from '#lib/scroll.ts';
 	import { app } from '#lib/stores/app.svelte.ts';
 	import { bumpData, dataVersion, openAddSheet, toast } from '#lib/stores/ui.svelte.ts';
 	import { editEntry, logFood } from '#lib/logging.ts';
@@ -160,7 +161,7 @@
 <svelte:head><title>{title} · Nutrition</title></svelte:head>
 
 <main class="page day-page">
-	<div class="day-main">
+	<div class="day-main pane-scroll" {@attach scrollIndicator}>
 		<div class="nav-row">
 			<button
 				class="nav-btn"
@@ -323,7 +324,12 @@
 		{/if}
 	</div>
 	{#if viewport.ultra}
-		<aside class="day-nutrients" aria-label={t('day.nutrients')} data-testid="nutrients-pane">
+		<aside
+			class="day-nutrients pane-scroll"
+			{@attach scrollIndicator}
+			aria-label={t('day.nutrients')}
+			data-testid="nutrients-pane"
+		>
 			<h2 class="add-title">{t('day.nutrients')}</h2>
 			{#if day.entries.length}
 				<NutrientTable
@@ -338,7 +344,12 @@
 		</aside>
 	{/if}
 	{#if viewport.wide}
-		<aside class="day-add" aria-label={addTitle} data-testid="inline-add">
+		<aside
+			class="day-add pane-scroll"
+			{@attach scrollIndicator}
+			aria-label={addTitle}
+			data-testid="inline-add"
+		>
 			<h2 class="add-title">{addTitle}</h2>
 			<AddPanel onselect={inlineSelect} inputId="inline-search" />
 		</aside>
@@ -581,12 +592,18 @@
 			min-height: 0;
 			overflow-y: auto;
 			overscroll-behavior: contain;
+			/* 8 px of slack on each side: the day arrows hang 8 px out for optical alignment and
+			   focus rings need room, so nothing makes the pane scroll sideways */
+			margin-inline: -8px;
+			padding-inline: 8px;
 		}
 		.day-main {
-			padding: calc(var(--safe-top) + 8px) 0 64px;
+			padding-top: calc(var(--safe-top) + 8px);
+			padding-bottom: 64px;
 		}
 		.day-add {
-			padding: calc(var(--safe-top) + 12px) 0 24px;
+			padding-top: calc(var(--safe-top) + 12px);
+			padding-bottom: 24px;
 		}
 		.add-title {
 			font-size: 22px;
@@ -606,7 +623,8 @@
 			min-height: 0;
 			overflow-y: auto;
 			overscroll-behavior: contain;
-			padding: calc(var(--safe-top) + 12px) 0 24px;
+			margin-inline: -8px;
+			padding: calc(var(--safe-top) + 12px) 8px 24px;
 		}
 		.day-nutrients :global(.nt-group:first-child .section-header) {
 			margin-top: 14px;
