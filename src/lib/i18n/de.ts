@@ -307,6 +307,8 @@ export const de = {
 		backToToday: 'Heute',
 		kcalChartYear: 'Ø Kalorien pro erfasstem Tag',
 		yearHint: 'Tippe auf einen Monat, um ihn zu öffnen.',
+		yearsHint: 'Tippe auf ein Jahr, um es zu öffnen.',
+		since: 'Seit {d}',
 		basisCurrent: 'Verglichen mit deinen aktuellen Zielen.',
 		basisThen: 'Verglichen mit den Zielen, die damals galten.',
 		showThen: 'Damalige Ziele verwenden',
@@ -314,7 +316,8 @@ export const de = {
 		emptyPeriod: {
 			week: 'In dieser Woche gibt es keine Einträge.',
 			month: 'In diesem Monat gibt es keine Einträge.',
-			year: 'In diesem Jahr gibt es keine Einträge.'
+			year: 'In diesem Jahr gibt es keine Einträge.',
+			all: 'Noch keine Einträge.'
 		},
 		jumpBack: 'Zum letzten Eintrag davor',
 		prev: 'Vorherige',

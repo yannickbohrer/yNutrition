@@ -13,13 +13,25 @@ Whenever you plan or change frontend code (Svelte components, routes, `src/app.c
   `.segmented`, `.nav-row`, `.section-footer`). Don't introduce new palettes or typefaces.
 - Optimise for a polished UI and an intuitive UX: plain sentence-case copy (German primary, English
   mirrored in `src/lib/i18n/`), visible keyboard focus, `prefers-reduced-motion` respected.
-- Check every layout tier (phone, iPad portrait/landscape, desktop, ultra; see the comment at the
-  top of `src/app.css`) in light and dark mode.
+- Layout tiers (phone, iPad, desktop, ultra; see the top of `src/app.css`) and light/dark matter,
+  but reason about them from the CSS. Don't take screenshots unless asked.
 
 ## Data
 
 The user's history must never be lost. Never purge log entries or weights. Keep exports, backups
 and imports in sync whenever the schema changes (`src/lib/server/backup.ts`, change journal).
+
+## Testing
+
+Single user and single developer: the user tests in production. Keep verification light.
+
+- After a change: `npm run check` and `npm run test:unit -- --run` (a few seconds).
+- Run the E2E suite (`npm run test:e2e`, all platforms) only when the user explicitly tells you
+  to: never after a change, before a commit or before a push. `npm test` includes it, so don't use
+  `npm test` either. Keep the suite itself; it covers every platform and is worth having on demand.
+- No screenshots unless asked.
+- Add unit tests for data, backup and calculation logic (where silent bugs would lose data).
+  Don't add E2E tests for UI changes.
 
 ## Commands
 

@@ -132,8 +132,13 @@ export const api = {
 	restoreWeight: (row: DeletedRow['row']) =>
 		req<WeightDTO>('POST', '/api/weights/restore', { row }),
 
-	insights: (from: string, to: string, bucket: 'day' | 'month' = 'day') =>
-		req<InsightsDTO>('GET', `/api/insights?from=${from}&to=${to}&bucket=${bucket}`),
+	insights: (range: { from: string; to: string } | 'all', bucket: 'day' | 'month' = 'day') =>
+		req<InsightsDTO>(
+			'GET',
+			range === 'all'
+				? '/api/insights?scope=all'
+				: `/api/insights?from=${range.from}&to=${range.to}&bucket=${bucket}`
+		),
 	breakdown: (range: { from: string; to: string } | 'all', nutrient: NutrientKey) =>
 		req<Breakdown>(
 			'GET',

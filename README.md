@@ -18,10 +18,10 @@ laptops and ultrawide monitors. German (Swiss) and English.
   ±1/±5 buttons with long-press acceleration, exact input and a live nutrition preview.
 - **Day view**: progress rings for kcal and macros, a timeline, swipe-to-delete with undo,
   editing, copying entries between days, favourites and recents.
-- **Insights (Verlauf)**: weekly, monthly and yearly charts you can page through back to the first
-  entry, adherence and macro averages against your current targets or the targets that applied at
-  the time (target changes are kept with their date), and a "top sources" breakdown for any
-  nutrient.
+- **Insights (Verlauf)**: one switch for week, month, year or all time drives the charts (paged
+  back to the first entry), adherence and macro averages, and the "top sources" breakdown for any
+  nutrient. Figures compare with your current targets or, once targets changed, with the targets
+  that applied at the time.
 - **Weight**: 7-day trend over 30 days, 90 days, a year or everything; the full history loads page
   by page, and deletions can be undone.
 - **Export/import**: full JSON backup and restore; CSV for entries and weights.

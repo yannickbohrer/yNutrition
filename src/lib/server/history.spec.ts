@@ -8,7 +8,7 @@ import { addEntry, deleteEntry, updateEntry } from './log';
 import { createCustomFood, saveRecipe } from './customFoods';
 import { setFavorite } from './foods/repo';
 import { addWeight, deleteWeight, restoreWeight, weightsPage } from './weights';
-import { insights } from './insights';
+import { allTimeRange, insights } from './insights';
 import { exportBackup, importBackup } from './backup';
 import {
 	BASELINE_DATE,
@@ -128,6 +128,36 @@ describe('target history', () => {
 		expect(i.days[0]).toMatchObject({ date: '2026-01-01', kcal: 480, loggedDays: 2, weight: 79.5 });
 		expect(i.days[1]).toMatchObject({ kcal: null, loggedDays: 0 });
 		expect(i.loggedDays).toBe(3);
+	});
+});
+
+describe('all-time view', () => {
+	it('spans from the first entry to today, by month up to two years, then by year', () => {
+		expect(allTimeRange('2026-11-23', db)).toEqual({
+			from: '2026-11-23',
+			to: '2026-11-23',
+			bucket: 'month'
+		});
+		addEntry({ foodId: bread, amount: 100, date: '2025-02-10', time: '12:00' }, 'de', db);
+		const r = allTimeRange('2026-11-23', db);
+		expect(r).toMatchObject({ from: '2025-02-10', bucket: 'month' });
+		const i = insights(r.from, r.to, r.bucket, db);
+		expect(i.days).toHaveLength(22); // Feb 2025 … Nov 2026
+		expect(i.days[0]).toMatchObject({ date: '2025-02-01', kcal: 240 });
+		addEntry({ foodId: bread, amount: 200, date: '2021-06-01', time: '12:00' }, 'de', db);
+		const y = allTimeRange('2026-11-23', db);
+		expect(y.bucket).toBe('year');
+		const iy = insights(y.from, y.to, y.bucket, db);
+		expect(iy.days.map((d) => d.date)).toEqual([
+			'2021-01-01',
+			'2022-01-01',
+			'2023-01-01',
+			'2024-01-01',
+			'2025-01-01',
+			'2026-01-01'
+		]);
+		expect(iy.days[0].kcal).toBe(480);
+		expect(iy.loggedDays).toBe(2);
 	});
 });
 

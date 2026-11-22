@@ -123,7 +123,11 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   evening), optionally keeping the original times. On past days, the swipe action
   "Nach heute kopieren" copies a single entry.
 - **Adherence** = days within ±10 % of the kcal target, among logged days.
-- **Insights breakdown** periods: today, or the selected week, month or year.
+- **One period switch** (Woche | Monat | Jahr | Gesamt) drives the whole Verlauf page, including
+  "Wer liefert was?", whose total names the period. The list used to have its own Tag/period/Gesamt
+  switch, which made an empty "Tag" look like missing data. "Gesamt" runs from the first entry to
+  today, in monthly bars up to two years and yearly bars beyond; tapping a bar opens that month or
+  year. It opens on Monat the first time; after that the last choice is remembered.
 - **Verlauf periods**: week, month and year, paged with the chevrons, ←/→ or a horizontal swipe
   on the chart. Paging back stops at the period of the first entry; "Heute" jumps back. The year
   shows 12 monthly bars (average kcal per logged day); tapping one opens that month. An empty period

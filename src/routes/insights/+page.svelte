@@ -18,7 +18,7 @@
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import { HEADLINE_KEYS, NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
 	import type { InsightsDTO } from '#lib/server/insights.ts';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import {
 		SOURCE_SORTS,
 		sortContributions,
@@ -26,9 +26,12 @@
 		type SourceSort
 	} from '#lib/nutrition.ts';
 
-	type Mode = 'week' | 'month' | 'year';
+	/** one switch drives the whole page: chart, figures and "Wer liefert was?" */
+	type Mode = 'week' | 'month' | 'year' | 'all';
+	const MODES: Mode[] = ['week', 'month', 'year', 'all'];
 	type Basis = 'current' | 'then';
-	let mode = $state<Mode>('week');
+	// opens on this month the first time; after that the last choice is remembered
+	let mode = $state<Mode>('month');
 	let offset = $state(0);
 	let data = $state<InsightsDTO | null>(null);
 	let loading = $state(false);
@@ -37,8 +40,6 @@
 	/** which targets the figures are compared with: today's (default) or those that applied then */
 	let basis = $state<Basis>('current');
 	let nutrient = $state<NutrientKey>('energy_kcal');
-	type BdPeriod = 'day' | 'range' | 'all';
-	let bdPeriod = $state<BdPeriod>('range');
 	let bdSort = $state<SourceSort>('value');
 	let bdDir = $state<'asc' | 'desc'>('desc');
 	let bd = $state<Breakdown | null>(null);
@@ -59,8 +60,12 @@
 			const from = addMonths(startOfMonth(today), off);
 			return { from, to: endOfMonth(from) };
 		}
-		const y = Number(today.slice(0, 4)) + off;
-		return { from: `${y}-01-01`, to: `${y}-12-31` };
+		if (m === 'year') {
+			const y = Number(today.slice(0, 4)) + off;
+			return { from: `${y}-01-01`, to: `${y}-12-31` };
+		}
+		// all: from the first entry (known once loaded) to today
+		return { from: data?.firstDate ?? today, to: today };
 	}
 	/** offset (relative to today's period) of the period containing `date` */
 	function offsetOf(m: Mode, date: string): number {
@@ -68,7 +73,8 @@
 		if (m === 'week') return Math.round(diffDays(startOfWeek(today), startOfWeek(date)) / 7);
 		const months = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7)) - 1;
 		if (m === 'month') return months(date) - months(today);
-		return Number(date.slice(0, 4)) - Number(today.slice(0, 4));
+		if (m === 'year') return Number(date.slice(0, 4)) - Number(today.slice(0, 4));
+		return 0;
 	}
 
 	const range = $derived(periodOf(mode, offset, app.today));
@@ -85,12 +91,19 @@
 
 	// responses can arrive out of order when paging quickly: only the latest request counts
 	let insightsReq = 0;
+	/** what to load; for "all" the server picks the range, so it doesn't depend on loaded data */
+	const query = $derived(
+		mode === 'all'
+			? ('all' as const)
+			: { from: range.from, to: range.to, bucket: mode === 'year' ? 'month' : 'day' }
+	);
+	const queryKey = $derived(query === 'all' ? 'all' : `${query.from}|${query.to}`);
 	function loadInsights() {
-		const { from, to } = range;
+		const q = query;
 		const id = ++insightsReq;
 		loading = true;
 		api
-			.insights(from, to, mode === 'year' ? 'month' : 'day')
+			.insights(q, q === 'all' ? 'day' : (q.bucket as 'day' | 'month'))
 			.then((d) => {
 				if (id !== insightsReq) return;
 				data = d;
@@ -103,13 +116,20 @@
 				if (id === insightsReq) loading = false;
 			});
 	}
-	$effect(loadInsights);
+	$effect(() => {
+		// the saved switch position is read on mount: don't load the default view first
+		if (!prefsReady) return;
+		void queryKey;
+		untrack(loadInsights);
+	});
 
 	onMount(() => {
 		try {
 			const raw = localStorage.getItem(PREFS_KEY) ?? localStorage.getItem(OLD_PREFS_KEY);
 			const p = JSON.parse(raw ?? '{}');
-			if (['day', 'range', 'all'].includes(p.period)) bdPeriod = p.period;
+			if (MODES.includes(p.mode)) mode = p.mode;
+			// the list used to have its own switch; its "all time" choice carries over
+			else if (p.period === 'all') mode = 'all';
 			if (SOURCE_SORTS.includes(p.sort)) bdSort = p.sort;
 			if (p.dir === 'asc' || p.dir === 'desc') bdDir = p.dir;
 			if (p.basis === 'current' || p.basis === 'then') basis = p.basis;
@@ -120,7 +140,7 @@
 	});
 	$effect(() => {
 		if (!prefsReady) return;
-		const prefs = JSON.stringify({ period: bdPeriod, sort: bdSort, dir: bdDir, basis });
+		const prefs = JSON.stringify({ mode, sort: bdSort, dir: bdDir, basis });
 		try {
 			localStorage.setItem(PREFS_KEY, prefs);
 			localStorage.removeItem(OLD_PREFS_KEY);
@@ -132,8 +152,8 @@
 	$effect(() => {
 		if (!prefsReady) return;
 		const n = nutrient;
-		const r =
-			bdPeriod === 'all' ? 'all' : bdPeriod === 'day' ? { from: app.today, to: app.today } : range;
+		// same period as the chart above
+		const r = mode === 'all' ? 'all' : { from: range.from, to: range.to };
 		const id = ++bdReq;
 		api
 			.breakdown(r, n)
@@ -164,7 +184,9 @@
 					under: data.underDays
 				};
 	});
-	const totalDays = $derived(diffDays(range.from, range.to) + 1);
+	const totalDays = $derived(data ? diffDays(data.from, data.to) + 1 : 0);
+	/** bars stand for days, months or years */
+	const bucket = $derived(data?.bucket ?? 'day');
 
 	// swipe left/right on the chart pages through periods (keyboard: ← / →)
 	let swipe: { x: number; y: number; id: number } | null = null;
@@ -249,7 +271,13 @@
 			? `${fmtDate(range.from, { day: 'numeric', month: 'short' })} – ${fmtDate(range.to, { day: 'numeric', month: 'short', year: 'numeric' })}`
 			: mode === 'month'
 				? fmtDate(range.from, { month: 'long', year: 'numeric' })
-				: range.from.slice(0, 4)
+				: mode === 'year'
+					? range.from.slice(0, 4)
+					: data?.firstDate
+						? t('insights.since', {
+								d: fmtDate(data.firstDate, { day: 'numeric', month: 'short', year: 'numeric' })
+							})
+						: t('insights.allTime')
 	);
 	const hasWeights = $derived(!!data?.days.some((d) => d.weight !== null));
 
@@ -262,14 +290,19 @@
 		const sep = cssVar('--sep');
 		const then = useThen;
 		const targetOf = (x: InsightsDTO['days'][number]) => (then ? x.targetThen : d.targets.kcal);
+		const multiYear = d.from.slice(0, 4) !== d.to.slice(0, 4);
 		const labels = d.days.map((x) =>
 			fmtDate(
 				x.date,
-				mode === 'week'
-					? { weekday: 'short' }
-					: mode === 'month'
-						? { day: 'numeric' }
-						: { month: 'short' }
+				d.bucket === 'year'
+					? { year: 'numeric' }
+					: d.bucket === 'month'
+						? multiYear
+							? { month: 'short', year: '2-digit' }
+							: { month: 'short' }
+						: mode === 'week'
+							? { weekday: 'short' }
+							: { day: 'numeric' }
 			)
 		);
 		const colors = d.days.map((x) =>
@@ -327,20 +360,21 @@
 				maintainAspectRatio: false,
 				animation: reduceMotion ? false : { duration: 300 },
 				plugins: { legend: { display: false }, tooltip: { intersect: false, mode: 'index' } },
-				// year: tapping a month opens it
+				// month and year bars: tapping one opens that month or year
 				onClick:
-					mode === 'year'
+					d.bucket !== 'day'
 						? (_e, els) => {
 								const i = els[0]?.index;
 								if (i === undefined || !data) return;
-								const month = data.days[i].date;
-								mode = 'month';
-								offset = offsetOf('month', month);
+								const target: Mode = data.bucket === 'year' ? 'year' : 'month';
+								const date = data.days[i].date;
+								mode = target;
+								offset = offsetOf(target, date);
 							}
 						: undefined,
 				onHover: (e, els) => {
 					const el = e.native?.target as HTMLElement | undefined;
-					if (el) el.style.cursor = mode === 'year' && els.length ? 'pointer' : '';
+					if (el) el.style.cursor = d.bucket !== 'day' && els.length ? 'pointer' : '';
 				},
 				scales: {
 					x: {
@@ -392,13 +426,14 @@
 
 	<div class="period-bar">
 		<div class="segmented" role="group">
-			{#each ['week', 'month', 'year'] as const as m (m)}
+			{#each MODES as m (m)}
 				<button aria-pressed={mode === m} onclick={() => setMode(m)} data-testid="mode-{m}"
-					>{t(`insights.${m}`)}</button
+					>{t(m === 'all' ? 'insights.allTime' : `insights.${m}`)}</button
 				>
 			{/each}
 		</div>
-		<div class="nav-row period">
+		<!-- "Gesamt" has nothing to page through: the arrows step aside (their space stays) -->
+		<div class="nav-row period" class:no-paging={mode === 'all'}>
 			<button
 				class="nav-btn"
 				onclick={() => go(-1)}
@@ -440,7 +475,7 @@
 				{@attach swipeable}
 			>
 				<div class="card-head">
-					<h2>{mode === 'year' ? t('insights.kcalChartYear') : t('insights.kcalChart')}</h2>
+					<h2>{bucket === 'day' ? t('insights.kcalChart') : t('insights.kcalChartYear')}</h2>
 					{#if hasWeights}
 						<label class="toggle"
 							><input type="checkbox" class="switch small" bind:checked={showWeight} />
@@ -451,7 +486,7 @@
 				{#key `${showWeight}-${mode}`}
 					<ChartCanvas
 						config={chartConfig}
-						label={mode === 'year' ? t('insights.kcalChartYear') : t('insights.kcalChart')}
+						label={bucket === 'day' ? t('insights.kcalChart') : t('insights.kcalChartYear')}
 						height={viewport.ultra
 							? ultraChartHeight
 							: viewport.desktop
@@ -477,7 +512,9 @@
 				{:else}
 					<p class="hint">
 						{t('insights.loggedDays', { n: data.loggedDays, total: totalDays })}.
-						{#if mode === 'year'}{t('insights.yearHint')}{/if}
+						{#if bucket === 'month'}{t('insights.yearHint')}{:else if bucket === 'year'}{t(
+								'insights.yearsHint'
+							)}{/if}
 					</p>
 				{/if}
 			</section>
@@ -571,19 +608,6 @@
 							>{t(`nutrient.${k}`)}</option
 						>{/each}
 				</select>
-				<div class="segmented" role="group" aria-label={t('insights.period')}>
-					<button aria-pressed={bdPeriod === 'day'} onclick={() => (bdPeriod = 'day')}
-						>{t('insights.day')}</button
-					>
-					<button aria-pressed={bdPeriod === 'range'} onclick={() => (bdPeriod = 'range')}
-						>{t(`insights.${mode}`)}</button
-					>
-					<button
-						aria-pressed={bdPeriod === 'all'}
-						onclick={() => (bdPeriod = 'all')}
-						data-testid="breakdown-all">{t('insights.allTime')}</button
-					>
-				</div>
 			</div>
 			<div class="bd-controls">
 				<label class="bd-sort">
@@ -624,8 +648,8 @@
 							</li>
 						{/each}
 					</ul>
-					<p class="section-footer">
-						{t('insights.total')}: {fmtAmount(bd.total)}
+					<p class="section-footer" data-testid="breakdown-total">
+						{t('insights.total')} ({label}): {fmtAmount(bd.total)}
 						{unitOf(nutrient)}
 						{#if bd.missing}· <span class="warn"
 								>{t('insights.missingEntries', { n: bd.missing })}</span
@@ -678,6 +702,9 @@
 <style>
 	.period {
 		margin: 8px -8px 4px;
+	}
+	.no-paging .nav-btn {
+		visibility: hidden;
 	}
 	.period-label {
 		display: flex;
@@ -831,10 +858,6 @@
 		background: var(--bg-elev);
 		padding: 0 10px;
 	}
-	.bd-controls .segmented {
-		width: 228px;
-		flex: none;
-	}
 	.bd-sort {
 		flex: 1;
 		min-width: 0;
@@ -924,7 +947,7 @@
 			gap: 16px;
 		}
 		.period-bar .segmented {
-			width: 240px;
+			width: 320px;
 			flex: none;
 		}
 		.period {

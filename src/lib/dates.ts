@@ -71,8 +71,9 @@ export function addMonths(date: string, n: number): string {
 	return d.toISOString().slice(0, 10);
 }
 
-export function dateRange(from: string, to: string): string[] {
+/** Every day from `from` to `to`; at most `max` days (a guard against runaway ranges). */
+export function dateRange(from: string, to: string, max = 400): string[] {
 	const out: string[] = [];
-	for (let d = from; d <= to && out.length < 400; d = addDays(d, 1)) out.push(d);
+	for (let d = from; d <= to && out.length < max; d = addDays(d, 1)) out.push(d);
 	return out;
 }

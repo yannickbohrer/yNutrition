@@ -3,14 +3,14 @@ import { getDb, type DB } from './db';
 import { logEntries } from './db/schema';
 import { aggregate, macroEnergyShares, rankContributions, movingAverage } from '../nutrition';
 import type { NutrientKey, Nutrients } from '../nutrients';
-import { dateRange } from '../dates';
+import { dateRange, diffDays } from '../dates';
 import { entriesBetween } from './log';
 import { weightsBetween } from './weights';
 import { getUserSettings, targetChangeCount, targetPeriods } from './settings';
 import type { Targets } from '../types';
 
 export interface InsightDay {
-	/** the day, or the first day of the month when bucketed by month */
+	/** the day, or the first day of the month / year when bucketed */
 	date: string;
 	/** total of the day; for a month the average per logged day */
 	kcal: number | null;
@@ -27,6 +27,10 @@ export interface InsightDay {
 	targetThen: number;
 }
 
+export type Bucket = 'day' | 'month' | 'year';
+/** the whole history fits in one request; ~100 years of days */
+const MAX_DAYS = 36_600;
+
 type Macro = 'kcal' | 'protein' | 'carbs' | 'fat' | 'fiber';
 type MacroSet = Record<Macro, number>;
 
@@ -39,7 +43,7 @@ export interface Adherence {
 export interface InsightsDTO {
 	from: string;
 	to: string;
-	bucket: 'day' | 'month';
+	bucket: Bucket;
 	days: InsightDay[];
 	/** current targets (the default comparison) */
 	targets: MacroSet;
@@ -113,7 +117,7 @@ export function firstLogDate(db: DB = getDb()): string | null {
 export function insights(
 	from: string,
 	to: string,
-	bucket: 'day' | 'month' = 'day',
+	bucket: Bucket = 'day',
 	db: DB = getDb()
 ): InsightsDTO {
 	const s = getUserSettings(db);
@@ -128,7 +132,7 @@ export function insights(
 	const ws = weightsBetween(from, to, db);
 	const wByDay = new Map<string, number>();
 	for (const w of ws) wByDay.set(w.date, w.kg); // last one wins
-	const dates = dateRange(from, to);
+	const dates = dateRange(from, to, MAX_DAYS);
 	const then = targetsByDay(dates, t, db);
 	const daily: InsightDay[] = dates.map((date, i) => {
 		const list = byDay.get(date) ?? [];
@@ -162,7 +166,7 @@ export function insights(
 		from,
 		to,
 		bucket,
-		days: bucket === 'month' ? byMonth(daily) : daily,
+		days: bucket === 'day' ? daily : byBucket(daily, bucket),
 		targets: toSet(t),
 		avg,
 		energyShares: macroEnergyShares({ protein: avg.protein, carbs: avg.carbs, fat: avg.fat }),
@@ -187,11 +191,19 @@ export function insights(
 	};
 }
 
-/** Monthly buckets: averages per logged day (weights: per weighed day, targets: per day). */
-function byMonth(days: InsightDay[]): InsightDay[] {
+/** Whole history: from the first entry (or today) to today; months up to two years, then years. */
+export function allTimeRange(today: string, db: DB = getDb()) {
+	const first = firstLogDate(db);
+	const from = first && first < today ? first : today;
+	const bucket: Bucket = diffDays(from, today) > 731 ? 'year' : 'month';
+	return { from, to: today, bucket };
+}
+
+/** Month or year buckets: averages per logged day (weights: per weighed day, targets: per day). */
+function byBucket(days: InsightDay[], bucket: 'month' | 'year'): InsightDay[] {
 	const groups = new Map<string, InsightDay[]>();
 	for (const d of days) {
-		const k = d.date.slice(0, 8) + '01';
+		const k = bucket === 'month' ? d.date.slice(0, 8) + '01' : d.date.slice(0, 5) + '01-01';
 		const g = groups.get(k) ?? [];
 		g.push(d);
 		groups.set(k, g);

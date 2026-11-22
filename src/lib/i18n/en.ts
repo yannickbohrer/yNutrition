@@ -302,6 +302,8 @@ export const en: Messages = {
 		backToToday: 'Today',
 		kcalChartYear: 'Avg. calories per logged day',
 		yearHint: 'Tap a month to open it.',
+		yearsHint: 'Tap a year to open it.',
+		since: 'Since {d}',
 		basisCurrent: 'Compared with your current targets.',
 		basisThen: 'Compared with the targets that applied at the time.',
 		showThen: 'Use targets from the time',
@@ -309,7 +311,8 @@ export const en: Messages = {
 		emptyPeriod: {
 			week: 'No entries this week.',
 			month: 'No entries this month.',
-			year: 'No entries this year.'
+			year: 'No entries this year.',
+			all: 'No entries yet.'
 		},
 		jumpBack: 'Go to the previous entry',
 		prev: 'Previous',

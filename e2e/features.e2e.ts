@@ -294,15 +294,23 @@ test('weight entry and insights render', async ({ page }) => {
 	await page.getByTestId('breakdown-nutrient').selectOption('protein');
 	await expect(page.getByTestId('breakdown-list')).toContainText('%');
 
-	// sort by times eaten over the whole history; the choice survives a reload
+	// one switch drives the list too: its total names the selected period
+	await expect(page.getByTestId('breakdown-total')).toContainText(
+		(await page.getByTestId('period-label').textContent())!
+	);
+
+	// sort by times eaten over the whole history; both choices survive a reload
 	await page.getByTestId('breakdown-sort').selectOption('count');
-	await page.getByTestId('breakdown-all').click();
+	await page.getByTestId('mode-all').click();
+	await expect(page.getByTestId('period-label')).toContainText('Seit');
+	await expect(page.getByTestId('period-prev')).toBeDisabled();
 	await expect(page.getByTestId('breakdown-list')).toContainText('×');
 	await page.getByTestId('breakdown-dir').click();
 	await page.reload();
 	await expect(page.getByTestId('breakdown-sort')).toHaveValue('count');
-	await expect(page.getByTestId('breakdown-all')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('mode-all')).toHaveAttribute('aria-pressed', 'true');
 	await expect(page.getByTestId('breakdown-list')).toContainText('×');
+	await page.getByTestId('mode-week').click();
 });
 
 test('export / import round-trip', async ({ page }, info) => {
