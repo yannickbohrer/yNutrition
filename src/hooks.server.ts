@@ -10,10 +10,12 @@ import {
 } from '#lib/server/auth/session.ts';
 import { createLimiter } from '#lib/server/ratelimit.ts';
 import { config } from '#lib/server/config.ts';
+import { startBackupJob } from '#lib/server/backupJob.ts';
 
 export const init: ServerInit = () => {
 	getDb(); // open + migrate
 	ensureInitialSetup();
+	startBackupJob(config.backupDir);
 	console.log(`[nutrition] ready — origin ${config.origin}, RP ID ${config.rpId}`);
 };
 

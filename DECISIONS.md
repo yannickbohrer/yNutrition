@@ -56,6 +56,20 @@ Decisions made during implementation, especially where the brief left room or re
 - **±buttons**: four buttons (−5, −1, +1, +5). Long-press repeats with acceleration (×2 after
   6 repeats, ×5 after 16).
 
+## Backups
+
+- **Incremental, on the server**: a daily job (`src/lib/server/backupJob.ts`) writes to a host
+  directory outside the Docker volume. A chain is one gzipped JSON base snapshot of the user data
+  (not the database file, whose bulk is reproducible Swiss reference data) plus an append-only
+  journal of changes, so unchanged data is never stored twice. The journal comes from SQLite triggers
+  (`change_log`, generated from `scripts/lib/journal.js`), so every write path is covered: API,
+  import and scripts. Rows that reference foods carry `source:sourceId`, because food ids differ
+  between installations. Exported journal rows are kept in the database for 30 days.
+- A new chain starts each year, when the journal format changes, or when the database doesn't know
+  the chain on disk (e.g. after a restore). A crash between appending and recording the position only
+  repeats lines; the restore replays by sequence number, skipping repeats and a torn last line.
+- The deploy-time SQLite copies in `/data/backups` stay as a quick pre-deploy safety net.
+
 ## External services (usage rules checked)
 
 - **Open Food Facts** (API docs + terms of use):
@@ -109,7 +123,21 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   evening), optionally keeping the original times. On past days, the swipe action
   "Nach heute kopieren" copies a single entry.
 - **Adherence** = days within ±10 % of the kcal target, among logged days.
-- **Insights breakdown** periods: today, or the selected week or month.
+- **Insights breakdown** periods: today, or the selected week, month or year.
+- **Verlauf periods**: week, month and year, paged with the chevrons, ←/→ or a horizontal swipe
+  on the chart. Paging back stops at the period of the first entry; "Heute" jumps back. The year
+  shows 12 monthly bars (average kcal per logged day); tapping one opens that month. An empty period
+  offers a jump to the last entry before it. Only the latest request's answer is shown, so quick
+  paging never shows another period's numbers.
+- **Target history**: every target change is stored with the date it takes effect
+  (`target_history`, one row per day, the first change also stores the previous targets from
+  `0000-01-01`). Verlauf compares with the current targets by default; a quiet text button under the
+  adherence tiles switches to the targets that applied then (stepped, solid target line). It only
+  appears once targets were changed. Both comparisons come in one response, with one indexed query
+  for the targets of the period.
+- **Weight**: the chart covers 30 days, 90 days (default), a year or everything (weekly averages
+  beyond a year); the change tile follows that range. The history list loads 50 rows at a time
+  (keyset pagination over date and id), so every weigh-in stays reachable. Deleting offers undo.
 - **Colours**: iOS system colours, with the light-mode tint deepened to `#0066d6` and separate red tokens for text (`--danger-text`/`--over-text`); bright reds stay for rings and buttons. The light-mode secondary label is darkened to `#6c6c72`, the
   source badges and the active tab label are darker too, so small text passes WCAG AA.
   Lighthouse (production build, authenticated pages): performance 90–98, accessibility 100,

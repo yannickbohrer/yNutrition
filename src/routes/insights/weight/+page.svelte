@@ -9,20 +9,102 @@
 	import { toast } from '#lib/stores/ui.svelte.ts';
 	import { cssVar } from '#lib/charts.ts';
 	import { movingAverage } from '#lib/nutrition.ts';
+	import { addDays, diffDays, startOfWeek } from '#lib/dates.ts';
 	import { fmt, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import type { WeightDTO } from '#lib/types.ts';
+	import type { WeightCursor } from '#lib/server/weights.ts';
 
+	type Range = 'd30' | 'd90' | 'y1' | 'all';
+	const RANGES: Range[] = ['d30', 'd90', 'y1', 'all'];
+	const RANGE_DAYS = { d30: 30, d90: 90, y1: 365 } as const;
+	const RANGE_KEY = 'weight.range';
+
+	// history list: newest first, loaded page by page so every weigh-in stays reachable
 	let list = $state<WeightDTO[]>([]);
+	let next = $state<WeightCursor | null>(null);
+	let total = $state(0);
+	let first = $state<WeightDTO | null>(null);
+	let latest = $state<WeightDTO | null>(null);
+	let loaded = $state(false);
+	let loadingMore = $state(false);
+	/** how many rows the list was expanded to; a refresh keeps that many */
+	let shown = 50;
+
+	// chart: every weigh-in in the selected range
+	let range = $state<Range>('d90');
+	let points = $state<WeightDTO[]>([]);
+
 	let kg = $state<number | null>(null);
 	let date = $state(app.today);
 	let note = $state('');
 	let busy = $state(false);
 
-	onMount(load);
-	async function load() {
-		list = await api.weights();
-		if (kg === null && list[0]) kg = list[0].kg;
+	const rangeFrom = $derived(
+		range === 'all' ? (first?.date ?? app.today) : addDays(app.today, -(RANGE_DAYS[range] - 1))
+	);
+	const rangeTo = $derived(latest && latest.date > app.today ? latest.date : app.today);
+
+	onMount(() => {
+		try {
+			const r = localStorage.getItem(RANGE_KEY) as Range | null;
+			if (r && RANGES.includes(r)) range = r;
+		} catch {
+			// storage blocked: keep the default range
+		}
+		reloadList();
+	});
+	function setRange(r: Range) {
+		range = r;
+		try {
+			localStorage.setItem(RANGE_KEY, r);
+		} catch {
+			// not persisted
+		}
 	}
+
+	async function reloadList() {
+		// keep the list as far expanded as before (a refresh shouldn't collapse it)
+		let p = await api.weightsPage(null, Math.min(200, shown));
+		const items = [...p.items];
+		while (p.next && items.length < shown) {
+			p = await api.weightsPage(p.next, Math.min(200, shown - items.length));
+			items.push(...p.items);
+		}
+		list = items;
+		next = p.next;
+		total = p.total;
+		first = p.first;
+		latest = p.latest;
+		loaded = true;
+		if (kg === null && latest) kg = latest.kg;
+	}
+	async function loadMore() {
+		if (!next || loadingMore) return;
+		loadingMore = true;
+		try {
+			const p = await api.weightsPage(next, 50);
+			list = [...list, ...p.items];
+			shown = list.length;
+			next = p.next;
+			total = p.total;
+		} finally {
+			loadingMore = false;
+		}
+	}
+
+	let chartReq = 0;
+	function loadPoints() {
+		if (!loaded) return;
+		const id = ++chartReq;
+		api.weightsBetween(rangeFrom, rangeTo).then((ws) => {
+			if (id === chartReq) points = ws;
+		});
+	}
+	$effect(() => {
+		// re-run on range change and whenever the list was reloaded
+		void [rangeFrom, rangeTo, total, loaded];
+		loadPoints();
+	});
 
 	async function add(e: Event) {
 		e.preventDefault();
@@ -32,39 +114,66 @@
 			await api.addWeight({ date, kg: Number(kg), note: note || undefined });
 			note = '';
 			toast(t('weight.saved'));
-			await load();
+			await reloadList();
 		} finally {
 			busy = false;
 		}
 	}
 
-	async function remove(id: number) {
-		await api.deleteWeight(id);
-		await load();
+	async function remove(w: WeightDTO) {
+		list = list.filter((x) => x.id !== w.id);
+		try {
+			const { row } = await api.deleteWeight(w.id);
+			await reloadList();
+			toast(t('weight.deleted', { d: fmtDate(w.date, { day: 'numeric', month: 'short' }) }), {
+				action: {
+					label: t('app.undo'),
+					run: async () => {
+						await api.restoreWeight(row);
+						await reloadList();
+					}
+				}
+			});
+		} catch {
+			await reloadList();
+		}
 	}
 
-	const asc = $derived([...list].reverse().slice(-90));
-	const trend = $derived(
-		movingAverage(
-			asc.map((w) => ({ date: w.date, value: w.kg })),
-			7
-		)
-	);
-	const latest = $derived(list[0]);
-	const change = $derived(list.length > 1 ? list[0].kg - list[list.length - 1].kg : null);
+	// more than a year: weekly averages keep the chart readable
+	const weekly = $derived(diffDays(rangeFrom, rangeTo) > 366);
+	const series = $derived.by(() => {
+		if (!weekly) return points.map((w) => ({ date: w.date, value: w.kg }));
+		// plain object: a derived value, never mutated after it's built
+		const byWeek: Record<string, number[]> = {};
+		for (const w of points) (byWeek[startOfWeek(w.date)] ??= []).push(w.kg);
+		return Object.entries(byWeek).map(([d, v]) => ({
+			date: d,
+			value: Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 100) / 100
+		}));
+	});
+	const trend = $derived(movingAverage(series, weekly ? 28 : 7));
+	const change = $derived(points.length > 1 ? points[points.length - 1].kg - points[0].kg : null);
 
 	function chartConfig(): ChartConfiguration {
+		const multiYear = rangeFrom.slice(0, 4) !== rangeTo.slice(0, 4);
 		return {
 			type: 'line',
 			data: {
-				labels: asc.map((w) => fmtDate(w.date, { day: 'numeric', month: 'numeric' })),
+				labels: series.map((w) =>
+					fmtDate(
+						w.date,
+						multiYear
+							? { day: 'numeric', month: 'numeric', year: '2-digit' }
+							: { day: 'numeric', month: 'numeric' }
+					)
+				),
 				datasets: [
 					{
 						label: t('weight.kg'),
-						data: asc.map((w) => w.kg),
+						data: series.map((w) => w.value),
 						borderColor: 'transparent',
 						backgroundColor: cssVar('--label-3'),
-						pointRadius: 3,
+						pointRadius: series.length > 120 ? 2 : 3,
 						showLine: false
 					},
 					{
@@ -145,31 +254,45 @@
 				</div>
 			</form>
 
-			{#if list.length}
+			{#if latest}
 				<div class="tiles">
 					<div class="tile">
 						<span class="t-label">{t('weight.latest')}</span><span class="t-val tabular"
 							>{fmt(latest.kg, 1)}<small> kg</small></span
 						>
 					</div>
-					<div class="tile">
+					<div class="tile" data-testid="weight-change">
 						<span class="t-label">{t('weight.change')}</span><span class="t-val tabular"
 							>{change === null ? '–' : (change > 0 ? '+' : '') + fmt(change, 1)}<small>
 								kg</small
 							></span
 						>
+						<span class="t-sub">{t(`weight.rangeLong.${range}`)}</span>
 					</div>
 				</div>
-				{#if asc.length > 1}
-					<section class="card">
+				<section class="card">
+					<div class="card-head">
 						<h2>{t('weight.trend')}</h2>
-						{#key list}<ChartCanvas
+						<div class="segmented range" role="group" aria-label={t('weight.range')}>
+							{#each RANGES as r (r)}
+								<button
+									aria-pressed={range === r}
+									onclick={() => setRange(r)}
+									data-testid="weight-range-{r}">{t(`weight.ranges.${r}`)}</button
+								>
+							{/each}
+						</div>
+					</div>
+					{#if series.length > 1}
+						{#key `${list.length}-${range}`}<ChartCanvas
 								config={chartConfig}
 								label={t('weight.trend')}
 								height={viewport.ultra ? 440 : viewport.desktop ? 320 : 200}
 							/>{/key}
-					</section>
-				{/if}
+					{:else}
+						<p class="empty-range">{t('weight.noneInRange')}</p>
+					{/if}
+				</section>
 			{/if}
 		</div>
 		{#if list.length}
@@ -190,14 +313,25 @@
 								{#if w.note}<span class="row-sub">{w.note}</span>{/if}
 							</span>
 							<strong class="tabular">{fmt(w.kg, 1)} kg</strong>
-							<button class="del" onclick={() => remove(w.id)} aria-label={t('app.delete')}
-								>×</button
-							>
+							<button class="del" onclick={() => remove(w)} aria-label={t('app.delete')}>×</button>
 						</li>
 					{/each}
+					{#if next}
+						<li>
+							<button
+								class="row more"
+								onclick={loadMore}
+								disabled={loadingMore}
+								data-testid="weight-more">{t('weight.loadMore')}</button
+							>
+						</li>
+					{/if}
 				</ul>
+				{#if !next && total > 50}
+					<p class="section-footer">{t('weight.allLoaded', { n: total })}</p>
+				{/if}
 			</div>
-		{:else}
+		{:else if loaded}
 			<p class="empty">{t('weight.empty')}</p>
 		{/if}
 	</div>
@@ -248,7 +382,49 @@
 	}
 	.card h2 {
 		font-size: 17px;
-		margin: 0 0 8px;
+		margin: 0;
+	}
+	.card-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 8px;
+	}
+	.range {
+		flex: none;
+		width: 200px;
+	}
+	.range button {
+		font-size: 13px;
+		min-height: 28px;
+	}
+	.t-sub {
+		font-size: 12px;
+		color: var(--label-2);
+	}
+	.empty-range {
+		margin: 24px 0;
+		text-align: center;
+		color: var(--label-2);
+		font-size: 15px;
+	}
+	.more {
+		width: 100%;
+		border: 0;
+		background: var(--bg-elev);
+		color: var(--tint);
+		justify-content: center;
+		font: inherit;
+	}
+	/* phones: the range control gets its own line under the title */
+	@media (max-width: 639px) {
+		.card-head {
+			flex-wrap: wrap;
+		}
+		.range {
+			width: 100%;
+		}
 	}
 	.del {
 		border: 0;

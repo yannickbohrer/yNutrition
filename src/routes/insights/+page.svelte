@@ -7,7 +7,14 @@
 	import { toast } from '#lib/stores/ui.svelte.ts';
 	import { viewport } from '#lib/stores/viewport.svelte.ts';
 	import { cssVar } from '#lib/charts.ts';
-	import { addDays, addMonths, endOfMonth, startOfMonth, startOfWeek } from '#lib/dates.ts';
+	import {
+		addDays,
+		addMonths,
+		diffDays,
+		endOfMonth,
+		startOfMonth,
+		startOfWeek
+	} from '#lib/dates.ts';
 	import { fmt, fmtAmount, fmtDate, t } from '#lib/i18n/index.svelte.ts';
 	import { HEADLINE_KEYS, NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
 	import type { InsightsDTO } from '#lib/server/insights.ts';
@@ -19,10 +26,16 @@
 		type SourceSort
 	} from '#lib/nutrition.ts';
 
-	let mode = $state<'week' | 'month'>('week');
+	type Mode = 'week' | 'month' | 'year';
+	type Basis = 'current' | 'then';
+	let mode = $state<Mode>('week');
 	let offset = $state(0);
 	let data = $state<InsightsDTO | null>(null);
+	let loading = $state(false);
+	let failed = $state(false);
 	let showWeight = $state(false);
+	/** which targets the figures are compared with: today's (default) or those that applied then */
+	let basis = $state<Basis>('current');
 	let nutrient = $state<NutrientKey>('energy_kcal');
 	type BdPeriod = 'day' | 'range' | 'all';
 	let bdPeriod = $state<BdPeriod>('range');
@@ -31,30 +44,75 @@
 	let bd = $state<Breakdown | null>(null);
 	// the saved choice is read on mount (SSR renders the defaults), so wait for it before fetching
 	let prefsReady = $state(false);
-	const PREFS_KEY = 'insights.breakdown';
+	const PREFS_KEY = 'insights.prefs';
+	const OLD_PREFS_KEY = 'insights.breakdown';
 	let innerHeight = $state(0);
 	// ultra: the chart takes the window height left under the title, period bar and card chrome
 	const ultraChartHeight = $derived(Math.min(900, Math.max(480, innerHeight - 330)));
 
-	const range = $derived.by(() => {
-		if (mode === 'week') {
-			const from = addDays(startOfWeek(app.today), offset * 7);
+	function periodOf(m: Mode, off: number, today: string) {
+		if (m === 'week') {
+			const from = addDays(startOfWeek(today), off * 7);
 			return { from, to: addDays(from, 6) };
 		}
-		const from = addMonths(startOfMonth(app.today), offset);
-		return { from, to: endOfMonth(from) };
-	});
+		if (m === 'month') {
+			const from = addMonths(startOfMonth(today), off);
+			return { from, to: endOfMonth(from) };
+		}
+		const y = Number(today.slice(0, 4)) + off;
+		return { from: `${y}-01-01`, to: `${y}-12-31` };
+	}
+	/** offset (relative to today's period) of the period containing `date` */
+	function offsetOf(m: Mode, date: string): number {
+		const today = app.today;
+		if (m === 'week') return Math.round(diffDays(startOfWeek(today), startOfWeek(date)) / 7);
+		const months = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7)) - 1;
+		if (m === 'month') return months(date) - months(today);
+		return Number(date.slice(0, 4)) - Number(today.slice(0, 4));
+	}
 
-	$effect(() => {
+	const range = $derived(periodOf(mode, offset, app.today));
+	// paging back stops at the period of the first entry ever logged
+	const minOffset = $derived(data?.firstDate ? Math.min(0, offsetOf(mode, data.firstDate)) : 0);
+
+	function setMode(m: Mode) {
+		mode = m;
+		offset = 0;
+	}
+	function go(delta: number) {
+		offset = Math.max(minOffset, Math.min(0, offset + delta));
+	}
+
+	// responses can arrive out of order when paging quickly: only the latest request counts
+	let insightsReq = 0;
+	function loadInsights() {
 		const { from, to } = range;
-		api.insights(from, to).then((d) => (data = d));
-	});
+		const id = ++insightsReq;
+		loading = true;
+		api
+			.insights(from, to, mode === 'year' ? 'month' : 'day')
+			.then((d) => {
+				if (id !== insightsReq) return;
+				data = d;
+				failed = false;
+			})
+			.catch(() => {
+				if (id === insightsReq) failed = true;
+			})
+			.finally(() => {
+				if (id === insightsReq) loading = false;
+			});
+	}
+	$effect(loadInsights);
+
 	onMount(() => {
 		try {
-			const p = JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}');
+			const raw = localStorage.getItem(PREFS_KEY) ?? localStorage.getItem(OLD_PREFS_KEY);
+			const p = JSON.parse(raw ?? '{}');
 			if (['day', 'range', 'all'].includes(p.period)) bdPeriod = p.period;
 			if (SOURCE_SORTS.includes(p.sort)) bdSort = p.sort;
 			if (p.dir === 'asc' || p.dir === 'desc') bdDir = p.dir;
+			if (p.basis === 'current' || p.basis === 'then') basis = p.basis;
 		} catch {
 			// storage blocked or garbled: keep the defaults
 		}
@@ -62,20 +120,84 @@
 	});
 	$effect(() => {
 		if (!prefsReady) return;
-		const prefs = JSON.stringify({ period: bdPeriod, sort: bdSort, dir: bdDir });
+		const prefs = JSON.stringify({ period: bdPeriod, sort: bdSort, dir: bdDir, basis });
 		try {
 			localStorage.setItem(PREFS_KEY, prefs);
+			localStorage.removeItem(OLD_PREFS_KEY);
 		} catch {
 			// not persisted; the page works the same
 		}
 	});
+	let bdReq = 0;
 	$effect(() => {
 		if (!prefsReady) return;
 		const n = nutrient;
 		const r =
 			bdPeriod === 'all' ? 'all' : bdPeriod === 'day' ? { from: app.today, to: app.today } : range;
-		api.breakdown(r, n).then((b) => (bd = b));
+		const id = ++bdReq;
+		api
+			.breakdown(r, n)
+			.then((b) => {
+				if (id === bdReq) bd = b;
+			})
+			.catch(() => {
+				if (id === bdReq) bd = null;
+			});
 	});
+
+	/** figures for the chosen comparison; the historical one only exists after a target change */
+	const useThen = $derived(basis === 'then' && !!data?.hasTargetHistory);
+	const view = $derived.by(() => {
+		if (!data) return null;
+		const h = data.historical;
+		return useThen
+			? {
+					targets: h.targets,
+					on: h.onTargetDays,
+					over: h.overDays,
+					under: h.underDays
+				}
+			: {
+					targets: data.targets,
+					on: data.onTargetDays,
+					over: data.overDays,
+					under: data.underDays
+				};
+	});
+	const totalDays = $derived(diffDays(range.from, range.to) + 1);
+
+	// swipe left/right on the chart pages through periods (keyboard: ← / →)
+	let swipe: { x: number; y: number; id: number } | null = null;
+	function onPointerDown(e: PointerEvent) {
+		if (e.pointerType === 'mouse') return;
+		swipe = { x: e.clientX, y: e.clientY, id: e.pointerId };
+	}
+	function onPointerUp(e: PointerEvent) {
+		if (!swipe || swipe.id !== e.pointerId) return;
+		const dx = e.clientX - swipe.x;
+		const dy = e.clientY - swipe.y;
+		swipe = null;
+		if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+	}
+	/** attach the swipe gesture (pointer buttons and ← / → keys do the same) */
+	function swipeable(el: HTMLElement) {
+		const cancel = () => (swipe = null);
+		el.addEventListener('pointerdown', onPointerDown);
+		el.addEventListener('pointerup', onPointerUp);
+		el.addEventListener('pointercancel', cancel);
+		return () => {
+			el.removeEventListener('pointerdown', onPointerDown);
+			el.removeEventListener('pointerup', onPointerUp);
+			el.removeEventListener('pointercancel', cancel);
+		};
+	}
+	function onKey(e: KeyboardEvent) {
+		if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+		const el = e.target as HTMLElement | null;
+		if (el?.closest('input, select, textarea, [contenteditable]')) return;
+		if (e.key === 'ArrowLeft') go(-1);
+		else if (e.key === 'ArrowRight') go(1);
+	}
 
 	const bdItems = $derived(bd ? sortContributions(bd.items, bdSort, bdDir).slice(0, 12) : []);
 	const dirLabel = $derived(
@@ -125,20 +247,33 @@
 	const label = $derived(
 		mode === 'week'
 			? `${fmtDate(range.from, { day: 'numeric', month: 'short' })} – ${fmtDate(range.to, { day: 'numeric', month: 'short', year: 'numeric' })}`
-			: fmtDate(range.from, { month: 'long', year: 'numeric' })
+			: mode === 'month'
+				? fmtDate(range.from, { month: 'long', year: 'numeric' })
+				: range.from.slice(0, 4)
 	);
 	const hasWeights = $derived(!!data?.days.some((d) => d.weight !== null));
+
+	const reduceMotion =
+		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	function chartConfig(): ChartConfiguration {
 		const d = data!;
 		const label2 = cssVar('--label-2');
 		const sep = cssVar('--sep');
-		const target = d.targets.kcal;
+		const then = useThen;
+		const targetOf = (x: InsightsDTO['days'][number]) => (then ? x.targetThen : d.targets.kcal);
 		const labels = d.days.map((x) =>
-			fmtDate(x.date, mode === 'week' ? { weekday: 'short' } : { day: 'numeric' })
+			fmtDate(
+				x.date,
+				mode === 'week'
+					? { weekday: 'short' }
+					: mode === 'month'
+						? { day: 'numeric' }
+						: { month: 'short' }
+			)
 		);
 		const colors = d.days.map((x) =>
-			(x.kcal ?? 0) > target * 1.1 ? cssVar('--over') : cssVar('--kcal')
+			(x.kcal ?? 0) > targetOf(x) * 1.1 ? cssVar('--over') : cssVar('--kcal')
 		);
 		const weightPts = d.days.map((x) => x.weight);
 		return {
@@ -159,9 +294,11 @@
 					{
 						type: 'line',
 						label: t('insights.target'),
-						data: d.days.map(() => target),
+						data: d.days.map(targetOf),
 						borderColor: label2,
-						borderDash: [5, 4],
+						// current target: dashed and flat; targets from the time: solid steps
+						borderDash: then ? [] : [5, 4],
+						stepped: then ? 'middle' : false,
 						borderWidth: 1.5,
 						pointRadius: 0,
 						yAxisID: 'y',
@@ -188,8 +325,23 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
-				animation: { duration: 300 },
+				animation: reduceMotion ? false : { duration: 300 },
 				plugins: { legend: { display: false }, tooltip: { intersect: false, mode: 'index' } },
+				// year: tapping a month opens it
+				onClick:
+					mode === 'year'
+						? (_e, els) => {
+								const i = els[0]?.index;
+								if (i === undefined || !data) return;
+								const month = data.days[i].date;
+								mode = 'month';
+								offset = offsetOf('month', month);
+							}
+						: undefined,
+				onHover: (e, els) => {
+					const el = e.native?.target as HTMLElement | undefined;
+					if (el) el.style.cursor = mode === 'year' && els.length ? 'pointer' : '';
+				},
 				scales: {
 					x: {
 						grid: { display: false },
@@ -220,8 +372,7 @@
 		await api.addWeight({ date: app.today, kg: Number(quickKg) });
 		quickKg = null;
 		toast(t('weight.saved'));
-		const { from, to } = range;
-		data = await api.insights(from, to);
+		loadInsights();
 	}
 
 	const macroColors = {
@@ -234,43 +385,62 @@
 </script>
 
 <svelte:head><title>{t('insights.title')} · Nutrition</title></svelte:head>
-<svelte:window bind:innerHeight />
+<svelte:window bind:innerHeight onkeydown={onKey} />
 
 <main class="page insights-page">
 	<h1 class="large-title">{t('insights.title')}</h1>
 
 	<div class="period-bar">
 		<div class="segmented" role="group">
-			<button
-				aria-pressed={mode === 'week'}
-				onclick={() => ((mode = 'week'), (offset = 0))}
-				data-testid="mode-week">{t('insights.week')}</button
-			>
-			<button
-				aria-pressed={mode === 'month'}
-				onclick={() => ((mode = 'month'), (offset = 0))}
-				data-testid="mode-month">{t('insights.month')}</button
-			>
+			{#each ['week', 'month', 'year'] as const as m (m)}
+				<button aria-pressed={mode === m} onclick={() => setMode(m)} data-testid="mode-{m}"
+					>{t(`insights.${m}`)}</button
+				>
+			{/each}
 		</div>
 		<div class="nav-row period">
-			<button class="nav-btn" onclick={() => offset--} aria-label={t('insights.prev')}
-				><Icon name="chevronLeft" /></button
-			>
-			<strong>{label}</strong>
 			<button
 				class="nav-btn"
-				onclick={() => offset++}
+				onclick={() => go(-1)}
+				disabled={offset <= minOffset}
+				aria-label={t('insights.prev')}
+				data-testid="period-prev"><Icon name="chevronLeft" /></button
+			>
+			<span class="period-label">
+				<strong data-testid="period-label">{label}</strong>
+				<!-- only while paged away from today's period -->
+				<button
+					class="text-btn today-btn"
+					class:hidden={offset === 0}
+					disabled={offset === 0}
+					aria-hidden={offset === 0}
+					tabindex={offset === 0 ? -1 : 0}
+					onclick={() => (offset = 0)}
+					data-testid="period-today">{t('insights.backToToday')}</button
+				>
+			</span>
+			<button
+				class="nav-btn"
+				onclick={() => go(1)}
 				disabled={offset >= 0}
-				aria-label={t('insights.next')}><Icon name="chevronRight" /></button
+				aria-label={t('insights.next')}
+				data-testid="period-next"><Icon name="chevronRight" /></button
 			>
 		</div>
 	</div>
 
 	<div class="ins-grid">
-		{#if data}
-			<section class="card a-chart">
+		{#if data && view}
+			<section
+				class="card a-chart"
+				class:stale={loading}
+				aria-busy={loading}
+				data-from={data.from}
+				data-testid="insights-chart"
+				{@attach swipeable}
+			>
 				<div class="card-head">
-					<h2>{t('insights.kcalChart')}</h2>
+					<h2>{mode === 'year' ? t('insights.kcalChartYear') : t('insights.kcalChart')}</h2>
 					{#if hasWeights}
 						<label class="toggle"
 							><input type="checkbox" class="switch small" bind:checked={showWeight} />
@@ -278,10 +448,10 @@
 						>
 					{/if}
 				</div>
-				{#key showWeight}
+				{#key `${showWeight}-${mode}`}
 					<ChartCanvas
 						config={chartConfig}
-						label={t('insights.kcalChart')}
+						label={mode === 'year' ? t('insights.kcalChartYear') : t('insights.kcalChart')}
 						height={viewport.ultra
 							? ultraChartHeight
 							: viewport.desktop
@@ -293,42 +463,68 @@
 										: 220}
 					/>
 				{/key}
-				<p class="hint">
-					{t('insights.loggedDays', { n: data.loggedDays, total: data.days.length })}
-				</p>
+				{#if data.loggedDays === 0}
+					<p class="hint empty-period" data-testid="period-empty">
+						{t(`insights.emptyPeriod.${mode}`)}
+						{#if data.lastBefore}
+							<button
+								class="text-btn"
+								onclick={() => (offset = offsetOf(mode, data!.lastBefore!))}
+								data-testid="period-jump">{t('insights.jumpBack')}</button
+							>
+						{/if}
+					</p>
+				{:else}
+					<p class="hint">
+						{t('insights.loggedDays', { n: data.loggedDays, total: totalDays })}.
+						{#if mode === 'year'}{t('insights.yearHint')}{/if}
+					</p>
+				{/if}
 			</section>
 
-			<div class="a-tiles">
+			<div class="a-tiles" class:stale={loading}>
 				<div class="tiles">
 					<div class="tile" data-testid="avg-kcal">
 						<span class="t-label">{t('insights.avgPerDay')}</span>
 						<span class="t-val tabular">{fmt(data.avg.kcal)}</span>
-						<span class="t-sub">/ {fmt(data.targets.kcal)} kcal</span>
+						<span class="t-sub">/ {fmt(view.targets.kcal)} kcal</span>
 					</div>
-					<div class="tile">
+					<div class="tile" data-testid="adherence">
 						<span class="t-label">{t('insights.adherence')}</span>
 						<span class="t-val tabular"
-							>{data.loggedDays ? fmt((data.onTargetDays / data.loggedDays) * 100) : '–'}<small
-								>%</small
+							>{data.loggedDays ? fmt((view.on / data.loggedDays) * 100) : '–'}<small>%</small
 							></span
 						>
 						<span class="t-sub"
-							>{data.onTargetDays}
-							{t('insights.onTarget')} · {data.overDays}
-							{t('insights.over')} · {data.underDays}
+							>{view.on}
+							{t('insights.onTarget')} · {view.over}
+							{t('insights.over')} · {view.under}
 							{t('insights.under')}</span
 						>
 					</div>
 				</div>
-				<p class="section-footer">{t('insights.adherenceHint')}</p>
+				<p class="section-footer">
+					{t('insights.adherenceHint')}.
+					{#if data.hasTargetHistory}
+						<span data-testid="target-basis"
+							>{useThen ? t('insights.basisThen') : t('insights.basisCurrent')}</span
+						>
+						<button
+							class="text-btn"
+							onclick={() => (basis = useThen ? 'current' : 'then')}
+							data-testid="target-basis-toggle"
+							>{useThen ? t('insights.showCurrent') : t('insights.showThen')}</button
+						>
+					{/if}
+				</p>
 			</div>
 
-			<section class="a-macros">
+			<section class="a-macros" class:stale={loading}>
 				<h2 class="section-header">{t('insights.macros')}</h2>
 				<ul class="group">
 					{#each HEADLINE_KEYS as k (k)}
 						{@const v = data.avg[k]}
-						{@const tg = data.targets[k]}
+						{@const tg = view.targets[k]}
 						<li class="row macro">
 							<span class="dot" style:background={macroColors[k]}></span>
 							<span class="grow">{t(`macros.${k}`)}</span>
@@ -341,7 +537,7 @@
 						<li class="bar-li">
 							<div class="bar">
 								<div
-									style:width="{Math.min(100, (v / tg) * 100)}%"
+									style:width="{tg ? Math.min(100, (v / tg) * 100) : 0}%"
 									style:background={macroColors[k]}
 								></div>
 							</div>
@@ -354,6 +550,11 @@
 					)}% · F {fmt(data.energyShares.fat)}%
 				</p>
 			</section>
+		{:else if failed}
+			<p class="empty a-chart">
+				{t('app.error')}
+				<button class="text-btn" onclick={loadInsights}>{t('app.retry')}</button>
+			</p>
 		{:else}
 			<p class="empty a-chart">{t('app.loading')}</p>
 		{/if}
@@ -375,7 +576,7 @@
 						>{t('insights.day')}</button
 					>
 					<button aria-pressed={bdPeriod === 'range'} onclick={() => (bdPeriod = 'range')}
-						>{mode === 'week' ? t('insights.week') : t('insights.month')}</button
+						>{t(`insights.${mode}`)}</button
 					>
 					<button
 						aria-pressed={bdPeriod === 'all'}
@@ -477,6 +678,54 @@
 <style>
 	.period {
 		margin: 8px -8px 4px;
+	}
+	.period-label {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		min-width: 0;
+	}
+	/* room to spare: keep the label centred and hang "Heute" beside it */
+	@media (min-width: 400px) {
+		.period-label {
+			position: relative;
+		}
+		.today-btn {
+			position: absolute;
+			left: calc(100% + 10px);
+			white-space: nowrap;
+		}
+	}
+	.text-btn {
+		border: 0;
+		background: none;
+		padding: 2px 0;
+		color: var(--tint);
+		font: inherit;
+		cursor: pointer;
+	}
+	.today-btn {
+		font-size: 15px;
+	}
+	/* out of the layout when on today's period, so the label stays centred */
+	.today-btn.hidden {
+		display: none;
+	}
+	.stale {
+		opacity: 0.6;
+		transition: opacity 150ms ease;
+	}
+	.a-chart,
+	.a-tiles,
+	.a-macros {
+		transition: opacity 150ms ease;
+	}
+	.a-chart.card {
+		/* horizontal swipes page through periods; vertical ones still scroll */
+		touch-action: pan-y;
+	}
+	.empty-period .text-btn {
+		font-size: inherit;
 	}
 	.card {
 		background: var(--bg-elev);

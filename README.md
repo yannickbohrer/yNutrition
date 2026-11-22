@@ -18,9 +18,15 @@ laptops and ultrawide monitors. German (Swiss) and English.
   ±1/±5 buttons with long-press acceleration, exact input and a live nutrition preview.
 - **Day view**: progress rings for kcal and macros, a timeline, swipe-to-delete with undo,
   editing, copying entries between days, favourites and recents.
-- **Insights**: weekly and monthly charts, adherence, macro averages, weight trend
-  (7-day average) and a "top sources" breakdown for any nutrient.
+- **Insights (Verlauf)**: weekly, monthly and yearly charts you can page through back to the first
+  entry, adherence and macro averages against your current targets or the targets that applied at
+  the time (target changes are kept with their date), and a "top sources" breakdown for any
+  nutrient.
+- **Weight**: 7-day trend over 30 days, 90 days, a year or everything; the full history loads page
+  by page, and deletions can be undone.
 - **Export/import**: full JSON backup and restore; CSV for entries and weights.
+- **Incremental backups**: a daily base snapshot plus append-only change journal in a host
+  directory (see [Backups](#backups)).
 
 | Today                                    | Portion picker                                    | Search                                    | Insights (dark)                            |
 | ---------------------------------------- | ------------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
@@ -74,6 +80,7 @@ allow WebAuthn on `localhost` without HTTPS.
 | `npm run import:swissfcd`         | Import the Swiss food DB, downloading the XLSX files if missing (`--download` refreshes) |
 | `npm run recovery`                | Print a one-time passkey registration link                                               |
 | `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |
+| `node scripts/restore.js <dir>`   | Rebuild a backup JSON from the incremental backups (base + journal) for the import       |
 | `npm run db:generate`             | Generate a Drizzle migration after schema changes                                        |
 | `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                            |
 
@@ -90,6 +97,18 @@ Passkeys need HTTPS, so put the container behind a TLS-terminating reverse proxy
 `X-Forwarded-For` and `X-Forwarded-Proto`. `ORIGIN` and `RP_ID` must match the public URL. On first
 start, open `/setup?token=<SETUP_TOKEN>` to register a passkey. If `SETUP_TOKEN` is empty, a random
 one is printed to the container logs.
+
+### Backups
+
+With `BACKUP_DIR` set (the compose file mounts the host's `/var/backups/nutrition` at `/backups`),
+the app backs itself up shortly after start and then daily. Each `chain-<date>/` folder holds a
+`base.json.gz` snapshot of all user data and a `journal.jsonl` that only ever grows by the changes
+since the last run (SQLite triggers record every write in `change_log`). A new chain starts each
+year. The host directory must exist and belong to uid 1000 before the container starts
+(`sudo install -d -m 750 -o 1000 -g 1000 /var/backups/nutrition`).
+
+To restore: `node scripts/restore.js /var/backups/nutrition restore.json`, then import
+`restore.json` under Einstellungen → Daten.
 
 ## Architecture
 
@@ -111,8 +130,11 @@ src/
       foods/                 FoodSource interface, Open Food Facts + USDA adapters,
                              local FTS search, caching service, portion presets
       log.ts customFoods.ts weights.ts insights.ts backup.ts settings.ts
+      backupJob.ts           daily incremental backup (base snapshot + change journal)
   routes/                    pages + typed JSON API under /api
-scripts/                     start (entrypoint), import-swissfcd, recovery, backup
+scripts/                     start (entrypoint), import-swissfcd, recovery, backup, restore
+  lib/journal.js             change journal: trigger definitions, snapshot, replay, restore
+  dev/journal-triggers.mjs   regenerates the journal trigger migration from lib/journal.js
 data/                        official Swiss DB XLSX files, portion presets, search aliases
 e2e/                         Playwright specs + mock Open Food Facts server (recorded fixtures)
 ```
@@ -122,7 +144,12 @@ Key design points:
 - **Foods** store nutrients **per 100 g/ml** as JSON. A missing key means _unknown_, never 0.
   Aggregates count the items missing each nutrient, and the UI shows "incomplete data" hints.
 - **Log entries** keep a snapshot of the food (name and per-100 values), so history doesn't
-  change when a custom food is edited later.
+  change when a custom food is edited later. Entries and weigh-ins are never purged.
+- **Targets** have a history (`target_history`, one row per day a change takes effect), so past
+  periods can be judged against the targets of the time.
+- **Every write to user data** is recorded by SQLite triggers in `change_log`, which the backup job
+  appends to the host. When the schema of a journaled table changes, update
+  `scripts/lib/journal.js` and add a migration that recreates its triggers.
 - **Food sources** implement a common `FoodSource` interface (`search`, `lookupBarcode`,
   `sourceUrl`). The adapters are tested against recorded API responses, with no network in tests.
 - **The portion picker** opens with `openPicker({ food, amount?, date, mode })` from anywhere.

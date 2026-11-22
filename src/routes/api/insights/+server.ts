@@ -8,5 +8,6 @@ export const GET: RequestHandler = async ({ url }) => {
 	const to = url.searchParams.get('to') ?? '';
 	if (!isDate(from) || !isDate(to) || diffDays(from, to) < 0 || diffDays(from, to) > 370)
 		error(400, 'invalid range');
-	return json(insights(from, to));
+	const bucket = url.searchParams.get('bucket') === 'month' ? 'month' : 'day';
+	return json(insights(from, to, bucket));
 };

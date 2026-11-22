@@ -303,6 +303,20 @@ export const de = {
 		title: 'Verlauf',
 		week: 'Woche',
 		month: 'Monat',
+		year: 'Jahr',
+		backToToday: 'Heute',
+		kcalChartYear: 'Ø Kalorien pro erfasstem Tag',
+		yearHint: 'Tippe auf einen Monat, um ihn zu öffnen.',
+		basisCurrent: 'Verglichen mit deinen aktuellen Zielen.',
+		basisThen: 'Verglichen mit den Zielen, die damals galten.',
+		showThen: 'Damalige Ziele verwenden',
+		showCurrent: 'Aktuelle Ziele verwenden',
+		emptyPeriod: {
+			week: 'In dieser Woche gibt es keine Einträge.',
+			month: 'In diesem Monat gibt es keine Einträge.',
+			year: 'In diesem Jahr gibt es keine Einträge.'
+		},
+		jumpBack: 'Zum letzten Eintrag davor',
 		prev: 'Vorherige',
 		next: 'Nächste',
 		kcalChart: 'Kalorien pro Tag',
@@ -365,7 +379,19 @@ export const de = {
 		empty: 'Noch keine Einträge.',
 		saved: 'Gewicht gesichert',
 		history: 'Verlauf',
-		quickAdd: 'Schnell erfassen'
+		quickAdd: 'Schnell erfassen',
+		range: 'Zeitraum',
+		ranges: { d30: '30 T', d90: '90 T', y1: '1 J', all: 'Alle' },
+		rangeLong: {
+			d30: 'in 30 Tagen',
+			d90: 'in 90 Tagen',
+			y1: 'in einem Jahr',
+			all: 'seit dem ersten Eintrag'
+		},
+		noneInRange: 'In diesem Zeitraum gibt es keine Einträge.',
+		loadMore: 'Ältere Einträge laden',
+		allLoaded: 'Alle {n} Einträge geladen',
+		deleted: 'Gewicht vom {d} gelöscht'
 	},
 	settings: {
 		title: 'Einstellungen',

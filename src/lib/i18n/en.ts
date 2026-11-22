@@ -298,6 +298,20 @@ export const en: Messages = {
 		title: 'History',
 		week: 'Week',
 		month: 'Month',
+		year: 'Year',
+		backToToday: 'Today',
+		kcalChartYear: 'Avg. calories per logged day',
+		yearHint: 'Tap a month to open it.',
+		basisCurrent: 'Compared with your current targets.',
+		basisThen: 'Compared with the targets that applied at the time.',
+		showThen: 'Use targets from the time',
+		showCurrent: 'Use current targets',
+		emptyPeriod: {
+			week: 'No entries this week.',
+			month: 'No entries this month.',
+			year: 'No entries this year.'
+		},
+		jumpBack: 'Go to the previous entry',
 		prev: 'Previous',
 		next: 'Next',
 		kcalChart: 'Calories per day',
@@ -360,7 +374,19 @@ export const en: Messages = {
 		empty: 'No entries yet.',
 		saved: 'Weight saved',
 		history: 'History',
-		quickAdd: 'Quick add'
+		quickAdd: 'Quick add',
+		range: 'Range',
+		ranges: { d30: '30 d', d90: '90 d', y1: '1 y', all: 'All' },
+		rangeLong: {
+			d30: 'in 30 days',
+			d90: 'in 90 days',
+			y1: 'in one year',
+			all: 'since the first entry'
+		},
+		noneInRange: 'No entries in this range.',
+		loadMore: 'Load older entries',
+		allLoaded: 'All {n} entries loaded',
+		deleted: 'Weight from {d} deleted'
 	},
 	settings: {
 		title: 'Settings',

@@ -9,6 +9,8 @@ services:
       # the container always listens on 3000; PORT in .env is the host port
       PORT: '3000'
       DATABASE_PATH: /data/nutrition.db
+      # incremental backups (base snapshot + append-only change journal), see backupJob.ts
+      BACKUP_DIR: /backups
       # behind a reverse proxy, which appends the resolved client IP to
       # X-Forwarded-For. ORIGIN (in .env) fixes protocol/host for cookies and WebAuthn.
       ADDRESS_HEADER: x-forwarded-for
@@ -21,6 +23,13 @@ services:
       - '${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000'
     volumes:
       - nutrition-data:/data
+      # host directory owned by uid 1000 (the container's node user); created by deploy.sh.
+      # Not auto-created: Docker would make it root-owned and the backups would fail.
+      - type: bind
+        source: ${BACKUP_HOST_DIR:-/var/backups/nutrition}
+        target: /backups
+        bind:
+          create_host_path: false
     mem_limit: 384m
     healthcheck:
       test:

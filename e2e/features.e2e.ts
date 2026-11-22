@@ -407,5 +407,116 @@ test('optional nutrient limits are shown against day totals; quick weight from i
 	await page.getByTestId('quick-weight').press('Enter');
 	await expect(page.getByText('Gewicht gesichert')).toBeVisible();
 	const w = await (await page.request.get('/api/weights')).json();
-	expect(w[0].kg).toBe(77.7);
+	expect(w.items[0].kg).toBe(77.7);
+});
+
+/** Monday of the week containing a YYYY-MM-DD date */
+function mondayOf(date: string): string {
+	const d = new Date(date + 'T00:00:00Z');
+	d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+	return d.toISOString().slice(0, 10);
+}
+
+test('Verlauf: year view, paging limits, out-of-order responses and the target basis', async ({
+	page
+}) => {
+	const s = await (await page.request.get('/api/foods/search?q=apfel')).json();
+	const apple = (s.mine[0] ?? s.local[0]).id;
+	const longAgo = zurichDate(-400);
+	await page.request.post('/api/entries', {
+		data: { foodId: apple, amount: 200, date: longAgo, time: '08:00' }
+	});
+	// a target change: the basis toggle only appears once targets have a history
+	const cur = (await (await page.request.patch('/api/settings', { data: {} })).json()).targets;
+	await page.request.patch('/api/settings', {
+		data: { targets: { ...cur, energy_kcal: cur.energy_kcal + 300 } }
+	});
+
+	await page.goto('/insights');
+	const thisYear = zurichDate(0).slice(0, 4);
+	await page.getByTestId('mode-year').click();
+	await expect(page.getByTestId('period-label')).toHaveText(thisYear);
+	await expect(page.getByTestId('period-today')).toBeHidden();
+	await expect(page.getByTestId('period-next')).toBeDisabled();
+
+	// paging back stops at the year of the first entry
+	const first = (
+		await (
+			await page.request.get(`/api/insights?from=${thisYear}-01-01&to=${thisYear}-12-31`)
+		).json()
+	).firstDate as string;
+	const prev = page.getByTestId('period-prev');
+	while (await prev.isEnabled()) await prev.click();
+	await expect(page.getByTestId('period-label')).toHaveText(first.slice(0, 4));
+	await expect(page.getByTestId('period-today')).toBeVisible();
+	await page.getByTestId('period-today').click();
+	await expect(page.getByTestId('period-label')).toHaveText(thisYear);
+
+	// keyboard paging
+	await page.keyboard.press('ArrowLeft');
+	await expect(page.getByTestId('period-label')).toHaveText(String(Number(thisYear) - 1));
+	await page.keyboard.press('ArrowRight');
+	await expect(page.getByTestId('period-label')).toHaveText(thisYear);
+
+	// a slow answer for an older week must not replace the current week's data
+	await page.getByTestId('mode-week').click();
+	await expect(page.getByTestId('insights-chart')).toHaveAttribute(
+		'data-from',
+		mondayOf(zurichDate(0))
+	);
+	await page.route('**/api/insights?*', async (route) => {
+		const from = new URL(route.request().url()).searchParams.get('from');
+		if (from !== mondayOf(zurichDate(0))) await new Promise((r) => setTimeout(r, 1500));
+		await route.continue();
+	});
+	await page.getByTestId('period-prev').click();
+	await page.getByTestId('period-next').click();
+	await page.waitForTimeout(2000);
+	await expect(page.getByTestId('insights-chart')).toHaveAttribute(
+		'data-from',
+		mondayOf(zurichDate(0))
+	);
+	await page.unroute('**/api/insights?*');
+
+	// compare with current targets by default; the targets from back then are one tap away
+	await expect(page.getByTestId('target-basis')).toContainText('aktuellen Zielen');
+	await page.getByTestId('target-basis-toggle').click();
+	await expect(page.getByTestId('target-basis')).toContainText('damals galten');
+	await page.reload();
+	await expect(page.getByTestId('target-basis')).toContainText('damals galten');
+	await page.getByTestId('target-basis-toggle').click();
+	await expect(page.getByTestId('target-basis')).toContainText('aktuellen Zielen');
+});
+
+test('weight: every weigh-in stays reachable, ranges and undo', async ({ page }) => {
+	for (let i = 1; i <= 120; i++)
+		await page.request.post('/api/weights', {
+			data: { date: zurichDate(-i * 3), kg: 80 + (i % 7) / 10 }
+		});
+	const total = (await (await page.request.get('/api/weights')).json()).total as number;
+	expect(total).toBeGreaterThanOrEqual(120);
+
+	await page.goto('/insights/weight');
+	const rows = page.getByTestId('weight-list').locator('li.row');
+	await expect(rows).toHaveCount(50);
+	while (await page.getByTestId('weight-more').isVisible()) {
+		const n = await rows.count();
+		await page.getByTestId('weight-more').click();
+		await expect(rows).not.toHaveCount(n);
+	}
+	await expect(rows).toHaveCount(total);
+	await expect(page.getByText(`Alle ${total} Einträge geladen`)).toBeVisible();
+
+	await page.getByTestId('weight-range-all').click();
+	await expect(page.getByTestId('weight-change')).toContainText('seit dem ersten Eintrag');
+	await page.getByTestId('weight-range-d30').click();
+	await expect(page.getByTestId('weight-change')).toContainText('in 30 Tagen');
+
+	const firstRow = rows.first();
+	const text = await firstRow.textContent();
+	await firstRow.getByRole('button').click();
+	await expect(rows).toHaveCount(total - 1);
+	await page.getByRole('button', { name: 'Rückgängig' }).click();
+	await expect(rows.first()).toHaveText(text!);
+	await expect(page.getByTestId('weight-list').locator('li.row')).toHaveCount(total);
 });

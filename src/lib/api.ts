@@ -13,6 +13,7 @@ import type {
 	WeightDTO
 } from './types';
 import type { InsightsDTO } from './server/insights';
+import type { WeightCursor, WeightPage } from './server/weights';
 import type { NutrientKey } from './nutrients';
 import type { Contribution } from './nutrition';
 
@@ -116,13 +117,23 @@ export const api = {
 	updateRecipe: (id: number, b: unknown) => req<RecipeDTO>('PUT', `/api/recipes/${id}`, b),
 	deleteRecipe: (id: number) => req<{ ok: true }>('DELETE', `/api/recipes/${id}`),
 
-	weights: () => req<WeightDTO[]>('GET', '/api/weights'),
+	weightsPage: (cursor: WeightCursor | null = null, limit = 50) =>
+		req<WeightPage>(
+			'GET',
+			cursor
+				? `/api/weights?before=${cursor.date}&beforeId=${cursor.id}&limit=${limit}`
+				: `/api/weights?limit=${limit}`
+		),
+	weightsBetween: (from: string, to: string) =>
+		req<WeightDTO[]>('GET', `/api/weights?from=${from}&to=${to}`),
 	addWeight: (b: { date: string; kg: number; note?: string }) =>
 		req<WeightDTO>('POST', '/api/weights', b),
-	deleteWeight: (id: number) => req<{ ok: true }>('DELETE', `/api/weights/${id}`),
+	deleteWeight: (id: number) => req<DeletedRow>('DELETE', `/api/weights/${id}`),
+	restoreWeight: (row: DeletedRow['row']) =>
+		req<WeightDTO>('POST', '/api/weights/restore', { row }),
 
-	insights: (from: string, to: string) =>
-		req<InsightsDTO>('GET', `/api/insights?from=${from}&to=${to}`),
+	insights: (from: string, to: string, bucket: 'day' | 'month' = 'day') =>
+		req<InsightsDTO>('GET', `/api/insights?from=${from}&to=${to}&bucket=${bucket}`),
 	breakdown: (range: { from: string; to: string } | 'all', nutrient: NutrientKey) =>
 		req<Breakdown>(
 			'GET',

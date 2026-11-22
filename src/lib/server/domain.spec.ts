@@ -189,7 +189,7 @@ describe('insights', () => {
 		addEntry({ foodId: bread, amount: 100, date: '2026-03-03', time: '08:00' }, 'de', db); // 240 → over
 		addWeight({ date: '2026-03-02', kg: 80 }, db);
 		addWeight({ date: '2026-03-04', kg: 79 }, db);
-		const i = insights('2026-03-02', '2026-03-08', db);
+		const i = insights('2026-03-02', '2026-03-08', 'day', db);
 		expect(i.days).toHaveLength(7);
 		expect(i.loggedDays).toBe(2);
 		expect(i.avg.kcal).toBe(168);

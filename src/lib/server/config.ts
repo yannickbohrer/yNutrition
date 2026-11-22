@@ -26,6 +26,10 @@ export const config = {
 	get databasePath() {
 		return str('DATABASE_PATH', str('DATABASE_URL', 'data/nutrition.db'));
 	},
+	/** host directory for incremental backups (empty = off) */
+	get backupDir() {
+		return str('BACKUP_DIR');
+	},
 	get origin() {
 		return str('ORIGIN', 'http://localhost:5173');
 	},

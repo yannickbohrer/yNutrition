@@ -9,17 +9,25 @@ import {
 	recipeItems,
 	recipes,
 	searchCache,
+	targetHistory,
 	weights,
 	type FoodRow
 } from './db/schema';
 import { NUTRIENT_KEYS, sanitizeNutrients, isNutrientKey, type NutrientKey } from '../nutrients';
 import { scaleNutrients } from '../nutrition';
-import { getUserSettings, updateUserSettings } from './settings';
+import {
+	BASELINE_DATE,
+	getUserSettings,
+	listTargetHistory,
+	sanitizeTargets,
+	updateUserSettings
+} from './settings';
 import type { UserSettings } from '../types';
 import { isDate, isTime } from '../dates';
 import { ValidationError } from './log';
 
-export const BACKUP_VERSION = 1;
+/** 2: adds `targetHistory` (version 1 files are still accepted). */
+export const BACKUP_VERSION = 2;
 
 type Ref = string;
 const ref = (f: Pick<FoodRow, 'source' | 'sourceId'>): Ref => `${f.source}:${f.sourceId}`;
@@ -71,6 +79,8 @@ export interface Backup {
 		createdAt: number;
 	}[];
 	weights: { date: string; kg: number; note: string | null; createdAt: number }[];
+	/** since version 2 */
+	targetHistory?: { effectiveFrom: string; targets: unknown; createdAt: number }[];
 }
 
 export function exportBackup(db: DB = getDb()): Backup {
@@ -165,7 +175,12 @@ export function exportBackup(db: DB = getDb()): Backup {
 			.from(weights)
 			.orderBy(asc(weights.date))
 			.all()
-			.map((w) => ({ date: w.date, kg: w.kg, note: w.note, createdAt: w.createdAt }))
+			.map((w) => ({ date: w.date, kg: w.kg, note: w.note, createdAt: w.createdAt })),
+		targetHistory: listTargetHistory(db).map((t) => ({
+			effectiveFrom: t.effectiveFrom,
+			targets: t.targets,
+			createdAt: t.createdAt
+		}))
 	};
 }
 
@@ -195,6 +210,7 @@ export function importBackup(input: unknown, db: DB = getDb()) {
 	const counts = db.transaction((tx) => {
 		tx.delete(logEntries).run();
 		tx.delete(weights).run();
+		tx.delete(targetHistory).run();
 		tx.delete(favorites).run();
 		tx.delete(recipeItems).run();
 		tx.delete(recipes).run();
@@ -321,9 +337,22 @@ export function importBackup(input: unknown, db: DB = getDb()) {
 				.run();
 			ws++;
 		}
+		for (const h of Array.isArray(b.targetHistory) ? b.targetHistory : []) {
+			if (h.effectiveFrom !== BASELINE_DATE && !isDate(h.effectiveFrom))
+				throw new ValidationError('invalid target history date');
+			tx.insert(targetHistory)
+				.values({
+					effectiveFrom: h.effectiveFrom,
+					targets: sanitizeTargets(h.targets),
+					createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now()
+				})
+				.onConflictDoNothing()
+				.run();
+		}
 		return { foods: ids.size, entries, weights: ws, recipes: b.recipes!.length };
 	});
-	if (b.settings) updateUserSettings(b.settings, db);
+	// the history comes from the backup itself: restoring old targets isn't a new change
+	if (b.settings) updateUserSettings(b.settings, db, { recordHistory: false });
 	return counts;
 }
 

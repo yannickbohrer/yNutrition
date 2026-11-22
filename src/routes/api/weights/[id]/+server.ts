@@ -10,7 +10,9 @@ export const PATCH: RequestHandler = async (event) => {
 	return json(w);
 };
 
+/** Returns the deleted row so the client can offer "undo" via /api/weights/restore. */
 export const DELETE: RequestHandler = async ({ params }) => {
-	deleteWeight(intParam(params.id));
-	return json({ ok: true });
+	const row = deleteWeight(intParam(params.id));
+	if (!row) error(404, 'not found');
+	return json({ ok: true, row });
 };

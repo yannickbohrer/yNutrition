@@ -9,6 +9,7 @@ import {
 	uniqueIndex
 } from 'drizzle-orm/sqlite-core';
 import type { NutrientKey, Nutrients } from '../../nutrients';
+import type { Targets } from '../../types';
 
 const now = sql`(unixepoch() * 1000)`;
 
@@ -165,6 +166,24 @@ export const weights = sqliteTable(
 	},
 	(t) => [index('weights_date_idx').on(t.date)]
 );
+
+// ---------- target history (one row per change, effective from that local date) ----------
+export const targetHistory = sqliteTable('target_history', {
+	/** local date YYYY-MM-DD from which these targets apply; '0000-01-01' = before the first change */
+	effectiveFrom: text('effective_from').primaryKey(),
+	targets: text('targets', { mode: 'json' }).$type<Targets>().notNull(),
+	createdAt: integer('created_at').notNull().default(now)
+});
+
+// ---------- change journal (filled by triggers, see scripts/lib/journal.js) ----------
+export const changeLog = sqliteTable('change_log', {
+	seq: integer('seq').primaryKey({ autoIncrement: true }),
+	at: integer('at').notNull(),
+	tbl: text('tbl').notNull(),
+	op: text('op', { enum: ['i', 'u', 'd'] }).notNull(),
+	rowKey: text('row_key').notNull(),
+	data: text('data')
+});
 
 // ---------- caches ----------
 export const searchCache = sqliteTable('search_cache', {
