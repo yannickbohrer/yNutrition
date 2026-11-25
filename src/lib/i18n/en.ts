@@ -38,6 +38,8 @@ export const en: Messages = {
 		remaining: 'left',
 		over: 'over',
 		of: 'of',
+		ofTarget: 'of {target}',
+		toggleEaten: 'Tap to switch between left and eaten',
 		consumed: 'eaten',
 		target: 'Target',
 		empty: 'Nothing logged yet.',

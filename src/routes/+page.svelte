@@ -23,6 +23,8 @@
 	// writable derived: follows navigation, can be overwritten by local refreshes
 	let day = $derived<DaySummary>(data.day);
 	let showAll = $state(false);
+	/** the ring centre shows what's left (default) or what's been eaten; tapping switches */
+	let showEaten = $state(false);
 
 	// refresh when log data changes elsewhere (add sheet, picker)
 	let seenVersion = dataVersion.v;
@@ -210,25 +212,45 @@
 		</header>
 
 		<section class="summary" aria-label={t('day.nutrients')}>
-			<Ring
-				value={kcal}
-				target={targets.energy_kcal}
-				color="var(--kcal)"
-				size={148}
-				width={14}
-				label={t('a11y.ring', {
+			<button
+				type="button"
+				class="ring-toggle"
+				aria-pressed={showEaten}
+				aria-label="{t('a11y.ring', {
 					label: t('macros.energy_kcal'),
 					value: fmt(e(kcal)),
 					target: fmt(e(targets.energy_kcal))
-				})}
+				})}. {t('day.toggleEaten')}"
+				onclick={() => (showEaten = !showEaten)}
+				data-testid="kcal-toggle"
 			>
-				<span class="remain tabular" class:over={remaining < 0} data-testid="kcal-remaining"
-					>{fmt(e(Math.abs(remaining)))}</span
+				<Ring
+					value={kcal}
+					target={targets.energy_kcal}
+					color="var(--kcal)"
+					size={148}
+					width={14}
+					label={t('a11y.ring', {
+						label: t('macros.energy_kcal'),
+						value: fmt(e(kcal)),
+						target: fmt(e(targets.energy_kcal))
+					})}
 				>
-				<span class="remain-label" class:over={remaining < 0}
-					>{unit} {remaining < 0 ? t('day.over') : t('day.remaining')}</span
-				>
-			</Ring>
+					{#if showEaten}
+						<span class="remain tabular" class:over={remaining < 0}>{fmt(e(kcal))}</span>
+						<span class="remain-label" class:over={remaining < 0}
+							>{t('day.ofTarget', { target: `${fmt(e(targets.energy_kcal))} ${unit}` })}</span
+						>
+					{:else}
+						<span class="remain tabular" class:over={remaining < 0} data-testid="kcal-remaining"
+							>{fmt(e(Math.abs(remaining)))}</span
+						>
+						<span class="remain-label" class:over={remaining < 0}
+							>{unit} {remaining < 0 ? t('day.over') : t('day.remaining')}</span
+						>
+					{/if}
+				</Ring>
+			</button>
 			<div class="summary-side">
 				<div class="kcal-line tabular">
 					<strong>{fmt(e(kcal))}</strong> / {fmt(e(targets.energy_kcal))}
@@ -403,6 +425,20 @@
 		background: var(--bg-elev);
 		border-radius: var(--radius-lg);
 		padding: 16px;
+	}
+	.ring-toggle {
+		flex: none;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		border-radius: 50%;
+		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.ring-toggle:active {
+		opacity: 0.7;
 	}
 	.remain {
 		font-family: var(--font-rounded);

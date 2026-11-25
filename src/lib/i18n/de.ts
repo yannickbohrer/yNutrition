@@ -42,6 +42,8 @@ export const de = {
 		remaining: 'übrig',
 		over: 'zu viel',
 		of: 'von',
+		ofTarget: 'von {target}',
+		toggleEaten: 'Tippen, um zwischen übrig und gegessen zu wechseln',
 		consumed: 'gegessen',
 		target: 'Ziel',
 		empty: 'Noch nichts erfasst.',

@@ -123,6 +123,8 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   evening), optionally keeping the original times. On past days, the swipe action
   "Nach heute kopieren" copies a single entry.
 - **Adherence** = days within ±10 % of the kcal target, among logged days.
+- **Kcal ring centre**: shows what's left by default; tapping the ring switches to what's been
+  eaten "von {Ziel}" and back. The choice isn't saved, so the page always opens on "übrig".
 - **One period switch** (Woche | Monat | Jahr | Gesamt) drives the whole Verlauf page, including
   "Wer liefert was?", whose total names the period. The list used to have its own Tag/period/Gesamt
   switch, which made an empty "Tag" look like missing data. "Gesamt" runs from the first entry to
