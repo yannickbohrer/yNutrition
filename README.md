@@ -60,8 +60,10 @@ npm run import:swissfcd
 npm run dev                   # http://localhost:5173
 ```
 
-To run it in production you need Docker, a domain and an HTTPS reverse proxy:
-[what has to run](docs/deployment/README.md), and a
+## Deployment
+
+To run it in production you need Docker, a domain and an HTTPS reverse proxy. The
+[deployment guide](docs/deployment/README.md) lists what has to run, and there is a
 [step-by-step example on a V-Server](docs/deployment/vserver.md).
 
 ## Documentation
