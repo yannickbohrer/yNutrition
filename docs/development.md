@@ -11,7 +11,7 @@ npx npm@11 install
 cp .env.example .env
 ```
 
-Then set these in `.env` for local use:
+Then switch `.env` to the local values listed at its end:
 
 ```sh
 ORIGIN=http://localhost:5173

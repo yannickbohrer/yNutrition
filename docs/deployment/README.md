@@ -63,26 +63,26 @@ and the proxy settings (`ADDRESS_HEADER`, `XFF_DEPTH`, `PROTOCOL_HEADER`, `BODY_
 
 ### Configuration (`.env`, next to `docker-compose.yml`)
 
-| Variable             | Required | Meaning                                                                          |
-| -------------------- | -------- | -------------------------------------------------------------------------------- |
-| `ORIGIN`             | yes      | public URL exactly as the browser shows it, e.g. `https://nutrition.example.com` |
-| `RP_ID`              | yes      | the hostname alone, e.g. `nutrition.example.com`                                 |
-| `SESSION_SECRET`     | yes      | ≥ 32 random characters (`openssl rand -base64 48`); start fails otherwise        |
-| `OFF_CONTACT_EMAIL`  | yes¹     | your contact address, sent to Open Food Facts in the User-Agent                  |
-| `SETUP_TOKEN`        | no       | first-run token; leave empty and a random one is printed to the logs             |
-| `PORT`               | no       | **host** port the container is published on (default 3000)                       |
-| `BIND_ADDRESS`       | no       | host interface to publish on. `127.0.0.1` when the proxy runs on the same host   |
-| `BACKUP_HOST_DIR`    | no       | host directory for incremental backups (default `/var/backups/nutrition`)        |
-| `USDA_API_KEY`       | no       | free key from [fdc.nal.usda.gov](https://fdc.nal.usda.gov/api-key-signup)        |
-| `TZ`                 | no       | container time zone (default `Europe/Zurich`), see the note below                |
-| `SWISSFCD_URL_DE/EN` | no       | replacement download URLs after the FSVO publishes a new version                 |
+| Variable             | Required | Meaning                                                                               |
+| -------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `ORIGIN`             | yes      | public URL exactly as the browser shows it, e.g. `https://nutrition.example.com`      |
+| `RP_ID`              | yes      | the hostname alone, e.g. `nutrition.example.com`                                      |
+| `SESSION_SECRET`     | yes      | ≥ 32 random characters (`openssl rand -base64 48`); start fails otherwise             |
+| `OFF_CONTACT_EMAIL`  | yes¹     | your contact address, sent to Open Food Facts in the User-Agent                       |
+| `SETUP_TOKEN`        | no       | first-run token; leave empty and a random one is printed to the logs                  |
+| `PORT`               | no       | **host** port the container is published on (default 3000)                            |
+| `BIND_ADDRESS`       | no       | host interface to publish on (default `127.0.0.1`: only the local proxy can reach it) |
+| `BACKUP_HOST_DIR`    | no       | host directory for incremental backups (default `/var/backups/nutrition`)             |
+| `USDA_API_KEY`       | no       | free key from [fdc.nal.usda.gov](https://fdc.nal.usda.gov/api-key-signup)             |
+| `TZ`                 | no       | container time zone (default `Europe/Zurich`), see the note below                     |
+| `SWISSFCD_URL_DE/EN` | no       | replacement download URLs after the FSVO publishes a new version                      |
 
 ¹ The app starts without it but logs a warning; Open Food Facts' API rules ask for it.
 
 > **Bind address:** Docker's published ports bypass host firewalls such as `ufw`. If the proxy
-> runs on the same machine, set `BIND_ADDRESS=127.0.0.1` so port 3000 is never reachable from the
-> internet. Use `0.0.0.0` only when the proxy is on another machine and a firewall in front
-> restricts the port.
+> runs on the same machine, keep the default `BIND_ADDRESS=127.0.0.1` so port 3000 is never
+> reachable from the internet. Use `0.0.0.0` only when the proxy is on another machine and a
+> firewall in front restricts the port.
 
 > **Time zone:** the day boundary is currently fixed to Europe/Zurich in several places
 > (`src/lib/dates.ts`), so `TZ` doesn't fully move it yet.
