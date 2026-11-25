@@ -82,11 +82,23 @@ export interface Targets {
 	extra: Partial<Record<NutrientKey, NutrientTarget>>;
 }
 
+/** Protein, carbs and fat as whole percent of the kcal target (or grams, where noted). */
+export interface MacroSplit {
+	protein: number;
+	carbs: number;
+	fat: number;
+}
+
 export interface UserSettings {
 	lang: Lang;
 	energyUnit: EnergyUnit;
 	showKj: boolean;
 	targets: Targets;
+	/**
+	 * When set, the macro targets are kept as these shares of the kcal target: the gram values in
+	 * `targets` are derived from them on every save. `null` = macro targets are set in grams.
+	 */
+	macroSplit: MacroSplit | null;
 }
 
 export interface DaySummary {

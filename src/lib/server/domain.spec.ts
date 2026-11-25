@@ -13,7 +13,8 @@ import { getFoodDTO, setFavorite } from './foods/repo';
 import { addWeight, listWeights } from './weights';
 import { breakdown, insights } from './insights';
 import { entriesCsv, exportBackup, importBackup, weightsCsv } from './backup';
-import { updateUserSettings, getUserSettings, setSetting } from './settings';
+import { updateUserSettings, getUserSettings, setSetting, listTargetHistory } from './settings';
+import { gramsFromSplit, sanitizeSplit, splitFromGrams } from '../macros';
 import { addDays, endOfMonth, startOfWeek, todayLocal } from '../dates';
 
 let db: DB;
@@ -229,6 +230,48 @@ describe('targets', () => {
 		expect(t.extra.fiber).toBeUndefined();
 		expect(t.extra.sugars?.max).toBe(50);
 	});
+	it('keeps macros as shares of the kcal target and rescales them when kcal changes', () => {
+		const t0 = getUserSettings(db).targets;
+		let s = updateUserSettings(
+			{ targets: { ...t0, energy_kcal: 2000 }, macroSplit: { protein: 25, carbs: 50, fat: 25 } },
+			db
+		);
+		expect(s.targets).toMatchObject({ protein: 125, carbs: 250, fat: 56 });
+		s = updateUserSettings({ targets: { ...s.targets, energy_kcal: 2400 } }, db);
+		expect(s.macroSplit).toEqual({ protein: 25, carbs: 50, fat: 25 });
+		expect(s.targets).toMatchObject({ protein: 150, carbs: 300, fat: 67 });
+		// the history records the derived grams
+		expect(listTargetHistory(db).at(-1)!.targets).toMatchObject({ protein: 150, fat: 67 });
+		// an invalid split keeps the current one; null goes back to grams
+		s = updateUserSettings({ macroSplit: { protein: 0, carbs: 50, fat: 25 } }, db);
+		expect(s.macroSplit?.protein).toBe(25);
+		s = updateUserSettings({ targets: { ...s.targets, protein: 160 }, macroSplit: null }, db);
+		expect(s.macroSplit).toBeNull();
+		expect(getUserSettings(db).targets.protein).toBe(160);
+	});
+});
+
+describe('macro split', () => {
+	it('converts between grams and shares', () => {
+		expect(gramsFromSplit(1800, { protein: 30, carbs: 40, fat: 30 })).toEqual({
+			protein: 135,
+			carbs: 180,
+			fat: 60
+		});
+		expect(splitFromGrams(2000, { protein: 100, carbs: 230, fat: 70 })).toEqual({
+			protein: 20,
+			carbs: 46,
+			fat: 32
+		});
+		expect(gramsFromSplit(500, { protein: 1, carbs: 1, fat: 1 }).fat).toBe(1);
+		expect(sanitizeSplit({ protein: '25', carbs: 50.4, fat: 25 })).toEqual({
+			protein: 25,
+			carbs: 50,
+			fat: 25
+		});
+		expect(sanitizeSplit({ protein: 101, carbs: 50, fat: 25 })).toBeNull();
+		expect(sanitizeSplit(null)).toBeNull();
+	});
 });
 
 describe('backup', () => {
@@ -303,6 +346,18 @@ describe('backup', () => {
 		// importing twice is idempotent (replace semantics)
 		importBackup(json, db2);
 		expect(getDay('2026-03-01', db2).count).toBe(2);
+	});
+	it('restores the macro split, and treats backups without one as gram targets', () => {
+		updateUserSettings({ macroSplit: { protein: 30, carbs: 40, fat: 30 } }, db);
+		const json = JSON.parse(JSON.stringify(exportBackup(db)));
+		const db2 = createTestDb();
+		importBackup(json, db2);
+		expect(getUserSettings(db2).macroSplit).toEqual({ protein: 30, carbs: 40, fat: 30 });
+		delete json.settings.macroSplit;
+		json.settings.targets.protein = 111;
+		importBackup(json, db2);
+		expect(getUserSettings(db2).macroSplit).toBeNull();
+		expect(getUserSettings(db2).targets.protein).toBe(111);
 	});
 	it('rejects foreign files', () => {
 		expect(() => importBackup({ foo: 1 }, db)).toThrow();

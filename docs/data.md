@@ -37,6 +37,10 @@ of backups. ² Never exported.
   to midnight.
 - **Target history** starts with a `0000-01-01` row holding the targets before the first change,
   so past periods are judged against the targets of the time.
+- **Macro targets in percent**: `settings.user.macroSplit` (`{ protein, carbs, fat }`, whole
+  percent of the kcal target, or `null` for grams). When set, every save derives the gram targets
+  from it (`src/lib/macros.ts`, 4/4/9 kcal per g, rounded to whole grams), so `targets` and the
+  target history always hold grams. Fibre always stays in grams.
 - **Entries and weigh-ins are never purged.** Deletes are explicit user actions with undo.
 
 ## Changing the schema

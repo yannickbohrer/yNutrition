@@ -6,14 +6,17 @@
 	import { toast } from '#lib/stores/ui.svelte.ts';
 	import { fmt, t } from '#lib/i18n/index.svelte.ts';
 	import { NUTRIENTS, NUTRIENT_KEYS, type NutrientKey } from '#lib/nutrients.ts';
-	import type { NutrientTarget } from '#lib/types.ts';
+	import { MACRO_KEYS, gramsFromSplit, sanitizeSplit, splitFromGrams } from '#lib/macros.ts';
+	import type { MacroSplit, NutrientTarget } from '#lib/types.ts';
 
 	const cur = app.settings.targets;
 	let kcal = $state(cur.energy_kcal);
-	let protein = $state(cur.protein);
-	let carbs = $state(cur.carbs);
-	let fat = $state(cur.fat);
 	let fiber = $state(cur.fiber);
+	/** macro targets in grams: what is saved in gram mode */
+	let grams = $state<MacroSplit>({ protein: cur.protein, carbs: cur.carbs, fat: cur.fat });
+	/** macro targets as % of kcal: what is saved in percent mode */
+	let pct = $state<MacroSplit>(app.settings.macroSplit ?? splitFromGrams(cur.energy_kcal, cur));
+	let mode = $state<'g' | 'pct'>(app.settings.macroSplit ? 'pct' : 'g');
 	let extra = $state<{ key: NutrientKey; min: number | null; max: number | null }[]>(
 		Object.entries(cur.extra).map(([k, v]) => ({
 			key: k as NutrientKey,
@@ -23,7 +26,36 @@
 	);
 	let addKey = $state<NutrientKey | ''>('');
 
-	const macroKcal = $derived((protein || 0) * 4 + (carbs || 0) * 4 + (fat || 0) * 9);
+	const macroKcal = $derived(
+		(grams.protein || 0) * 4 + (grams.carbs || 0) * 4 + (grams.fat || 0) * 9
+	);
+	const pctGrams = $derived(
+		gramsFromSplit(kcal || 0, {
+			protein: pct.protein || 0,
+			carbs: pct.carbs || 0,
+			fat: pct.fat || 0
+		})
+	);
+	const pctSum = $derived(MACRO_KEYS.reduce((sum, k) => sum + (pct[k] || 0), 0));
+	const macroLabel = {
+		protein: 'targets.protein',
+		carbs: 'targets.carbs',
+		fat: 'targets.fat'
+	} as const;
+
+	/** Switching carries the current values over, so the targets don't jump. */
+	function setMode(m: 'g' | 'pct') {
+		if (m === mode) return;
+		if (m === 'pct') {
+			const p = splitFromGrams(kcal || 0, grams);
+			pct = {
+				protein: Math.max(1, p.protein),
+				carbs: Math.max(1, p.carbs),
+				fat: Math.max(1, p.fat)
+			};
+		} else grams = sanitizeSplit(pct) ? { ...pctGrams } : grams;
+		mode = m;
+	}
 	const available = $derived(
 		NUTRIENT_KEYS.filter(
 			(k) =>
@@ -39,12 +71,17 @@
 	}
 
 	async function save() {
+		const split = mode === 'pct' ? sanitizeSplit(pct) : null;
+		if (mode === 'pct' && !split) return toast(t('targets.pctInvalid'));
 		const ex: Record<string, NutrientTarget> = {};
 		for (const e of extra)
 			if (e.min || e.max) ex[e.key] = { min: e.min || null, max: e.max || null };
+		const g = split ? gramsFromSplit(kcal, split) : grams;
 		const s = await api.settings({
-			targets: { energy_kcal: kcal, protein, carbs, fat, fiber, extra: ex }
+			targets: { energy_kcal: kcal, ...g, fiber, extra: ex },
+			macroSplit: split
 		});
+		grams = { protein: s.targets.protein, carbs: s.targets.carbs, fat: s.targets.fat };
 		app.settings = s;
 		await invalidateAll();
 		toast(t('targets.saved'));
@@ -71,33 +108,6 @@
 			/><span class="u">kcal</span>
 		</li>
 		<li class="row">
-			<label class="grow" for="t-p">{t('targets.protein')}</label><input
-				id="t-p"
-				type="number"
-				inputmode="numeric"
-				min="0"
-				bind:value={protein}
-			/><span class="u">g</span>
-		</li>
-		<li class="row">
-			<label class="grow" for="t-c">{t('targets.carbs')}</label><input
-				id="t-c"
-				type="number"
-				inputmode="numeric"
-				min="0"
-				bind:value={carbs}
-			/><span class="u">g</span>
-		</li>
-		<li class="row">
-			<label class="grow" for="t-f">{t('targets.fat')}</label><input
-				id="t-f"
-				type="number"
-				inputmode="numeric"
-				min="0"
-				bind:value={fat}
-			/><span class="u">g</span>
-		</li>
-		<li class="row">
 			<label class="grow" for="t-fib">{t('targets.fiber')}</label><input
 				id="t-fib"
 				type="number"
@@ -108,9 +118,51 @@
 			/><span class="u">g</span>
 		</li>
 	</ul>
-	<p class="section-footer" class:warn={Math.abs(macroKcal - kcal) > kcal * 0.1}>
-		{t('targets.macroCheck', { kcal: `${fmt(macroKcal)} kcal` })}
-	</p>
+
+	<h2 class="section-header" id="macros-h">{t('targets.macros')}</h2>
+	<div class="segmented mode" role="group" aria-labelledby="macros-h">
+		<button type="button" aria-pressed={mode === 'g'} onclick={() => setMode('g')}
+			>{t('targets.inGrams')}</button
+		>
+		<button
+			type="button"
+			aria-pressed={mode === 'pct'}
+			onclick={() => setMode('pct')}
+			data-testid="macro-mode-pct">{t('targets.inPercent')}</button
+		>
+	</div>
+	<ul class="group">
+		{#each MACRO_KEYS as k (k)}
+			<li class="row">
+				<label class="grow" for="t-{k}">{t(macroLabel[k])}</label>
+				{#if mode === 'pct'}
+					<span class="calc">{pct[k] > 0 ? `${fmt(pctGrams[k])} g` : '–'}</span><input
+						id="t-{k}"
+						type="number"
+						inputmode="numeric"
+						min="1"
+						max="100"
+						bind:value={pct[k]}
+					/><span class="u">%</span>
+				{:else}
+					<input id="t-{k}" type="number" inputmode="numeric" min="0" bind:value={grams[k]} /><span
+						class="u">g</span
+					>
+				{/if}
+			</li>
+		{/each}
+	</ul>
+	{#if mode === 'pct'}
+		<p class="section-footer" class:warn={pctSum !== 100}>
+			{pctSum === 100
+				? t('targets.pctSum', { sum: fmt(pctSum) })
+				: t('targets.pctSumOff', { sum: fmt(pctSum) })}
+		</p>
+	{:else}
+		<p class="section-footer" class:warn={Math.abs(macroKcal - kcal) > kcal * 0.1}>
+			{t('targets.macroCheck', { kcal: `${fmt(macroKcal)} kcal` })}
+		</p>
+	{/if}
 
 	<h2 class="section-header">{t('targets.extra')}</h2>
 	{#if extra.length}
@@ -165,6 +217,14 @@
 	}
 	.row input {
 		max-width: 90px;
+	}
+	.mode {
+		margin: 0 0 10px;
+	}
+	.calc {
+		color: var(--label-2);
+		font-variant-numeric: tabular-nums;
+		margin-right: 12px;
 	}
 	.extra input {
 		max-width: 72px;

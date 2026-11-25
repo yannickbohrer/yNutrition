@@ -139,6 +139,13 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   adherence tiles switches to the targets that applied then (stepped, solid target line). It only
   appears once targets were changed. Both comparisons come in one response, with one indexed query
   for the targets of the period.
+- **Macro targets in percent**: the targets page switches protein, carbs and fat together between
+  grams and % of the kcal target (fibre isn't a share of calories, so it stays in grams). Percent
+  mode is remembered: the shares are stored and the grams are recalculated whenever the kcal target
+  changes, which is the point of setting them that way. The grams stay the stored target, so the
+  Today rings, Verlauf and the target history keep working unchanged and past days aren't
+  re-judged. Shares that don't add up to 100 % only get a warning, like grams that don't match
+  the kcal target. A backup without a split predates the feature and restores as gram targets.
 - **Weight**: the chart covers 30 days, 90 days (default), a year or everything (weekly averages
   beyond a year); the change tile follows that range. The history list loads 50 rows at a time
   (keyset pagination over date and id), so every weigh-in stays reachable. Deleting offers undo.

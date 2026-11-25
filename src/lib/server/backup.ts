@@ -352,7 +352,11 @@ export function importBackup(input: unknown, db: DB = getDb()) {
 		return { foods: ids.size, entries, weights: ws, recipes: b.recipes!.length };
 	});
 	// the history comes from the backup itself: restoring old targets isn't a new change
-	if (b.settings) updateUserSettings(b.settings, db, { recordHistory: false });
+	// a backup without `macroSplit` predates percent targets: its macros were set in grams
+	if (b.settings)
+		updateUserSettings({ ...b.settings, macroSplit: b.settings.macroSplit ?? null }, db, {
+			recordHistory: false
+		});
 	return counts;
 }
 

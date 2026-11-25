@@ -3,13 +3,15 @@ import { getDb, type DB } from './db';
 import { settings, targetHistory } from './db/schema';
 import { todayLocal } from '../dates';
 import { sanitizeNutrients, isNutrientKey } from '../nutrients';
+import { gramsFromSplit, sanitizeSplit } from '../macros';
 import type { Lang, NutrientTarget, Targets, UserSettings } from '../types';
 
 export const DEFAULT_SETTINGS: UserSettings = {
 	lang: 'de',
 	energyUnit: 'kcal',
 	showKj: false,
-	targets: { energy_kcal: 2000, protein: 100, carbs: 230, fat: 70, fiber: 30, extra: {} }
+	targets: { energy_kcal: 2000, protein: 100, carbs: 230, fat: 70, fiber: 30, extra: {} },
+	macroSplit: null
 };
 
 export function getSetting<T>(key: string, db: DB = getDb()): T | undefined {
@@ -41,7 +43,8 @@ export function getUserSettings(db: DB = getDb()): UserSettings {
 			...(s.targets ?? {}),
 			fiber: fiber ?? DEFAULT_SETTINGS.targets.fiber,
 			extra
-		}
+		},
+		macroSplit: sanitizeSplit(s.macroSplit)
 	};
 }
 
@@ -79,12 +82,22 @@ export function updateUserSettings(
 	opts: { recordHistory?: boolean } = {}
 ): UserSettings {
 	const cur = getUserSettings(db);
+	// `null` switches back to grams; an invalid split keeps the current mode
+	const macroSplit =
+		patch.macroSplit === undefined
+			? cur.macroSplit
+			: patch.macroSplit === null
+				? null
+				: (sanitizeSplit(patch.macroSplit) ?? cur.macroSplit);
+	let targets = patch.targets ? sanitizeTargets(patch.targets, cur.targets) : cur.targets;
+	if (macroSplit) targets = { ...targets, ...gramsFromSplit(targets.energy_kcal, macroSplit) };
 	const next: UserSettings = {
 		lang: patch.lang === 'en' || patch.lang === 'de' ? (patch.lang as Lang) : cur.lang,
 		energyUnit:
 			patch.energyUnit === 'kJ' || patch.energyUnit === 'kcal' ? patch.energyUnit : cur.energyUnit,
 		showKj: typeof patch.showKj === 'boolean' ? patch.showKj : cur.showKj,
-		targets: patch.targets ? sanitizeTargets(patch.targets, cur.targets) : cur.targets
+		targets,
+		macroSplit
 	};
 	db.transaction((tx) => {
 		setSetting('user', next, tx as unknown as DB);
