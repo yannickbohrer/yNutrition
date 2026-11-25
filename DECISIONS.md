@@ -219,7 +219,3 @@ preferred`, attestation `none`. Single user, with a random user handle in settin
   route from 320 to 430 px.
 - The camera is mocked via Chromium's fake media stream plus a test hook
   (`window.__NUTRITION_TEST_BARCODE__`) that stands in for the detector.
-- `deploy.sh` was tested end-to-end against a simulated Debian 12 VM (privileged container with
-  sshd and a sudo user that requires a password): the first deploy installed Docker, built,
-  passed the healthcheck and printed the setup link; the redeploy backed up and kept the
-  secrets. It's also ShellCheck-clean.

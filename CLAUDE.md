@@ -1,7 +1,19 @@
 # Working on yNutrition
 
-Single-user nutrition tracker (SvelteKit 3, Svelte 5, SQLite via drizzle). Read `DECISIONS.md`
-for the reasoning behind data, auth and UX choices before changing them.
+Single-user nutrition tracker (SvelteKit 3, Svelte 5, SQLite via drizzle).
+
+## Documentation
+
+`docs/README.md` is the wiki index: a table from task to page. Before working on an area, read
+only the page it points to (each lists its key files), not the whole folder. `DECISIONS.md` holds
+the reasoning behind data, auth and UX choices; read the relevant section before changing them.
+
+- When a change alters behaviour, configuration, the schema or deployment, update the matching
+  page in the same change. Record new non-obvious choices in `DECISIONS.md`.
+- The docs are public. Never write real hostnames, IP addresses, e-mail addresses, server paths or
+  secrets into them; use `example.com` and placeholders. The owner's own deployment setup
+  (`private/`, `deploy.sh`, `deploy.env*`) is gitignored and must not be referenced or copied into
+  tracked files.
 
 ## Frontend work
 

@@ -19,11 +19,11 @@ services:
       # allow backup imports larger than adapter-node's 512K default
       BODY_SIZE_LIMIT: 50M
     ports:
-      # default: localhost only — a reverse proxy (Apache) on the same host forwards to it
+      # default: localhost only — a reverse proxy on the same host forwards to it
       - '${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000'
     volumes:
       - nutrition-data:/data
-      # host directory owned by uid 1000 (the container's node user); created by deploy.sh.
+      # host directory owned by uid 1000 (the container's node user), see docs/deployment.
       # Not auto-created: Docker would make it root-owned and the backups would fail.
       - type: bind
         source: ${BACKUP_HOST_DIR:-/var/backups/nutrition}

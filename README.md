@@ -26,7 +26,7 @@ laptops and ultrawide monitors. German (Swiss) and English.
   by page, and deletions can be undone.
 - **Export/import**: full JSON backup and restore; CSV for entries and weights.
 - **Incremental backups**: a daily base snapshot plus append-only change journal in a host
-  directory (see [Backups](#backups)).
+  directory (see [Backups](docs/backups.md)).
 
 | Today                                    | Portion picker                                    | Search                                    | Insights (dark)                            |
 | ---------------------------------------- | ------------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
@@ -51,110 +51,26 @@ SvelteKit 3 (Svelte 5 runes, TypeScript, `adapter-node`) · SQLite (`better-sqli
 ORM · `@simplewebauthn` · `barcode-detector`/`zxing-wasm` · Chart.js (lazy-loaded, tree-shaken) ·
 Vitest · Playwright · Docker.
 
-## Local development
+## Quick start
 
-Requirements: Node ≥ 22. Use **npm 11** for installs (`npx npm@11 install`); npm 10 hits a
-known arborist bug with this dependency tree.
-
-```bash
+```sh
 npx npm@11 install
-cp .env.example .env          # then set ORIGIN=http://localhost:5173, RP_ID=localhost,
-                              # SETUP_TOKEN=dev-setup-token, DATABASE_PATH=data/nutrition.db
-npm run import:swissfcd       # download XLSX → data/swissfcd.json → SQLite (idempotent)
+cp .env.example .env          # see docs/development.md for local values
+npm run import:swissfcd
 npm run dev                   # http://localhost:5173
 ```
 
-Open `http://localhost:5173/setup?token=dev-setup-token` to register a passkey. Browsers
-allow WebAuthn on `localhost` without HTTPS.
+To run it in production you need Docker, a domain and an HTTPS reverse proxy:
+[what has to run](docs/deployment/README.md), and a
+[step-by-step example on a V-Server](docs/deployment/vserver.md).
 
-### Scripts
+## Documentation
 
-| Script                            | Purpose                                                                                  |
-| --------------------------------- | ---------------------------------------------------------------------------------------- |
-| `npm run dev`                     | Vite dev server                                                                          |
-| `npm run build` / `npm start`     | Production build / start (migrations + data import + server)                             |
-| `npm run check`                   | `svelte-check` (TypeScript)                                                              |
-| `npm run lint` / `npm run format` | Prettier + ESLint                                                                        |
-| `npm run test:unit`               | Vitest (nutrition math, adapters with recorded fixtures, auth, domain, i18n)             |
-| `npm run test:e2e`                | Playwright E2E on emulated iPhone, iPad, laptop and ultrawide, Chromium + WebAuthn       |
-| `npm run import:swissfcd`         | Import the Swiss food DB, downloading the XLSX files if missing (`--download` refreshes) |
-| `npm run recovery`                | Print a one-time passkey registration link                                               |
-| `npm run backup`                  | Online SQLite backup (`node scripts/backup.js [dir] [keep]`)                             |
-| `node scripts/restore.js <dir>`   | Rebuild a backup JSON from the incremental backups (base + journal) for the import       |
-| `npm run db:generate`             | Generate a Drizzle migration after schema changes                                        |
-| `npm run icons`                   | Re-render PWA icons from `static/favicon.svg`                                            |
-
-## Deployment
-
-The app ships as a Docker image. On any Docker host:
-
-```sh
-cp .env.example .env          # set ORIGIN, RP_ID and SESSION_SECRET
-docker compose up -d --build  # downloads the Swiss food data from the FSVO during the build
-```
-
-Passkeys need HTTPS, so put the container behind a TLS-terminating reverse proxy that forwards
-`X-Forwarded-For` and `X-Forwarded-Proto`. `ORIGIN` and `RP_ID` must match the public URL. On first
-start, open `/setup?token=<SETUP_TOKEN>` to register a passkey. If `SETUP_TOKEN` is empty, a random
-one is printed to the container logs.
-
-### Backups
-
-With `BACKUP_DIR` set (the compose file mounts the host's `/var/backups/nutrition` at `/backups`),
-the app backs itself up shortly after start and then daily. Each `chain-<date>/` folder holds a
-`base.json.gz` snapshot of all user data and a `journal.jsonl` that only ever grows by the changes
-since the last run (SQLite triggers record every write in `change_log`). A new chain starts each
-year. The host directory must exist and belong to uid 1000 before the container starts
-(`sudo install -d -m 750 -o 1000 -g 1000 /var/backups/nutrition`).
-
-To restore: `node scripts/restore.js /var/backups/nutrition restore.json`, then import
-`restore.json` under Einstellungen → Daten.
-
-## Architecture
-
-```
-src/
-  hooks.server.ts            auth gate, auth rate limiting, security headers, startup init
-  lib/
-    nutrients.ts             nutrient registry (keys, units, groups)
-    nutrition.ts             pure math: scaling, recipes, aggregation, missing data, moving avg
-    slider.ts                portion slider math (range, magnetic snapping)
-    i18n/                    typed message catalogs (de = source of truth, en) + Swiss formatting
-    api.ts                   typed client for the JSON API
-    components/              PortionPicker, PortionSlider, Sheet, AddPanel, BarcodeScanner, Ring, …
-    stores/                  global UI state (sheets, picker, toasts) and app settings
-    server/
-      config.ts              env-based configuration (shared with CLI scripts)
-      db/                    Drizzle schema + connection (migrations in /drizzle, incl. FTS5)
-      auth/                  sessions, setup/recovery tokens, WebAuthn
-      foods/                 FoodSource interface, Open Food Facts + USDA adapters,
-                             local FTS search, caching service, portion presets
-      log.ts customFoods.ts weights.ts insights.ts backup.ts settings.ts
-      backupJob.ts           daily incremental backup (base snapshot + change journal)
-  routes/                    pages + typed JSON API under /api
-scripts/                     start (entrypoint), import-swissfcd, recovery, backup, restore
-  lib/journal.js             change journal: trigger definitions, snapshot, replay, restore
-  dev/journal-triggers.mjs   regenerates the journal trigger migration from lib/journal.js
-data/                        official Swiss DB XLSX files, portion presets, search aliases
-e2e/                         Playwright specs + mock Open Food Facts server (recorded fixtures)
-```
-
-Key design points:
-
-- **Foods** store nutrients **per 100 g/ml** as JSON. A missing key means _unknown_, never 0.
-  Aggregates count the items missing each nutrient, and the UI shows "incomplete data" hints.
-- **Log entries** keep a snapshot of the food (name and per-100 values), so history doesn't
-  change when a custom food is edited later. Entries and weigh-ins are never purged.
-- **Targets** have a history (`target_history`, one row per day a change takes effect), so past
-  periods can be judged against the targets of the time.
-- **Every write to user data** is recorded by SQLite triggers in `change_log`, which the backup job
-  appends to the host. When the schema of a journaled table changes, update
-  `scripts/lib/journal.js` and add a migration that recreates its triggers.
-- **Food sources** implement a common `FoodSource` interface (`search`, `lookupBarcode`,
-  `sourceUrl`). The adapters are tested against recorded API responses, with no network in tests.
-- **The portion picker** opens with `openPicker({ food, amount?, date, mode })` from anywhere.
-  A future AI estimator (e.g. a swappable `NutritionEstimator`) can propose food + grams and
-  hand them to this same picker for confirmation.
+The [docs/](docs/README.md) folder is the project wiki, with one short page per topic:
+[architecture](docs/architecture.md), [development](docs/development.md),
+[data model](docs/data.md), [backups](docs/backups.md), [food data](docs/food-data.md),
+[auth](docs/auth.md), [frontend](docs/frontend.md) and [deployment](docs/deployment/README.md).
+The reasons behind the design choices are in [DECISIONS.md](DECISIONS.md).
 
 ## Data sources and licenses
 

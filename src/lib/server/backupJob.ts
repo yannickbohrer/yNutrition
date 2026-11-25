@@ -4,7 +4,7 @@
  * Layout: one folder per chain, `chain-<YYYY-MM-DD>/` with
  *   base.json.gz   snapshot of all user data when the chain started (written once)
  *   journal.jsonl  every change after that, appended (nothing is written when nothing changed)
- * plus `status.json` at the top for `deploy.sh --status`.
+ * plus `status.json` at the top (last run, for monitoring).
  *
  * A new chain starts on the first run, at the start of a new year, when the journal format
  * changes, or when this database doesn't know the chain on disk (e.g. it was restored). Old chains
