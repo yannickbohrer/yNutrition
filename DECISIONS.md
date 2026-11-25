@@ -81,7 +81,8 @@ Decisions made during implementation, especially where the brief left room or re
     instantly.
   - Every fetched product is cached in SQLite, searches for 7 days, barcode misses for 24 h.
   - Uses the `search.openfoodfacts.org` (search-a-licious) full-text search with
-    `countries_tags:"en:switzerland"`, under the same conservative limiter.
+    `countries:"en:switzerland"` (the index renamed `countries_tags` in late 2026 and rejects
+    the old name with HTTP 400), under the same conservative limiter.
   - **ODbL attribution**: each OFF food links to its product page, and credits name ODbL/DbCL.
     **Product images are not displayed**, which avoids CC BY-SA image attribution and
     hotlinking.

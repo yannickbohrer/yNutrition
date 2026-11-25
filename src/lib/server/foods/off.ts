@@ -203,7 +203,7 @@ export class OpenFoodFactsSource implements FoodSource {
 		if (!q) return [];
 		if (!this.searchLimiter.take()) throw new RateLimitedError('Open Food Facts');
 		const params = new URLSearchParams({
-			q: `${q} countries_tags:"en:switzerland"`,
+			q: `${q} countries:"en:switzerland"`,
 			langs: opts.lang === 'en' ? 'en,de' : 'de,en',
 			page_size: String(opts.limit ?? 20),
 			fields: OFF_FIELDS

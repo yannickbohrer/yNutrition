@@ -65,7 +65,7 @@ describe('OpenFoodFactsSource', () => {
 		const res = await off.search('rivella');
 		expect(res.length).toBeGreaterThan(2);
 		const url = String((fetch.mock.calls[0] as unknown as [string])[0]);
-		expect(decodeURIComponent(url)).toContain('countries_tags:"en:switzerland"');
+		expect(decodeURIComponent(url)).toContain('countries:"en:switzerland"');
 		const rot = res.find((r) => r.sourceId === '7610097111188')!;
 		expect(rot.brand).toBe('rivella');
 		expect(rot.nameDe).toBe('Rivella');
